@@ -360,25 +360,25 @@ def dispatch_tool(name, arguments):
         
         elif name == "get_departures":
             return transit_connector.get_departures(
-                station=arguments.get("station", ""),
+                stop_name=arguments.get("station", "Zürich HB"),
                 limit=arguments.get("limit", 5)
             )
-        
+
         elif name == "get_parking":
-            return parking_connector.get_parking_situation()
-        
+            return parking_connector.get_parking()
+
         elif name == "get_water_temps":
-            return water_connector.get_water_temps()
-        
+            return water_connector.get_water_temperature()
+
         elif name == "get_air_quality":
-            return air_quality_connector.get_air_quality(
-                station=arguments.get("station", "")
-            )
-        
+            return air_quality_connector.get_air_quality()
+
         elif name == "get_pois":
-            return poi_connector.get_pois(
-                category=arguments.get("category", "restaurant"),
-                query=arguments.get("query", ""),
+            # search_poi uses text query matched against OSM_TAG_MAP;
+            # combine category + optional query for the best match
+            poi_query = arguments.get("query") or arguments.get("category", "restaurant")
+            return poi_connector.search_poi(
+                query=poi_query,
                 limit=arguments.get("limit", 10)
             )
         
