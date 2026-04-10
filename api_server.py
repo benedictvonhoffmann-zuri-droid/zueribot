@@ -130,7 +130,15 @@ async def chat_completions(request: ChatRequest):
         result = await graph.ainvoke({"messages": langchain_messages})
 
         final_message = result["messages"][-1]
-        response_content = final_message.content if hasattr(final_message, "content") else str(final_message)
+        raw_content = final_message.content if hasattr(final_message, "content") else str(final_message)
+        # Claude returns content as a list of blocks when tools are bound — extract text
+        if isinstance(raw_content, list):
+            response_content = "".join(
+                block.get("text", "") if isinstance(block, dict) else str(block)
+                for block in raw_content
+            )
+        else:
+            response_content = raw_content
 
         return ChatResponse(
             id=chat_id,
