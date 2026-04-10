@@ -7,12 +7,12 @@ import logging
 from typing import Annotated, Literal
 from typing_extensions import TypedDict
 
-from langchain_ollama import ChatOllama
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, ToolMessage
 from langgraph.graph import StateGraph, END
 from langgraph.graph.message import add_messages
 from langgraph.types import StreamWriter
 
+from backend.config.settings import get_llm
 from backend.tools.tools import TOOL_DEFINITIONS, dispatch_tool
 
 logger = logging.getLogger("zuribot.agent")
@@ -62,16 +62,18 @@ def call_model(state: AgentState, writer: StreamWriter) -> AgentState:
     """Call the LLM with current messages, streaming text tokens via writer."""
     messages = state["messages"]
 
-    llm = ChatOllama(
-        model="qwen2.5:7b",
-        temperature=0.1,
-    ).bind_tools(list(TOOL_DEFINITIONS))
+    llm = get_llm().bind_tools(list(TOOL_DEFINITIONS))
 
     accumulated = None
     for chunk in llm.stream(messages):
         # Emit text tokens only — skip tool_call_chunks (they carry JSON args, not text)
         if chunk.content and not chunk.tool_call_chunks:
-            writer({"token": chunk.content})
+            # Claude can return content as a list of blocks
+            text = chunk.content
+            if isinstance(text, list):
+                text = "".join(b.get("text", "") if isinstance(b, dict) else str(b) for b in text)
+            if text:
+                writer({"token": text})
         accumulated = chunk if accumulated is None else accumulated + chunk
 
     if accumulated is None:
