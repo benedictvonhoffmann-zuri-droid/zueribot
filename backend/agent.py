@@ -11,6 +11,7 @@ from langchain_ollama import ChatOllama
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, ToolMessage
 from langgraph.graph import StateGraph, END
 from langgraph.graph.message import add_messages
+from langgraph.types import StreamWriter
 
 from backend.tools.tools import TOOL_DEFINITIONS, dispatch_tool
 
@@ -57,21 +58,26 @@ def should_continue(state: AgentState) -> Literal["tools", "respond"]:
     return "respond"
 
 
-def call_model(state: AgentState) -> AgentState:
-    """Call the LLM with current messages."""
+def call_model(state: AgentState, writer: StreamWriter) -> AgentState:
+    """Call the LLM with current messages, streaming text tokens via writer."""
     messages = state["messages"]
-    
-    ollama_tools = []
-    for td in TOOL_DEFINITIONS:
-        ollama_tools.append(td)
-    
+
     llm = ChatOllama(
         model="qwen2.5:7b",
         temperature=0.1,
-    ).bind_tools(ollama_tools)
-    
-    response = llm.invoke(messages)
-    return {"messages": [response]}
+    ).bind_tools(list(TOOL_DEFINITIONS))
+
+    accumulated = None
+    for chunk in llm.stream(messages):
+        # Emit text tokens only — skip tool_call_chunks (they carry JSON args, not text)
+        if chunk.content and not chunk.tool_call_chunks:
+            writer({"token": chunk.content})
+        accumulated = chunk if accumulated is None else accumulated + chunk
+
+    if accumulated is None:
+        accumulated = AIMessage(content="")
+
+    return {"messages": [accumulated]}
 
 
 def call_tools(state: AgentState) -> AgentState:

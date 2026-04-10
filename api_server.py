@@ -5,11 +5,12 @@ ZuriBot FastAPI Server - OpenAI-compatible API for Open WebUI.
 import json
 import uuid
 import logging
-from datetime import datetime
+import time
 from typing import Optional, List
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 import uvicorn
 
@@ -76,18 +77,39 @@ async def list_models():
             {
                 "id": "qwen2.5:7b",
                 "object": "model",
-                "created": int(datetime.now().timestamp()),
+                "created": int(time.time()),
                 "owned_by": "zuribot",
             }
         ],
     }
 
 
+async def _stream_generator(langchain_messages: list, model: str, chat_id: str):
+    """Async generator that yields OpenAI-compatible SSE lines."""
+    created = int(time.time())
+
+    # Role announcement chunk
+    yield f"data: {json.dumps({'id': chat_id, 'object': 'chat.completion.chunk', 'created': created, 'model': model, 'choices': [{'index': 0, 'delta': {'role': 'assistant'}, 'finish_reason': None}]})}\n\n"
+
+    try:
+        async for item in graph.astream({"messages": langchain_messages}, stream_mode="custom"):
+            token = item.get("token", "")
+            if not token:
+                continue
+            yield f"data: {json.dumps({'id': chat_id, 'object': 'chat.completion.chunk', 'created': created, 'model': model, 'choices': [{'index': 0, 'delta': {'content': token}, 'finish_reason': None}]})}\n\n"
+    except Exception as e:
+        logger.error(f"Error during streaming: {e}", exc_info=True)
+
+    # Stop chunk
+    yield f"data: {json.dumps({'id': chat_id, 'object': 'chat.completion.chunk', 'created': created, 'model': model, 'choices': [{'index': 0, 'delta': {}, 'finish_reason': 'stop'}]})}\n\n"
+    yield "data: [DONE]\n\n"
+
+
 @app.post("/v1/chat/completions")
 async def chat_completions(request: ChatRequest):
     try:
         langchain_messages = [SystemMessage(content=SYSTEM_PROMPT)]
-        
+
         for msg in request.messages:
             if msg.role == "user":
                 langchain_messages.append(HumanMessage(content=msg.content))
@@ -95,15 +117,24 @@ async def chat_completions(request: ChatRequest):
                 langchain_messages.append(AIMessage(content=msg.content))
             elif msg.role == "system":
                 langchain_messages.append(SystemMessage(content=msg.content))
-        
-        result = graph.invoke({"messages": langchain_messages})
-        
+
+        chat_id = f"chatcmpl-{uuid.uuid4().hex[:8]}"
+
+        if request.stream:
+            return StreamingResponse(
+                _stream_generator(langchain_messages, request.model, chat_id),
+                media_type="text/event-stream",
+                headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+            )
+
+        result = await graph.ainvoke({"messages": langchain_messages})
+
         final_message = result["messages"][-1]
         response_content = final_message.content if hasattr(final_message, "content") else str(final_message)
-        
+
         return ChatResponse(
-            id=f"chatcmpl-{uuid.uuid4().hex[:8]}",
-            created=int(datetime.now().timestamp()),
+            id=chat_id,
+            created=int(time.time()),
             model=request.model,
             choices=[
                 ChatChoice(
@@ -112,13 +143,9 @@ async def chat_completions(request: ChatRequest):
                     finish_reason="stop",
                 )
             ],
-            usage=Usage(
-                prompt_tokens=0,
-                completion_tokens=0,
-                total_tokens=0,
-            ),
+            usage=Usage(prompt_tokens=0, completion_tokens=0, total_tokens=0),
         )
-    
+
     except Exception as e:
         logger.error(f"Error in chat_completions: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
