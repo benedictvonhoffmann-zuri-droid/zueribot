@@ -466,19 +466,31 @@ def dispatch_tool(name, arguments):
             # Geocode user_address → lat/lon if coordinates not provided directly
             user_address = arguments.get("user_address", "")
             if user_address and not (lat and lon):
-                import requests as _requests, time as _time
-                try:
+                import requests as _requests, time as _time, re as _re
+                def _geocode(q):
                     _time.sleep(0.5)
-                    geo = _requests.get(
+                    r = _requests.get(
                         "https://nominatim.openstreetmap.org/search",
-                        params={"q": user_address + ", Zürich" if "zürich" not in user_address.lower() and "zurich" not in user_address.lower() else user_address,
-                                "format": "json", "limit": 1},
-                        headers={"User-Agent": "ZuriBot/1.0"},
-                        timeout=5,
+                        params={"q": q, "format": "json", "limit": 1},
+                        headers={"User-Agent": "ZuriBot/1.0"}, timeout=5,
                     )
-                    if geo.status_code == 200 and geo.json():
-                        lat = float(geo.json()[0]["lat"])
-                        lon = float(geo.json()[0]["lon"])
+                    hits = r.json() if r.status_code == 200 else []
+                    return (float(hits[0]["lat"]), float(hits[0]["lon"])) if hits else None
+                try:
+                    q = user_address if any(x in user_address.lower() for x in ("zürich", "zurich")) else user_address + ", Zürich"
+                    coords = _geocode(q)
+                    # Fallback 1: try postcode only (e.g. "8052, Zürich")
+                    if not coords:
+                        m = _re.search(r'\b(80\d{2})\b', user_address)
+                        if m:
+                            coords = _geocode(f"{m.group(1)}, Zürich")
+                    # Fallback 2: try street name without house number
+                    if not coords:
+                        street = _re.sub(r'\s+\d+.*', '', user_address).strip()
+                        if street != user_address:
+                            coords = _geocode(street + ", Zürich")
+                    if coords:
+                        lat, lon = coords
                 except Exception:
                     pass
             return poi_connector.search_poi(
