@@ -40,6 +40,32 @@ TOOL_DEFINITIONS = [
     {
         "type": "function",
         "function": {
+            "name": "get_connections",
+            "description": "Get public transport connections between two stations in Zürich (tram, bus, train).",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "from_station": {
+                        "type": "string",
+                        "description": "Origin station name (e.g. 'Zürich HB', 'Bellevue')"
+                    },
+                    "to_station": {
+                        "type": "string",
+                        "description": "Destination station name (e.g. 'Zürich HB', 'Oerlikon')"
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "description": "Number of connections to return (default: 3)",
+                        "default": 3
+                    }
+                },
+                "required": ["from_station", "to_station"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "get_departures",
             "description": "Get next departures from a Zürich transit station (tram, bus, train).",
             "parameters": {
@@ -380,6 +406,13 @@ def dispatch_tool(name, arguments):
                 location=arguments.get("location", "Zürich")
             )
         
+        elif name == "get_connections":
+            return transit_connector.get_connections(
+                origin=arguments.get("from_station", ""),
+                destination=arguments.get("to_station", ""),
+                limit=arguments.get("limit", 3)
+            )
+
         elif name == "get_departures":
             return transit_connector.get_departures(
                 stop_name=arguments.get("station", "Zürich HB"),
