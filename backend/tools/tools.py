@@ -105,7 +105,12 @@ TOOL_DEFINITIONS = [
         "type": "function",
         "function": {
             "name": "get_pois",
-            "description": "Get points of interest in Zürich (attractions, restaurants, hotels, etc.) from OpenStreetMap.",
+            "description": (
+                "Get points of interest in Zürich (shops, restaurants, pharmacies, supermarkets, etc.) from OpenStreetMap, "
+                "sorted by distance from the given location. "
+                "When the user asks for the 'nearest' or 'closest' place, ask for their address or current location first, "
+                "then pass it as user_address. Results include opening_hours — always mention them in your answer."
+            ),
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -116,13 +121,30 @@ TOOL_DEFINITIONS = [
                     },
                     "query": {
                         "type": "string",
-                        "description": "Optional name search query",
+                        "description": "Search query — use the place type or brand name (e.g. 'Migros', 'pharmacy', 'restaurant')",
                         "default": ""
+                    },
+                    "user_address": {
+                        "type": "string",
+                        "description": "User's current address or location in Zürich (e.g. 'Bahnhofstrasse 10, Zürich'). Used to find nearest results. Leave empty to search city-wide."
+                    },
+                    "user_latitude": {
+                        "type": "number",
+                        "description": "User's latitude (optional, use instead of user_address if coordinates are known)"
+                    },
+                    "user_longitude": {
+                        "type": "number",
+                        "description": "User's longitude (optional, use instead of user_address if coordinates are known)"
+                    },
+                    "radius_m": {
+                        "type": "integer",
+                        "description": "Search radius in metres around the user's location (default: 1500)",
+                        "default": 1500
                     },
                     "limit": {
                         "type": "integer",
-                        "description": "Number of results (default: 10)",
-                        "default": 10
+                        "description": "Number of results (default: 5)",
+                        "default": 5
                     }
                 },
                 "required": []
@@ -374,12 +396,33 @@ def dispatch_tool(name, arguments):
             return air_quality_connector.get_air_quality()
 
         elif name == "get_pois":
-            # search_poi uses text query matched against OSM_TAG_MAP;
-            # combine category + optional query for the best match
             poi_query = arguments.get("query") or arguments.get("category", "restaurant")
+            lat = arguments.get("user_latitude")
+            lon = arguments.get("user_longitude")
+            # Geocode user_address → lat/lon if coordinates not provided directly
+            user_address = arguments.get("user_address", "")
+            if user_address and not (lat and lon):
+                import requests as _requests, time as _time
+                try:
+                    _time.sleep(0.5)
+                    geo = _requests.get(
+                        "https://nominatim.openstreetmap.org/search",
+                        params={"q": user_address + ", Zürich" if "zürich" not in user_address.lower() and "zurich" not in user_address.lower() else user_address,
+                                "format": "json", "limit": 1},
+                        headers={"User-Agent": "ZuriBot/1.0"},
+                        timeout=5,
+                    )
+                    if geo.status_code == 200 and geo.json():
+                        lat = float(geo.json()[0]["lat"])
+                        lon = float(geo.json()[0]["lon"])
+                except Exception:
+                    pass
             return poi_connector.search_poi(
                 query=poi_query,
-                limit=arguments.get("limit", 10)
+                lat=lat,
+                lon=lon,
+                radius=arguments.get("radius_m", 1500),
+                limit=arguments.get("limit", 5)
             )
         
         elif name == "get_voting_results":
