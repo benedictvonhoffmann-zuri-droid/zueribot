@@ -9,3 +9,4 @@ from backend.connectors import events_connector
 from backend.connectors import venues_connector
 from backend.connectors import recycling_connector
 from backend.connectors import search_connector
+from backend.connectors import knowledge_connector

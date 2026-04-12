@@ -30,3 +30,6 @@ node_modules/
 # Model files
 *.gguf
 models/
+
+# Knowledge base (large binary files, rebuilt locally)
+data/knowledge_base/

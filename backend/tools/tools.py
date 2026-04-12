@@ -15,6 +15,7 @@ from backend.connectors import (
     venues_connector,
     recycling_connector,
     search_connector,
+    knowledge_connector,
 )
 
 # Tool definitions in OpenAI/Ollama function calling format
@@ -387,6 +388,36 @@ TOOL_DEFINITIONS = [
             }
         }
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_knowledge_base",
+            "description": (
+                "Search the Zürich knowledge base for local, cultural, and legal knowledge. "
+                "Use for: neighborhood character and recommendations (Kreis 1-12), Swiss customs "
+                "and etiquette, tenancy and housing law, government services, local news, "
+                "restaurant and food recommendations, recycling rules, history, hidden gems. "
+                "Works in German, English, French, Italian, and Swiss German. "
+                "For questions about specific places, combine this with get_pois or get_venues "
+                "to also get real-time addresses and opening hours."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Natural language question or topic to search for"
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "description": "Number of knowledge chunks to retrieve (default: 5)",
+                        "default": 5
+                    }
+                },
+                "required": ["query"]
+            }
+        }
+    },
 ]
 
 
@@ -510,7 +541,13 @@ def dispatch_tool(name, arguments):
                 language=arguments.get("language", "de"),
                 limit=arguments.get("limit", 10)
             )
-        
+
+        elif name == "search_knowledge_base":
+            return knowledge_connector.search_knowledge_base(
+                query=arguments.get("query", ""),
+                limit=arguments.get("limit", 5)
+            )
+
         else:
             return {"success": False, "data": None, "source": None, "error": f"Unknown tool: {name}"}
     
