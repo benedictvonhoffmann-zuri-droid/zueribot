@@ -1,5 +1,4 @@
 ---
-import Button from '../ui/Button.astro';
 import type { TranslationSchema } from '../../i18n/translations/de';
 import type { Locale } from '../../i18n/locales';
 
@@ -15,32 +14,149 @@ const betaHref = `mailto:sali@buenzli.space?subject=${encodeURIComponent(cta.bet
 const collabHref = `mailto:sali@buenzli.space?subject=${encodeURIComponent(cta.collabSubject)}&body=${encodeURIComponent(cta.collabBody)}`;
 ---
 
-<section class="bg-zurich-blue text-white py-24 sm:py-36 relative overflow-hidden">
-  <!-- Swiss grid background pattern -->
-  <div class="absolute inset-0 opacity-5 pointer-events-none" aria-hidden="true">
-    <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
-          <path d="M 60 0 L 0 0 0 60" fill="none" stroke="white" stroke-width="1"/>
-        </pattern>
-      </defs>
-      <rect width="100%" height="100%" fill="url(#grid)" />
-    </svg>
-  </div>
+<section class="hero-section relative overflow-hidden bg-hero-dark text-white min-h-[90vh] flex items-center">
 
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 relative">
-    <p class="text-zurich-blue-light text-sm font-semibold uppercase tracking-widest mb-6">
-      {hero.eyebrow}
-    </p>
-    <h1 class="text-4xl sm:text-6xl lg:text-7xl font-bold leading-tight tracking-tight max-w-4xl mb-6">
-      {hero.headline}
+  <!-- Grid lines -->
+  <div class="hero-grid absolute inset-0 pointer-events-none" aria-hidden="true"></div>
+
+  <!-- Gradient orbs -->
+  <div class="orb orb-blue absolute pointer-events-none" aria-hidden="true"></div>
+  <div class="orb orb-orange absolute pointer-events-none" aria-hidden="true"></div>
+  <div class="orb orb-teal absolute pointer-events-none" aria-hidden="true"></div>
+
+  <!-- Bottom fade -->
+  <div class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-hero-dark to-transparent pointer-events-none" aria-hidden="true"></div>
+
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 relative z-10 py-28 sm:py-36">
+
+    <!-- Pill badge -->
+    <div class="hero-fade-in mb-8 flex">
+      <span class="hero-pill inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border border-white/15 bg-white/5 text-white/70 backdrop-blur-sm">
+        <span class="w-1.5 h-1.5 rounded-full bg-badi-orange animate-pulse"></span>
+        {hero.eyebrow}
+      </span>
+    </div>
+
+    <!-- Headline -->
+    <h1 class="hero-fade-in hero-delay-1 text-5xl sm:text-7xl lg:text-8xl font-bold leading-[1.05] tracking-tight max-w-4xl mb-6">
+      {hero.headline.split('Zürich').length > 1
+        ? <>
+            {hero.headline.split('Zürich')[0]}<span class="hero-gradient-text">Zürich</span>{hero.headline.split('Zürich')[1]}
+          </>
+        : hero.headline.split('Züri').length > 1
+          ? <>
+              {hero.headline.split('Züri')[0]}<span class="hero-gradient-text">Züri</span>{hero.headline.split('Züri')[1]}
+            </>
+          : hero.headline
+      }
     </h1>
-    <p class="text-lg sm:text-xl text-white/80 max-w-2xl mb-10 leading-relaxed">
+
+    <!-- Subline -->
+    <p class="hero-fade-in hero-delay-2 text-lg sm:text-xl text-white/55 max-w-xl mb-10 leading-relaxed font-normal">
       {hero.subline}
     </p>
-    <div class="flex flex-col sm:flex-row gap-4">
-      <Button href={betaHref} variant="secondary" label={hero.ctaBeta} note={hero.ctaBetaNote} />
-      <Button href={collabHref} variant="primary" label={hero.ctaCollaborate} note={hero.ctaCollabNote} />
+
+    <!-- CTAs -->
+    <div class="hero-fade-in hero-delay-3 flex flex-col sm:flex-row items-start gap-4">
+      <a
+        href={betaHref}
+        class="hero-btn-primary inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-white text-zurich-dark hover:bg-white/90 transition-colors duration-150"
+      >
+        {hero.ctaBeta}
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+      <a
+        href={collabHref}
+        class="hero-btn-secondary inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm border border-white/20 text-white/80 hover:border-white/40 hover:text-white transition-all duration-150 backdrop-blur-sm"
+      >
+        {hero.ctaCollaborate}
+      </a>
+    </div>
+
+    <!-- Note lines -->
+    <div class="hero-fade-in hero-delay-4 flex flex-col sm:flex-row gap-4 mt-4">
+      <p class="text-xs text-white/30">{hero.ctaBetaNote}</p>
+      <p class="text-xs text-white/30 sm:ml-4">{hero.ctaCollabNote}</p>
+    </div>
+
+    <!-- Floating connector pills -->
+    <div class="hero-fade-in hero-delay-4 mt-20 hidden sm:flex flex-wrap gap-2">
+      {['🚋 ZVV', '🌤️ Wetter', '🏊 Badi', '🗳️ Abstimmungen', '🍽️ Restaurants', '♻️ Recycling', '📍 POIs', '…'].map(pill => (
+        <span class="connector-pill inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border border-white/10 bg-white/5 text-white/50">
+          {pill}
+        </span>
+      ))}
     </div>
   </div>
 </section>
+
+<style>
+  .bg-hero-dark {
+    background-color: #08111f;
+  }
+
+  .hero-grid {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 0%, black 40%, transparent 100%);
+  }
+
+  .orb {
+    border-radius: 50%;
+    filter: blur(80px);
+  }
+
+  .orb-blue {
+    width: 600px;
+    height: 600px;
+    top: -200px;
+    left: -100px;
+    background: radial-gradient(ellipse, rgba(0, 100, 180, 0.35) 0%, transparent 70%);
+  }
+
+  .orb-orange {
+    width: 500px;
+    height: 500px;
+    top: -100px;
+    right: -100px;
+    background: radial-gradient(ellipse, rgba(242, 101, 34, 0.2) 0%, transparent 70%);
+  }
+
+  .orb-teal {
+    width: 400px;
+    height: 400px;
+    bottom: 0;
+    right: 20%;
+    background: radial-gradient(ellipse, rgba(61, 138, 62, 0.15) 0%, transparent 70%);
+  }
+
+  .hero-gradient-text {
+    background: linear-gradient(135deg, #60a5fa 0%, #0064B4 50%, #38bdf8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: heroFadeUp 0.7s ease forwards;
+  }
+
+  .hero-delay-1 { animation-delay: 0.1s; }
+  .hero-delay-2 { animation-delay: 0.2s; }
+  .hero-delay-3 { animation-delay: 0.35s; }
+  .hero-delay-4 { animation-delay: 0.5s; }
+
+  @keyframes heroFadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .connector-pill {
+    backdrop-filter: blur(4px);
+  }
+</style>

@@ -1,6 +1,4 @@
 ---
-import SectionWrapper from '../ui/SectionWrapper.astro';
-import Button from '../ui/Button.astro';
 import type { TranslationSchema } from '../../i18n/translations/de';
 import type { Locale } from '../../i18n/locales';
 
@@ -16,13 +14,42 @@ const betaHref = `mailto:sali@buenzli.space?subject=${encodeURIComponent(cta.bet
 const collabHref = `mailto:sali@buenzli.space?subject=${encodeURIComponent(cta.collabSubject)}&body=${encodeURIComponent(cta.collabBody)}`;
 ---
 
-<SectionWrapper id="cta" bg="blue">
-  <div class="text-center max-w-2xl mx-auto">
-    <h2 class="text-3xl sm:text-5xl font-bold text-white mb-4">{cta.heading}</h2>
-    <p class="text-white/70 text-lg mb-12 leading-relaxed">{cta.subline}</p>
+<section id="cta" class="relative py-28 sm:py-36 overflow-hidden" style="background: #08111f;">
+
+  <!-- Grid -->
+  <div class="absolute inset-0 pointer-events-none" style="background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 60px 60px; mask-image: radial-gradient(ellipse 70% 80% at 50% 50%, black 30%, transparent 100%);"></div>
+
+  <!-- Orbs -->
+  <div class="absolute top-1/2 left-1/4 -translate-y-1/2 w-96 h-96 pointer-events-none" style="background: radial-gradient(ellipse, rgba(0,100,180,0.2) 0%, transparent 70%); filter: blur(60px);"></div>
+  <div class="absolute top-1/2 right-1/4 -translate-y-1/2 w-72 h-72 pointer-events-none" style="background: radial-gradient(ellipse, rgba(242,101,34,0.15) 0%, transparent 70%); filter: blur(60px);"></div>
+
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 relative z-10 text-center" data-animate>
+    <h2 class="text-4xl sm:text-6xl font-bold text-white mb-5 leading-tight tracking-tight">
+      {cta.heading}
+    </h2>
+    <p class="text-white/50 text-lg mb-12 leading-relaxed max-w-lg mx-auto">
+      {cta.subline}
+    </p>
+
     <div class="flex flex-col sm:flex-row gap-4 justify-center">
-      <Button href={betaHref} variant="secondary" label={cta.betaLabel} />
-      <Button href={collabHref} variant="primary" label={cta.collabLabel} />
+      <!-- Primary: white bg -->
+      <a
+        href={betaHref}
+        class="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-sm bg-white text-zurich-dark hover:bg-white/90 transition-colors duration-150 shadow-lg shadow-white/10"
+      >
+        {cta.betaLabel}
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+
+      <!-- Secondary: ghost -->
+      <a
+        href={collabHref}
+        class="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-sm border border-white/15 text-white/70 hover:border-white/30 hover:text-white transition-all duration-150"
+      >
+        {cta.collabLabel}
+      </a>
     </div>
   </div>
-</SectionWrapper>
+</section>

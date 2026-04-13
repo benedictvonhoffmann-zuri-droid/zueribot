@@ -24,7 +24,6 @@ const canonicalUrl = `https://buenzli.space/${lang}/`;
     <link rel="canonical" href={canonicalUrl} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-    <!-- hreflang for all locales -->
     {LOCALES.map(locale => (
       <link
         rel="alternate"
@@ -34,25 +33,32 @@ const canonicalUrl = `https://buenzli.space/${lang}/`;
     ))}
     <link rel="alternate" hreflang="x-default" href="https://buenzli.space/de/" />
 
-    <!-- Open Graph -->
     <meta property="og:title" content={t.meta.title} />
     <meta property="og:description" content={t.meta.description} />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content={htmlLang.replace('-', '_')} />
-
-    <!-- No tracking, no external scripts -->
   </head>
   <body>
     <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-zurich-blue text-white px-4 py-2 rounded z-50">
       {t.nav.skip}
     </a>
 
-    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-zurich-border">
+    <!-- Navigation -->
+    <header id="site-header" class="fixed top-0 left-0 right-0 z-40 transition-all duration-300">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
-        <a href={`/${lang}/`} class="font-bold text-xl text-zurich-blue tracking-tight">
-          Bünzli
+        <!-- Wordmark -->
+        <a href={`/${lang}/`} class="flex items-center gap-2 group" aria-label="Bünzli — Home">
+          <!-- B mark -->
+          <span class="wordmark-mark flex items-center justify-center w-8 h-8 rounded-lg text-white text-sm font-bold transition-transform duration-150 group-hover:scale-105">
+            B
+          </span>
+          <!-- Name -->
+          <span class="wordmark-text font-bold text-lg tracking-tight transition-colors duration-150">
+            Bünzli
+          </span>
         </a>
+
         <LanguageSwitcher currentLang={lang} />
       </div>
     </header>
@@ -61,11 +67,86 @@ const canonicalUrl = `https://buenzli.space/${lang}/`;
       <slot />
     </main>
 
-    <footer class="bg-zurich-dark text-white py-12">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-zurich-gray">
-        <p class="font-semibold text-white">{t.footer.tagline}</p>
-        <p>{t.footer.madeIn}</p>
+    <!-- Footer -->
+    <footer class="bg-[#08111f] text-white/40 py-12 border-t border-white/5">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
+        <div class="flex items-center gap-2">
+          <span class="wordmark-mark flex items-center justify-center w-6 h-6 rounded text-white text-xs font-bold opacity-60">B</span>
+          <span class="font-semibold text-white/60">{t.footer.tagline}</span>
+        </div>
+        <p class="text-white/30">{t.footer.madeIn}</p>
       </div>
     </footer>
+
+    <!-- Scroll animation script (~1KB) -->
+    <script>
+      // Sticky nav: transparent on hero, solid after scroll
+      const header = document.getElementById('site-header');
+      const THRESHOLD = 80;
+
+      function updateNav() {
+        if (!header) return;
+        if (window.scrollY > THRESHOLD) {
+          header.classList.add('nav-solid');
+          header.classList.remove('nav-transparent');
+        } else {
+          header.classList.add('nav-transparent');
+          header.classList.remove('nav-solid');
+        }
+      }
+
+      updateNav();
+      window.addEventListener('scroll', updateNav, { passive: true });
+
+      // Scroll animations: trigger [data-animate] and [data-animate-stagger] on intersection
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.1, rootMargin: '0px 0px -60px 0px' }
+      );
+
+      document.querySelectorAll('[data-animate], [data-animate-stagger]').forEach(el => {
+        observer.observe(el);
+      });
+    </script>
+
+    <style>
+      .nav-transparent {
+        background: transparent;
+        border-bottom: 1px solid transparent;
+      }
+
+      .nav-solid {
+        background: rgba(8, 17, 31, 0.85);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+      }
+
+      /* Wordmark: adapts to dark/light context */
+      .nav-transparent .wordmark-mark {
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.2);
+      }
+      .nav-transparent .wordmark-text { color: white; }
+
+      .nav-solid .wordmark-mark {
+        background: var(--color-zurich-blue);
+      }
+      .nav-solid .wordmark-text { color: white; }
+
+      /* Default (before JS runs) — match hero dark */
+      #site-header:not(.nav-solid):not(.nav-transparent) .wordmark-mark {
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.2);
+      }
+      #site-header:not(.nav-solid):not(.nav-transparent) .wordmark-text { color: white; }
+    </style>
   </body>
 </html>

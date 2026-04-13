@@ -10,20 +10,35 @@ const { t } = Astro.props;
 const { privacy } = t;
 ---
 
-<SectionWrapper id="privacy" bg="off-white">
-  <div class="text-center mb-14">
-    <h2 class="text-3xl sm:text-5xl font-bold text-zurich-dark mb-4">{privacy.heading}</h2>
-    <p class="text-zurich-gray text-lg max-w-2xl mx-auto">{privacy.subline}</p>
-  </div>
-  <div class="grid sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
-    {privacy.pillars.map(pillar => (
-      <div class="bg-white rounded-2xl p-7 border border-zurich-border flex gap-5">
-        <span class="text-3xl shrink-0 mt-1">{pillar.icon}</span>
-        <div>
-          <h3 class="font-bold text-zurich-dark text-lg mb-2">{pillar.title}</h3>
-          <p class="text-zurich-gray text-sm leading-relaxed">{pillar.desc}</p>
+<!-- Privacy gets the dark treatment — important enough to stand out -->
+<section id="privacy" class="relative py-24 sm:py-32 overflow-hidden" style="background: #08111f;">
+
+  <!-- Subtle grid -->
+  <div class="absolute inset-0 pointer-events-none" style="background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px); background-size: 60px 60px;"></div>
+
+  <!-- Green orb -->
+  <div class="absolute bottom-0 right-0 w-96 h-96 pointer-events-none" style="background: radial-gradient(ellipse, rgba(61,138,62,0.12) 0%, transparent 70%); filter: blur(60px);"></div>
+
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
+    <div class="text-center mb-14" data-animate>
+      <p class="section-label mb-3" style="color: #3D8A3E;">06</p>
+      <h2 class="section-heading text-white mb-4">{privacy.heading}</h2>
+      <p class="text-white/50 text-lg max-w-xl mx-auto">{privacy.subline}</p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 gap-4 max-w-4xl mx-auto" data-animate-stagger>
+      {privacy.pillars.map(pillar => (
+        <div class="group relative p-6 rounded-2xl border border-white/8 bg-white/3 hover:bg-white/6 hover:border-white/15 transition-all duration-300 overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-tram-green/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div class="flex gap-4">
+            <span class="text-2xl shrink-0 mt-0.5">{pillar.icon}</span>
+            <div>
+              <h3 class="font-bold text-white text-base mb-2">{pillar.title}</h3>
+              <p class="text-white/50 text-sm leading-relaxed">{pillar.desc}</p>
+            </div>
+          </div>
         </div>
-      </div>
-    ))}
+      ))}
+    </div>
   </div>
-</SectionWrapper>
+</section>
