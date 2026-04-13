@@ -1,0 +1,17 @@
+---
+interface Props {
+  icon: string;
+  name: string;
+  desc: string;
+}
+
+const { icon, name, desc } = Astro.props;
+---
+
+<div class="flex flex-col gap-3 p-5 bg-white rounded-xl border border-zurich-border hover:border-zurich-blue hover:shadow-md transition-all duration-150">
+  <span class="text-3xl" aria-hidden="true">{icon}</span>
+  <div>
+    <h3 class="font-semibold text-zurich-dark text-sm">{name}</h3>
+    <p class="text-zurich-gray text-sm mt-1 leading-relaxed">{desc}</p>
+  </div>
+</div>

@@ -1,0 +1,29 @@
+---
+import SectionWrapper from '../ui/SectionWrapper.astro';
+import type { TranslationSchema } from '../../i18n/translations/de';
+
+interface Props {
+  t: TranslationSchema;
+}
+
+const { t } = Astro.props;
+const { community } = t;
+---
+
+<SectionWrapper id="community" bg="white">
+  <div class="text-center mb-14">
+    <h2 class="text-3xl sm:text-5xl font-bold text-zurich-dark mb-4">{community.heading}</h2>
+    <p class="text-zurich-gray text-lg max-w-2xl mx-auto">{community.subline}</p>
+  </div>
+  <div class="grid sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
+    {community.items.map(item => (
+      <div class="flex gap-5 p-6 rounded-2xl border border-zurich-border hover:border-tram-green hover:bg-tram-green-light/40 transition-all duration-200">
+        <span class="text-3xl shrink-0">{item.icon}</span>
+        <div>
+          <h3 class="font-bold text-zurich-dark text-lg mb-2">{item.title}</h3>
+          <p class="text-zurich-gray text-sm leading-relaxed">{item.desc}</p>
+        </div>
+      </div>
+    ))}
+  </div>
+</SectionWrapper>

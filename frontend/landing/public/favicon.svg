@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Zürich blue background circle -->
+  <circle cx="32" cy="32" r="32" fill="#0064B4"/>
+  <!-- Stylised B for Bünzli -->
+  <text x="32" y="45" font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+    font-size="36" font-weight="700" fill="white" text-anchor="middle">B</text>
+</svg>

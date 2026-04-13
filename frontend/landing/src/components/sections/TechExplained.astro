@@ -1,0 +1,24 @@
+---
+import SectionWrapper from '../ui/SectionWrapper.astro';
+import TechCard from '../ui/TechCard.astro';
+import type { TranslationSchema } from '../../i18n/translations/de';
+
+interface Props {
+  t: TranslationSchema;
+}
+
+const { t } = Astro.props;
+const { tech } = t;
+---
+
+<SectionWrapper id="tech" bg="dark">
+  <div class="text-center mb-14">
+    <h2 class="text-3xl sm:text-5xl font-bold text-white mb-4">{tech.heading}</h2>
+    <p class="text-white/60 text-lg max-w-2xl mx-auto">{tech.subline}</p>
+  </div>
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    {tech.items.map(item => (
+      <TechCard name={item.name} role={item.role} desc={item.desc} />
+    ))}
+  </div>
+</SectionWrapper>

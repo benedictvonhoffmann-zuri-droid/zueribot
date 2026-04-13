@@ -1,0 +1,28 @@
+---
+import SectionWrapper from '../ui/SectionWrapper.astro';
+import Button from '../ui/Button.astro';
+import type { TranslationSchema } from '../../i18n/translations/de';
+import type { Locale } from '../../i18n/locales';
+
+interface Props {
+  t: TranslationSchema;
+  lang: Locale;
+}
+
+const { t, lang } = Astro.props;
+const { cta } = t;
+
+const betaHref = `mailto:sali@buenzli.space?subject=${encodeURIComponent(cta.betaSubject)}&body=${encodeURIComponent(cta.betaBody)}`;
+const collabHref = `mailto:sali@buenzli.space?subject=${encodeURIComponent(cta.collabSubject)}&body=${encodeURIComponent(cta.collabBody)}`;
+---
+
+<SectionWrapper id="cta" bg="blue">
+  <div class="text-center max-w-2xl mx-auto">
+    <h2 class="text-3xl sm:text-5xl font-bold text-white mb-4">{cta.heading}</h2>
+    <p class="text-white/70 text-lg mb-12 leading-relaxed">{cta.subline}</p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <Button href={betaHref} variant="secondary" label={cta.betaLabel} />
+      <Button href={collabHref} variant="primary" label={cta.collabLabel} />
+    </div>
+  </div>
+</SectionWrapper>

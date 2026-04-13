@@ -1,0 +1,71 @@
+---
+import '../styles/global.css';
+import LanguageSwitcher from '../components/LanguageSwitcher.astro';
+import { LOCALES, LOCALE_META, type Locale } from '../i18n/locales';
+import type { TranslationSchema } from '../i18n/translations/de';
+
+interface Props {
+  lang: Locale;
+  t: TranslationSchema;
+}
+
+const { lang, t } = Astro.props;
+const htmlLang = LOCALE_META[lang].htmlLang;
+const canonicalUrl = `https://buenzli.space/${lang}/`;
+---
+
+<!doctype html>
+<html lang={htmlLang} class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{t.meta.title}</title>
+    <meta name="description" content={t.meta.description} />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- hreflang for all locales -->
+    {LOCALES.map(locale => (
+      <link
+        rel="alternate"
+        hreflang={LOCALE_META[locale].htmlLang}
+        href={`https://buenzli.space/${locale}/`}
+      />
+    ))}
+    <link rel="alternate" hreflang="x-default" href="https://buenzli.space/de/" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={t.meta.title} />
+    <meta property="og:description" content={t.meta.description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content={htmlLang.replace('-', '_')} />
+
+    <!-- No tracking, no external scripts -->
+  </head>
+  <body>
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-zurich-blue text-white px-4 py-2 rounded z-50">
+      {t.nav.skip}
+    </a>
+
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-zurich-border">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
+        <a href={`/${lang}/`} class="font-bold text-xl text-zurich-blue tracking-tight">
+          Bünzli
+        </a>
+        <LanguageSwitcher currentLang={lang} />
+      </div>
+    </header>
+
+    <main id="main-content">
+      <slot />
+    </main>
+
+    <footer class="bg-zurich-dark text-white py-12">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-zurich-gray">
+        <p class="font-semibold text-white">{t.footer.tagline}</p>
+        <p>{t.footer.madeIn}</p>
+      </div>
+    </footer>
+  </body>
+</html>

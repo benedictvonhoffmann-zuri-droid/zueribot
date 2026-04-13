@@ -1,0 +1,27 @@
+---
+import SectionWrapper from '../ui/SectionWrapper.astro';
+import type { TranslationSchema } from '../../i18n/translations/de';
+
+interface Props {
+  t: TranslationSchema;
+}
+
+const { t } = Astro.props;
+const { different } = t;
+---
+
+<SectionWrapper id="different" bg="white">
+  <div class="text-center mb-14">
+    <h2 class="text-3xl sm:text-5xl font-bold text-zurich-dark mb-4">{different.heading}</h2>
+    <p class="text-zurich-gray text-lg max-w-2xl mx-auto">{different.subline}</p>
+  </div>
+  <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    {different.cards.map(card => (
+      <div class="p-6 rounded-2xl border border-zurich-border hover:border-zurich-blue hover:shadow-lg transition-all duration-200 group">
+        <span class="text-4xl mb-5 block">{card.icon}</span>
+        <h3 class="font-bold text-zurich-dark text-lg mb-3 group-hover:text-zurich-blue transition-colors">{card.title}</h3>
+        <p class="text-zurich-gray text-sm leading-relaxed">{card.desc}</p>
+      </div>
+    ))}
+  </div>
+</SectionWrapper>

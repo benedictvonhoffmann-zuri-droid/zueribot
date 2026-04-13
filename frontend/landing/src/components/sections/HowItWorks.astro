@@ -1,0 +1,30 @@
+---
+import SectionWrapper from '../ui/SectionWrapper.astro';
+import type { TranslationSchema } from '../../i18n/translations/de';
+
+interface Props {
+  t: TranslationSchema;
+}
+
+const { t } = Astro.props;
+const { howItWorks } = t;
+---
+
+<SectionWrapper id="how-it-works" bg="off-white">
+  <div class="text-center mb-14">
+    <h2 class="text-3xl sm:text-5xl font-bold text-zurich-dark mb-4">{howItWorks.heading}</h2>
+    <p class="text-zurich-gray text-lg max-w-2xl mx-auto">{howItWorks.subline}</p>
+  </div>
+  <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+    {howItWorks.items.map((item, i) => (
+      <div class="bg-white rounded-2xl p-6 border border-zurich-border relative">
+        <span class="absolute top-4 right-4 text-xs font-bold text-zurich-blue/30 tabular-nums">
+          0{i + 1}
+        </span>
+        <span class="text-3xl mb-4 block">{item.icon}</span>
+        <h3 class="font-bold text-zurich-dark text-lg mb-3">{item.title}</h3>
+        <p class="text-zurich-gray text-sm leading-relaxed">{item.text}</p>
+      </div>
+    ))}
+  </div>
+</SectionWrapper>

@@ -1,0 +1,46 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter";
+
+@theme {
+  /* Brand palette */
+  --color-zurich-blue:       #0064B4;
+  --color-zurich-blue-dark:  #004F8C;
+  --color-zurich-blue-light: #E5F0FA;
+  --color-badi-orange:       #F26522;
+  --color-badi-orange-dark:  #D4541A;
+  --color-badi-orange-light: #FEF0E8;
+  --color-tram-green:        #3D8A3E;
+  --color-tram-green-dark:   #2E6B2F;
+  --color-tram-green-light:  #EAF4EA;
+  --color-zurich-off-white:  #F8F9FA;
+  --color-zurich-dark:       #1A1A1A;
+  --color-zurich-gray:       #6B7280;
+  --color-zurich-border:     #E5E7EB;
+
+  /* Typography */
+  --font-sans: 'Inter Variable', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+  /* Section spacing */
+  --spacing-section: 6rem;
+  --spacing-section-sm: 3rem;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    color: var(--color-zurich-dark);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: white;
+  }
+
+  h1, h2, h3, h4 {
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+}

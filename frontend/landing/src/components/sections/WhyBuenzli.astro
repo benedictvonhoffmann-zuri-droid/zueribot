@@ -1,0 +1,29 @@
+---
+import SectionWrapper from '../ui/SectionWrapper.astro';
+import type { TranslationSchema } from '../../i18n/translations/de';
+
+interface Props {
+  t: TranslationSchema;
+}
+
+const { t } = Astro.props;
+const { why } = t;
+---
+
+<SectionWrapper id="why" bg="off-white">
+  <div class="text-center mb-14">
+    <h2 class="text-3xl sm:text-5xl font-bold text-zurich-dark">{why.heading}</h2>
+  </div>
+  <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+    <div class="bg-white rounded-2xl p-8 border border-zurich-border">
+      <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mb-5 text-xl">😤</div>
+      <h3 class="text-xl font-bold text-zurich-dark mb-4">{why.problemHeading}</h3>
+      <p class="text-zurich-gray leading-relaxed">{why.problemText}</p>
+    </div>
+    <div class="bg-zurich-blue-light rounded-2xl p-8 border border-zurich-blue/20">
+      <div class="w-10 h-10 bg-zurich-blue rounded-lg flex items-center justify-center mb-5 text-xl">✨</div>
+      <h3 class="text-xl font-bold text-zurich-dark mb-4">{why.solutionHeading}</h3>
+      <p class="text-zurich-gray leading-relaxed">{why.solutionText}</p>
+    </div>
+  </div>
+</SectionWrapper>
