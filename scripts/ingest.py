@@ -58,11 +58,32 @@ LAW_KEYWORDS = [
 ]
 
 # ── Source Definitions ─────────────────────────────────────────────────────
+# Per-source options:
+#   url_prefix      : only queue links whose URL starts with this prefix
+#                     (use for sites with /de/ German paths)
+#   sitemap_url     : instead of BFS from root URL, fetch this sitemap XML
+#                     and crawl the listed URLs (filtered by url_prefix)
+#   no_law_filter   : skip the Zürich-relevance filter for this source
+#                     (use when the entire site is already law-relevant)
 SOURCES = {
     "government": [
-        {"url": "https://www.stadt-zuerich.ch/", "name": "Stadt Zürich", "lang": "de", "depth": 2},
-        {"url": "https://www.zh.ch/", "name": "Kanton Zürich", "lang": "de", "depth": 2},
-        {"url": "https://www.admin.ch/de", "name": "Schweizer Bundesverwaltung", "lang": "de", "depth": 1},
+        # NOTE: stadt-zuerich.ch is excluded. The site uses stzh-* Web Components
+        # with `visibility: hidden` until JS hydrates — plain HTTP yields <20 chars
+        # per page (below our 300-char threshold). Requires headless browser.
+        # zh.ch (cantonal) covers Zürich government content via plain HTML.
+        {
+            "url": "https://www.zh.ch/de/",
+            "name": "Kanton Zürich",
+            "lang": "de",
+            "depth": 2,
+            "url_prefix": "https://www.zh.ch/de/",
+        },
+        {
+            "url": "https://www.admin.ch/de",
+            "name": "Schweizer Bundesverwaltung",
+            "lang": "de",
+            "depth": 1,
+        },
     ],
     "food": [
         {"url": "https://www.gaultmillau.ch/zueri-isst", "name": "Gault Millau Zürich", "lang": "de", "depth": 2},
@@ -71,11 +92,20 @@ SOURCES = {
     ],
     "news": [
         {"url": "https://tsri.ch/", "name": "tsri.ch", "lang": "de", "depth": 2},
-        {"url": "https://www.srf.ch/", "name": "SRF", "lang": "de", "depth": 1},
+        {"url": "https://www.srf.ch/news/regional/zuerich", "name": "SRF Zürich", "lang": "de", "depth": 2,
+         "url_prefix": "https://www.srf.ch/news/regional/zuerich"},
     ],
     "law": [
-        {"url": "https://www.gesetze.ch/", "name": "Gesetze.ch", "lang": "de", "depth": 2},
-        {"url": "https://www.fedlex.admin.ch/de", "name": "Fedlex", "lang": "de", "depth": 2},
+        # Beobachter is a legal advisory site — articles live across /wohnen, /geld,
+        # /familie etc., not just under /recht. No url_prefix restriction.
+        # Note: site rate-limits aggressively; RATE_LIMIT handles this.
+        {
+            "url": "https://www.beobachter.ch/recht",
+            "name": "Beobachter Recht",
+            "lang": "de",
+            "depth": 2,
+            "no_law_filter": True,
+        },
     ],
     "renting": [
         {"url": "https://www.hev-schweiz.ch/", "name": "HEV Schweiz", "lang": "de", "depth": 2},
@@ -165,8 +195,11 @@ def is_law_relevant(text: str, url: str) -> bool:
 
 # ── Link Discovery ─────────────────────────────────────────────────────────
 
-def discover_links(html: bytes, base_url: str) -> list[str]:
-    """Extract internal links from a page, normalised to absolute URLs."""
+def discover_links(html: bytes, base_url: str, url_prefix: Optional[str] = None) -> list[str]:
+    """
+    Extract internal links from a page, normalised to absolute URLs.
+    If url_prefix is set, only return links matching that prefix.
+    """
     soup = BeautifulSoup(html, "html.parser")
     base_domain = urlparse(base_url).netloc
     links = []
@@ -181,8 +214,53 @@ def discover_links(html: bytes, base_url: str) -> list[str]:
                 and parsed.scheme in ("http", "https")
                 and not parsed.path.endswith((".pdf", ".docx", ".xlsx", ".zip", ".png", ".jpg"))):
             clean = abs_url.split("#")[0].rstrip("/")
+            if url_prefix and not clean.startswith(url_prefix.rstrip("/")):
+                continue
             links.append(clean)
     return list(dict.fromkeys(links))  # deduplicate, preserve order
+
+
+# ── Sitemap Fetching ───────────────────────────────────────────────────────
+
+def fetch_sitemap_urls(sitemap_url: str, url_prefix: Optional[str] = None,
+                       limit: int = 0) -> list[str]:
+    """
+    Fetch a sitemap XML (handles both sitemapindex and urlset).
+    Returns a list of page URLs, filtered by url_prefix if provided.
+    """
+    logger.info(f"  Fetching sitemap: {sitemap_url}")
+    resp = _rate_limited_get(sitemap_url, timeout=30)
+    if not resp or resp.status_code != 200:
+        logger.warning(f"  Could not fetch sitemap: {sitemap_url}")
+        return []
+
+    soup = BeautifulSoup(resp.content, "xml")
+    urls = []
+
+    # Handle sitemapindex — recurse into child sitemaps
+    for sitemap in soup.find_all("sitemap"):
+        loc = sitemap.find("loc")
+        if loc:
+            child_url = loc.get_text(strip=True)
+            child_urls = fetch_sitemap_urls(child_url, url_prefix, limit=0)
+            urls.extend(child_urls)
+            if limit and len(urls) >= limit:
+                return urls[:limit]
+
+    # Handle urlset — collect page URLs
+    for url_tag in soup.find_all("url"):
+        loc = url_tag.find("loc")
+        if not loc:
+            continue
+        page_url = loc.get_text(strip=True)
+        if url_prefix and not page_url.startswith(url_prefix.rstrip("/")):
+            continue
+        urls.append(page_url)
+        if limit and len(urls) >= limit:
+            break
+
+    logger.info(f"  Sitemap yielded {len(urls)} URLs (prefix filter: {url_prefix or 'none'})")
+    return urls
 
 
 # ── Chunking ───────────────────────────────────────────────────────────────
@@ -269,7 +347,7 @@ def ingest_page(store, url: str, title: str, text: str,
                 source_name: str, category: str, language: str, depth: int) -> tuple[int, int]:
     """
     Chunk + embed one page. Returns (chunks_added, chunks_skipped).
-    Deduplication: ID = sha256(url + "::" + first 100 chars of chunk).
+    Deduplication: ID = sha256(url + "::" + chunk_index + "::" + first 100 chars of chunk).
     """
     from langchain_core.documents import Document
 
@@ -278,8 +356,13 @@ def ingest_page(store, url: str, title: str, text: str,
         return 0, 0
 
     docs, ids = [], []
-    for chunk in raw_chunks:
-        chunk_id = hashlib.sha256(f"{url}::{chunk[:100]}".encode()).hexdigest()
+    seen_ids: set[str] = set()
+
+    for i, chunk in enumerate(raw_chunks):
+        chunk_id = hashlib.sha256(f"{url}::{i}::{chunk[:100]}".encode()).hexdigest()
+        if chunk_id in seen_ids:
+            continue
+        seen_ids.add(chunk_id)
         docs.append(Document(
             page_content=chunk,
             metadata={
@@ -293,6 +376,9 @@ def ingest_page(store, url: str, title: str, text: str,
             },
         ))
         ids.append(chunk_id)
+
+    if not docs:
+        return 0, 0
 
     # Check which IDs already exist
     existing = set(store._collection.get(ids=ids)["ids"])
@@ -310,17 +396,88 @@ def ingest_page(store, url: str, title: str, text: str,
 def crawl_source(store, source: dict, category: str,
                  dry_run: bool = False, limit: int = 0) -> dict:
     """
-    Crawl one source definition (BFS up to source['depth']).
+    Crawl one source definition.
+    - If source has 'sitemap_url': fetch all URLs from sitemap, crawl each one.
+    - Otherwise: BFS from source['url'] up to source['depth'].
     Returns stats dict.
     """
     root_url = source["url"]
     source_name = source["name"]
     language = source["lang"]
-    max_depth = source["depth"]
+    max_depth = source.get("depth", 2)
+    url_prefix = source.get("url_prefix")
+    no_law_filter = source.get("no_law_filter", False)
 
+    stats = {"pages": 0, "chunks_added": 0, "chunks_skipped": 0, "skipped_pages": 0}
+
+    # ── Sitemap mode ──────────────────────────────────────────────────────
+    if "sitemap_url" in source:
+        sitemap_urls = fetch_sitemap_urls(
+            source["sitemap_url"],
+            url_prefix=url_prefix,
+            limit=limit,
+        )
+        if not sitemap_urls:
+            logger.warning(f"  No URLs from sitemap for {source_name}")
+            return stats
+
+        logger.info(f"  Crawling {len(sitemap_urls)} sitemap URLs for {source_name}")
+        page_count = 0
+
+        for url in sitemap_urls:
+            if limit and page_count >= limit:
+                break
+
+            logger.info(f"  [sitemap] {url}")
+
+            if dry_run:
+                stats["pages"] += 1
+                continue
+
+            resp = _rate_limited_get(url)
+            if resp is None:
+                stats["skipped_pages"] += 1
+                continue
+
+            if resp.status_code in (403, 429, 401):
+                logger.warning(f"  Blocked ({resp.status_code}): {url}")
+                stats["skipped_pages"] += 1
+                continue
+
+            if resp.status_code != 200:
+                stats["skipped_pages"] += 1
+                continue
+
+            content_type = resp.headers.get("content-type", "")
+            if "text/html" not in content_type:
+                continue
+
+            extracted = extract_text(resp.content, url)
+            if not extracted:
+                stats["skipped_pages"] += 1
+                continue
+
+            title, text = extracted
+
+            if category == "law" and not no_law_filter and not is_law_relevant(text, url):
+                logger.info(f"    Skipped (not law-relevant)")
+                stats["skipped_pages"] += 1
+                continue
+
+            added, skipped = ingest_page(
+                store, url, title, text, source_name, category, language, 0
+            )
+            stats["pages"] += 1
+            stats["chunks_added"] += added
+            stats["chunks_skipped"] += skipped
+            page_count += 1
+            logger.info(f"    +{added} chunks ({skipped} duplicates)")
+
+        return stats
+
+    # ── BFS mode ──────────────────────────────────────────────────────────
     visited = set()
     queue = [(root_url, 0)]
-    stats = {"pages": 0, "chunks_added": 0, "chunks_skipped": 0, "skipped_pages": 0}
     page_count = 0
 
     while queue:
@@ -363,9 +520,17 @@ def crawl_source(store, source: dict, category: str,
 
         title, text = extracted
 
-        # Law filter
-        if category == "law" and not is_law_relevant(text, url):
+        # Queue child links BEFORE the law filter so BFS exploration
+        # is not blocked by the content relevance check.
+        if depth < max_depth:
+            for link in discover_links(resp.content, url, url_prefix=url_prefix):
+                if link not in visited:
+                    queue.append((link, depth + 1))
+
+        # Law filter (after link queuing so crawl still explores the site)
+        if category == "law" and not no_law_filter and not is_law_relevant(text, url):
             logger.info(f"    Skipped (not law-relevant)")
+            stats["skipped_pages"] += 1
             continue
 
         added, skipped = ingest_page(
@@ -377,12 +542,6 @@ def crawl_source(store, source: dict, category: str,
         page_count += 1
 
         logger.info(f"    +{added} chunks ({skipped} duplicates)")
-
-        # Queue child links
-        if depth < max_depth:
-            for link in discover_links(resp.content, url):
-                if link not in visited:
-                    queue.append((link, depth + 1))
 
     return stats
 

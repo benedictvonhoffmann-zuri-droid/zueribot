@@ -418,6 +418,33 @@ TOOL_DEFINITIONS = [
             }
         }
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_law_knowledge_base",
+            "description": (
+                "Search the Swiss federal law collection (Bundesverfassung, OR, ZGB, StGB, StPO, ZPO, VRV). "
+                "Use ONLY when the user explicitly asks for statutory text, specific article numbers, "
+                "or legal citations (e.g. 'Was steht in OR Art. 271?', 'Zeig mir den Gesetzestext zur Kündigung'). "
+                "Do NOT use for general advice or questions — use search_knowledge_base for those."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Legal question or article reference, e.g. 'OR Art. 271 Kündigung', 'ZGB Eigentumsrecht Artikel'"
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "description": "Number of law chunks to retrieve (default: 5)",
+                        "default": 5
+                    }
+                },
+                "required": ["query"]
+            }
+        }
+    },
 ]
 
 
@@ -543,6 +570,12 @@ def dispatch_tool(name, arguments):
 
         elif name == "search_knowledge_base":
             return knowledge_connector.search_knowledge_base(
+                query=arguments.get("query", ""),
+                limit=arguments.get("limit", 5)
+            )
+
+        elif name == "search_law_knowledge_base":
+            return knowledge_connector.search_law_knowledge_base(
                 query=arguments.get("query", ""),
                 limit=arguments.get("limit", 5)
             )
