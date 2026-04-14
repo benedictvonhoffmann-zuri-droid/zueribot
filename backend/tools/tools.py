@@ -336,6 +336,24 @@ TOOL_DEFINITIONS = [
     {
         "type": "function",
         "function": {
+            "name": "get_badi_info",
+            "description": "Get current status, opening hours and water temperature for Zürich Badis (swimming pools and outdoor areas). Use when the user asks if a specific Badi is open, e.g. 'Ist der Letten offen?', 'Wann hat die Badi Mythenquai auf?'. Includes Letten, Oberer Letten, Unterer Letten, Mythenquai, Tiefenbrunnen, Enge, Utoquai, Wollishofen, Allenmoos, Heuried, Letzigraben, Frauenbad, Männerbad and more. Outdoor Freibäder are seasonal (May–September) — this tool will say so when they are closed.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "badi_name": {
+                        "type": "string",
+                        "description": "Name of the badi (e.g. 'Letten', 'Mythenquai', 'Tiefenbrunnen'). Leave empty to get all badis.",
+                        "default": ""
+                    }
+                },
+                "required": []
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "get_all_schedules",
             "description": "Get all waste collection schedules (garbage, bio, paper, cardboard, mobile recycling) for a Zürich zip code.",
             "parameters": {
@@ -566,6 +584,11 @@ def dispatch_tool(name, arguments):
                 categories=arguments.get("categories"),
                 language=arguments.get("language", "de"),
                 limit=arguments.get("limit", 10)
+            )
+
+        elif name == "get_badi_info":
+            return water_connector.get_badi_info(
+                badi_name=arguments.get("badi_name", "")
             )
 
         elif name == "search_knowledge_base":

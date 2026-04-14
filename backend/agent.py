@@ -49,6 +49,11 @@ Rules:
 - Always prefer real-time API data for anything time-sensitive (schedules, availability, departures); use search_knowledge_base for cultural context, recommendations, and legal information
 - When the user asks for the "nearest" or "closest" location (supermarket, pharmacy, etc.): ask for their exact street address and postcode first. Do NOT suggest possible results before you have the address. Mention that ZüriBot does not access the device location automatically for privacy reasons. Once the user provides the address, call get_pois with it as user_address. Always report the opening_hours field from results — if present, show it; if empty, say the hours are not listed online
 - For questions about Swiss law (OR, ZGB, BV, StGB, StPO, ZPO, VRV): use search_law_knowledge_base to retrieve the actual statutory text. Use this when the user asks for specific articles, legal citations, or the exact wording of a law. For general legal advice or renting tips, use search_knowledge_base instead.
+- For questions about Badis or swimming spots (e.g. "Ist der Letten offen?", "Wann hat die Badi auf?"): use get_badi_info. For water temperatures at lake stations use get_water_temps.
+- If search_knowledge_base returns empty results or no relevant content, always follow up with web_search before answering. Never say "I couldn't find anything" without first trying web_search.
+- For questions about Zürich places, events, or local topics: combine search_knowledge_base (background and editorial context) with live connector data (current status, hours, address) and web_search (recent or missing info). Synthesise all sources into one coherent answer rather than listing tool outputs separately.
+- Always cite your sources at the end of your answer using the [Quelle: ...] tag from tool results (e.g. "Quelle: OpenStreetMap", "Quelle: Mieterverband"). For web search results, cite the publication name or URL.
+- When a connector result includes a URL or website for a restaurant, venue, or place, always include it as a clickable link in your response.
 """
 
 
@@ -103,7 +108,10 @@ def call_tools(state: AgentState) -> AgentState:
         result = dispatch_tool(name, arguments)
         
         if result.get("success"):
-            content = json.dumps(result.get("data", {}), ensure_ascii=False, default=str)[:6000]
+            data_json = json.dumps(result.get("data", {}), ensure_ascii=False, default=str)[:6000]
+            source = result.get("source", {})
+            source_note = f'\n[Quelle: {source["name"]}]' if source.get("name") else ""
+            content = data_json + source_note
         else:
             content = f"Error: {result.get('error', 'Unknown error')}"
         

@@ -111,6 +111,24 @@ SOURCES = {
         {"url": "https://www.hev-schweiz.ch/", "name": "HEV Schweiz", "lang": "de", "depth": 2},
         {"url": "https://www.mieterverband.ch/", "name": "Mieterverband", "lang": "de", "depth": 2},
     ],
+    "neighborhoods": [
+        # General Zürich info, neighborhood overviews, facts, culture, history
+        {
+            "url": "https://www.zuerich.com/de/informieren-planen",
+            "name": "Zürich Informieren & Planen (zuerich.com)",
+            "lang": "de",
+            "depth": 2,
+            "url_prefix": "https://www.zuerich.com/de/informieren-planen",
+        },
+        # Attractions / sights — includes quartier articles
+        {
+            "url": "https://www.zuerich.com/de/besuchen/sehenswuerdigkeiten",
+            "name": "Zürich Sehenswürdigkeiten (zuerich.com)",
+            "lang": "de",
+            "depth": 1,
+            "url_prefix": "https://www.zuerich.com/de/besuchen",
+        },
+    ],
 }
 
 # ── HTTP Session ───────────────────────────────────────────────────────────
@@ -603,7 +621,7 @@ def ingest_manual_content(store, dry_run: bool = False) -> dict:
 
 def main():
     parser = argparse.ArgumentParser(description="ZüriBot knowledge base ingestion")
-    parser.add_argument("--category", help="Crawl one category only (government|food|news|law|renting|manual)")
+    parser.add_argument("--category", help="Crawl one category only (government|food|news|law|renting|neighborhoods|manual)")
     parser.add_argument("--reset", action="store_true", help="Drop and rebuild the store")
     parser.add_argument("--dry-run", action="store_true", help="Show what would be crawled, no changes")
     parser.add_argument("--limit", type=int, default=0, help="Max pages per source (0 = unlimited)")
