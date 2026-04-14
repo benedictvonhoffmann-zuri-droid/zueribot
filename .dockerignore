@@ -1,0 +1,37 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.eggs/
+dist/
+build/
+.pytest_cache/
+
+# Git
+.git/
+.gitignore
+
+# Claude / IDE
+.claude/
+.cursor/
+.vscode/
+
+# Large data files not needed in image
+data/law_pdfs/
+notebooks/
+training/
+
+# Frontend build artifacts (served separately)
+frontend/landing/node_modules/
+frontend/landing/dist/
+frontend/landing/.astro/
+
+# Secrets / local config
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
