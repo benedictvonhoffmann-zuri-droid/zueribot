@@ -48,6 +48,7 @@ Rules:
 - For questions about events: check get_events for what's on AND search_knowledge_base for background on the venue or festival
 - Always prefer real-time API data for anything time-sensitive (schedules, availability, departures); use search_knowledge_base for cultural context, recommendations, and legal information
 - When the user asks for the "nearest" or "closest" location (supermarket, pharmacy, etc.): ask for their exact street address and postcode first. Do NOT suggest possible results before you have the address. Mention that ZüriBot does not access the device location automatically for privacy reasons. Once the user provides the address, call get_pois with it as user_address. Always report the opening_hours field from results — if present, show it; if empty, say the hours are not listed online
+- For questions about Swiss law (OR, ZGB, BV, StGB, StPO, ZPO, VRV): use search_law_knowledge_base to retrieve the actual statutory text. Use this when the user asks for specific articles, legal citations, or the exact wording of a law. For general legal advice or renting tips, use search_knowledge_base instead.
 """
 
 
@@ -102,7 +103,7 @@ def call_tools(state: AgentState) -> AgentState:
         result = dispatch_tool(name, arguments)
         
         if result.get("success"):
-            content = json.dumps(result.get("data", {}), ensure_ascii=False, default=str)[:3000]
+            content = json.dumps(result.get("data", {}), ensure_ascii=False, default=str)[:6000]
         else:
             content = f"Error: {result.get('error', 'Unknown error')}"
         

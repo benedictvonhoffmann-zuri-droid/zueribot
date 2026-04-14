@@ -7,6 +7,7 @@ Zürich Knowledge Base Connector
 """
 
 import logging
+import re
 from pathlib import Path
 
 logger = logging.getLogger("zuribot.knowledge")
@@ -166,7 +167,73 @@ def search_law_knowledge_base(query: str, limit: int = 5) -> dict:
     """
     try:
         store = _get_law_vectorstore()
-        results = store.similarity_search_with_score(query, k=limit)
+
+        # For specific article number lookups (e.g. "OR Art. 271"), do a keyword scan
+        # of all OR/ZGB/etc. chunks first — embedding similarity can't find exact article
+        # numbers reliably in a large corpus.
+        art_match = re.search(r"(?:Art(?:ikel)?\.?\s*|§\s*)(\d+[a-z]?)\b", query, re.IGNORECASE)
+        if art_match:
+            art_num = art_match.group(1)
+            # Detect law abbreviation in query to filter results to the right statute
+            LAW_ABBREV_MAP = {
+                "or": "OBLIGATIONENRECHT", "obligationenrecht": "OBLIGATIONENRECHT",
+                "zgb": "ZIVILGESETZBUCH", "zivilgesetzbuch": "ZIVILGESETZBUCH",
+                "bv": "BUNDESVERFASSUNG", "bundesverfassung": "BUNDESVERFASSUNG",
+                "stgb": "STRAFGESETZBUCH", "strafgesetzbuch": "STRAFGESETZBUCH",
+                "stpo": "STRAFPROZESSORDNUNG", "strafprozessordnung": "STRAFPROZESSORDNUNG",
+                "zpo": "ZIVILPROZESSORDNUNG", "zivilprozessordnung": "ZIVILPROZESSORDNUNG",
+                "vrv": "VRV", "verkehrsregeln": "VRV",
+            }
+            target_law = None
+            query_lower = query.lower()
+            for abbrev, law_fragment in LAW_ABBREV_MAP.items():
+                if abbrev in query_lower.split() or f" {abbrev}" in query_lower or query_lower.startswith(abbrev):
+                    target_law = law_fragment
+                    break
+
+            # Keyword scan: fetch all docs and filter by article number presence
+            import chromadb as _chromadb
+            raw_client = _chromadb.PersistentClient(path=_LAW_STORE_PATH)
+            raw_collection = raw_client.get_collection(_LAW_COLLECTION_NAME)
+            total = raw_collection.count()
+            # Scan in batches for "Art. {num}" pattern
+            art_pattern = re.compile(rf"\bArt\.\s*{re.escape(art_num)}\b", re.IGNORECASE)
+            keyword_hits = []
+            for offset in range(0, min(total, 10000), 2000):
+                batch = raw_collection.get(limit=2000, offset=offset, include=["documents", "metadatas"])
+                for doc_text, meta in zip(batch["documents"], batch["metadatas"]):
+                    if target_law and target_law not in meta.get("law_name", "").upper():
+                        continue
+                    if art_pattern.search(doc_text):
+                        keyword_hits.append((doc_text, meta))
+            if keyword_hits:
+                # Return keyword matches directly (already filtered by article number)
+                chunks = []
+                for doc_text, meta in keyword_hits[:limit]:
+                    lines = [l.strip() for l in doc_text.split("\n") if l.strip()]
+                    if len(lines) > 4:
+                        avg_words = sum(len(l.split()) for l in lines) / len(lines)
+                        footnote_lines = sum(1 for l in lines if re.search(r"\d{3,}\s+AS \d{4}", l))
+                        if avg_words < 5 or footnote_lines / len(lines) > 0.3:
+                            continue
+                    chunks.append({
+                        "text": doc_text,
+                        "score": 1.0,
+                        "law_name": meta.get("law_name", ""),
+                        "abbrev": meta.get("abbrev", ""),
+                        "sr_number": meta.get("sr_number", ""),
+                        "source_file": meta.get("source_file", ""),
+                    })
+                if chunks:
+                    return {
+                        "success": True,
+                        "data": {"query": query, "results": chunks[:limit], "total_chunks_retrieved": len(chunks[:limit])},
+                        "source": {"name": "Swiss Law (Fedlex PDFs)", "type": "local-rag"},
+                        "error": None,
+                    }
+
+        # Fetch more candidates than needed so TOC chunks can be filtered out
+        results = store.similarity_search_with_score(query, k=limit * 5)
 
         if not results:
             return {
@@ -182,14 +249,28 @@ def search_law_knowledge_base(query: str, limit: int = 5) -> dict:
 
         chunks = []
         for doc, score in results:
+            text = doc.page_content
+            # Skip index/TOC/footnote chunks — they have no usable article text.
+            # These look like:
+            #   "Art. 247\nF. Aufhebung...\nArt. 248\n..." (TOC)
+            #   "1019  AS 2011 891\n1020  AS 2011 891\n..." (amendment footnotes)
+            lines = [l.strip() for l in text.split("\n") if l.strip()]
+            if len(lines) > 4:
+                avg_words = sum(len(l.split()) for l in lines) / len(lines)
+                # Amendment footnote pattern: "1019  AS 2011 891" or "1019 AS 2011 891"
+                footnote_lines = sum(1 for l in lines if re.search(r"\d{3,}\s+AS \d{4}", l))
+                if avg_words < 5 or footnote_lines / len(lines) > 0.3:
+                    continue
             chunks.append({
-                "text": doc.page_content,
+                "text": text,
                 "score": round(float(score), 4),
                 "law_name": doc.metadata.get("law_name", ""),
                 "abbrev": doc.metadata.get("abbrev", ""),
                 "sr_number": doc.metadata.get("sr_number", ""),
                 "source_file": doc.metadata.get("source_file", ""),
             })
+            if len(chunks) >= limit:
+                break
 
         return {
             "success": True,

@@ -101,12 +101,29 @@ def extract_pdf_text(pdf_path: Path) -> tuple[str, int]:
             text = re.sub(r"-\n(\w)", r"\1", text)    # hyphenated line breaks
             text = re.sub(r"(\w)\n(\w)", r"\1 \2", text)  # mid-sentence line breaks
             text = re.sub(r"\n{3,}", "\n\n", text)     # excessive blank lines
-            if text.strip():
-                pages_text.append(f"[Seite {i + 1}]\n{text.strip()}")
+            text = text.strip()
+            if text and not _is_index_page(text):
+                pages_text.append(f"[Seite {i + 1}]\n{text}")
         except Exception as e:
             logger.warning(f"  Could not extract page {i + 1}: {e}")
 
     return "\n\n".join(pages_text), page_count
+
+
+def _is_index_page(text: str) -> bool:
+    """
+    Return True if this page looks like a table of contents, footnote list,
+    or amendment log rather than actual article text.
+    Heuristic: most lines are short (< 6 words) AND contain "Art." or
+    are purely numeric (footnote references like "AS 2011 891").
+    """
+    lines = [l.strip() for l in text.split("\n") if l.strip()]
+    if len(lines) < 4:
+        return False
+    short_lines = sum(1 for l in lines if len(l.split()) < 6)
+    art_refs = sum(1 for l in lines if re.match(r"^(Art\.|§|\d+\.?\s|AS \d|SR \d|BBl )", l))
+    # If >70% of lines are short AND >40% look like index references → skip
+    return (short_lines / len(lines) > 0.70) and (art_refs / len(lines) > 0.40)
 
 
 def chunk_legal_text(text: str) -> list[str]:
