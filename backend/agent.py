@@ -17,6 +17,24 @@ from backend.tools.tools import TOOL_DEFINITIONS, dispatch_tool
 
 logger = logging.getLogger("zuribot.agent")
 
+# RAG tool names that trigger document grading
+RAG_TOOL_NAMES = {"search_knowledge_base", "search_law_knowledge_base"}
+
+GRADER_PROMPT = """You are a document relevance grader for a Zürich city assistant.
+
+Given a user question and retrieved knowledge base excerpts, decide if the documents
+are relevant enough to answer the question.
+
+Output ONLY valid JSON: {"relevant": true} or {"relevant": false}
+
+Mark relevant=false if:
+- The documents are clearly about a different topic than the question
+- The documents contain only empty results or "no results found"
+- The retrieved content cannot help answer the question at all
+
+Mark relevant=true if the documents contain ANY useful information related to the question,
+even if partial."""
+
 SYSTEM_PROMPT = """You are ZüriBot, a helpful assistant for the city of Zürich, Switzerland.
 
 You help residents and visitors with:
@@ -27,33 +45,44 @@ You help residents and visitors with:
 - Air quality measurements
 - Points of interest (restaurants, museums, attractions, etc.)
 - Voting and referendum results
-- Events happening in and aroürich
+- Events happening in and around Zürich
 - Venues (restaurants, bars, hotels, attractions)
 - Waste collection schedules (garbage, bio waste, paper, cardboard)
 - Recycling collection points (glass, metal, oil, textiles)
 - Mobile recycling center schedules
 - General web search when other tools don't cover the topic
-- Local knowledge: neighborhood character, Swiss customs and etiquette, tenancy law, government services, restaurant recommendations, news
+- Local knowledge: neighborhoods, Swiss customs, tenancy law, government services, restaurant recommendations, expat tips, news
 
-Rules:
+## Source Routing — which tool to use when
+
+Use this guide to decide which source to consult first:
+
+| Type of question | Primary source |
+|---|---|
+| Simple general knowledge (geography, world facts, language) | Answer from your own knowledge — no tool needed |
+| Zürich-specific background, neighborhood character, cultural events, expat tips, local history | `search_knowledge_base` first |
+| Real-time or time-sensitive (departures, parking, weather, badi status, air quality, events) | Live connector (get_departures, get_connections, get_parking, get_badi_info, get_weather, get_events, etc.) |
+| Swiss statutory text, specific law articles (OR, ZGB, BV, StGB, StPO) | `search_law_knowledge_base` |
+| Recent news, current prices, things that may have changed | `web_search` |
+| KB returns empty or clearly irrelevant results | Follow up immediately with `web_search` — never say "I couldn't find anything" without first trying web_search |
+| Questions needing multiple perspectives | Call `search_knowledge_base` AND the live connector AND `web_search` in one turn (parallel) |
+
+## Rules
+
 - Always respond in the same language the user writes in (German, Swiss German, English, French, Italian)
 - If the user writes in Swiss German, respond in Swiss German
-- Use the available tools to get real data before answering
 - Be concise and practical
 - If a tool returns an error, explain it simply and suggest alternatives
 - For locations, always include the address if available
 - For schedules, format dates clearly in European format (DD.MM.YYYY)
 - When mentioning times, use 24h format
-- For questions about specific places (restaurants, shops, venues): first call search_knowledge_base for editorial context and recommendations, then call get_pois or get_venues for real-time addresses and opening hours
-- For questions about events: check get_events for what's on AND search_knowledge_base for background on the venue or festival
-- Always prefer real-time API data for anything time-sensitive (schedules, availability, departures); use search_knowledge_base for cultural context, recommendations, and legal information
-- When the user asks for the "nearest" or "closest" location (supermarket, pharmacy, etc.): ask for their exact street address and postcode first. Do NOT suggest possible results before you have the address. Mention that ZüriBot does not access the device location automatically for privacy reasons. Once the user provides the address, call get_pois with it as user_address. Always report the opening_hours field from results — if present, show it; if empty, say the hours are not listed online
-- For questions about Swiss law (OR, ZGB, BV, StGB, StPO, ZPO, VRV): use search_law_knowledge_base to retrieve the actual statutory text. Use this when the user asks for specific articles, legal citations, or the exact wording of a law. For general legal advice or renting tips, use search_knowledge_base instead.
-- For questions about Badis or swimming spots (e.g. "Ist der Letten offen?", "Wann hat die Badi auf?"): use get_badi_info. For water temperatures at lake stations use get_water_temps.
-- If search_knowledge_base returns empty results or no relevant content, always follow up with web_search before answering. Never say "I couldn't find anything" without first trying web_search.
-- For questions about Zürich places, events, or local topics: combine search_knowledge_base (background and editorial context) with live connector data (current status, hours, address) and web_search (recent or missing info). Synthesise all sources into one coherent answer rather than listing tool outputs separately.
-- Always cite your sources at the end of your answer using the [Quelle: ...] tag from tool results (e.g. "Quelle: OpenStreetMap", "Quelle: Mieterverband"). For web search results, cite the publication name or URL.
-- When a connector result includes a URL or website for a restaurant, venue, or place, always include it as a clickable link in your response.
+- For questions about specific places (restaurants, shops, venues): call `search_knowledge_base` for editorial context AND `get_pois` or `get_venues` for current addresses/hours — both in the same turn
+- For questions about events: check `get_events` for what's on AND `search_knowledge_base` for background on the venue or festival
+- When the user asks for the "nearest" location: ask for their exact street address and postcode first. ZüriBot does not access device location for privacy reasons. Once address is provided, call `get_pois` with it as `user_address`
+- For Badi questions ("Ist der Letten offen?", "Wann hat die Badi auf?"): use `get_badi_info`. For lake water temperatures: use `get_water_temps`
+- Always synthesise results from multiple sources into one coherent, well-structured answer — do not paste raw tool output
+- Always cite sources at the end using [Quelle: ...] from tool results. For web results, cite the publication name or URL
+- When a connector result includes a URL for a restaurant, venue, or place, always include it as a clickable link
 """
 
 
@@ -93,6 +122,69 @@ def call_model(state: AgentState, writer: StreamWriter) -> AgentState:
     return {"messages": [accumulated]}
 
 
+def grade_rag_results(state: AgentState) -> AgentState:
+    """
+    CRAG: After RAG tool calls, check if retrieved chunks are actually relevant.
+    If not relevant, inject an AIMessage signalling the agent to try web_search.
+    """
+    messages = state["messages"]
+
+    # Find the most recent RAG tool result
+    rag_messages = [
+        m for m in messages
+        if isinstance(m, ToolMessage) and m.name in RAG_TOOL_NAMES
+    ]
+    if not rag_messages:
+        return state  # No RAG result to grade
+
+    rag_content = rag_messages[-1].content
+
+    # Find the last user question
+    user_query = ""
+    for m in reversed(messages):
+        if isinstance(m, HumanMessage):
+            user_query = m.content if isinstance(m.content, str) else str(m.content)
+            break
+
+    if not user_query:
+        return state
+
+    # Quick heuristic: if content is clearly empty/no results, skip LLM grading
+    lower = rag_content.lower()
+    if any(phrase in lower for phrase in ["keine ergebnisse", "no results", '"results": []', '"chunks": []']):
+        logger.info("Grader: RAG returned empty results — injecting web_search signal")
+        return {"messages": [AIMessage(
+            content="[GRADER: Knowledge base returned no relevant results. I will search the web.]"
+        )]}
+
+    # LLM grading call (fast, small prompt)
+    try:
+        grader_llm = get_llm()
+        response = grader_llm.invoke([
+            SystemMessage(content=GRADER_PROMPT),
+            HumanMessage(content=f"Question: {user_query[:400]}\n\nDocuments: {rag_content[:1500]}"),
+        ])
+        raw = response.content
+        if isinstance(raw, list):
+            raw = "".join(b.get("text", "") if isinstance(b, dict) else str(b) for b in raw)
+        raw = raw.strip()
+
+        # Extract JSON (model may wrap it in markdown)
+        import re
+        match = re.search(r'\{[^}]+\}', raw)
+        if match:
+            grade = json.loads(match.group())
+            if not grade.get("relevant", True):
+                logger.info("Grader: RAG results not relevant — injecting web_search signal")
+                return {"messages": [AIMessage(
+                    content="[GRADER: Retrieved documents are not relevant to the question. I will search the web for a better answer.]"
+                )]}
+    except Exception as e:
+        logger.warning(f"Grader failed (non-blocking): {e}")
+
+    return state  # Relevant — continue normally
+
+
 def call_tools(state: AgentState) -> AgentState:
     """Execute tool calls from the model."""
     last_message = state["messages"][-1]
@@ -130,6 +222,7 @@ workflow = StateGraph(AgentState)
 
 workflow.add_node("agent", call_model)
 workflow.add_node("tools", call_tools)
+workflow.add_node("grade", grade_rag_results)
 
 workflow.set_entry_point("agent")
 
@@ -142,6 +235,8 @@ workflow.add_conditional_edges(
     },
 )
 
-workflow.add_edge("tools", "agent")
+# After tools run, grade RAG results before returning to the agent
+workflow.add_edge("tools", "grade")
+workflow.add_edge("grade", "agent")
 
 graph = workflow.compile()

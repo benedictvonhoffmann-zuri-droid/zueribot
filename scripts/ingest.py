@@ -128,6 +128,85 @@ SOURCES = {
             "depth": 1,
             "url_prefix": "https://www.zuerich.com/de/besuchen",
         },
+        # Arts & culture
+        {
+            "url": "https://www.zuerich.com/de/besuchen/kunst-und-kultur",
+            "name": "Zürich Kunst & Kultur (zuerich.com)",
+            "lang": "de",
+            "depth": 2,
+            "url_prefix": "https://www.zuerich.com/de/besuchen/kunst-und-kultur",
+        },
+        # Sports & outdoor
+        {
+            "url": "https://www.zuerich.com/de/besuchen/sport",
+            "name": "Zürich Sport & Outdoor (zuerich.com)",
+            "lang": "de",
+            "depth": 2,
+            "url_prefix": "https://www.zuerich.com/de/besuchen/sport",
+        },
+        # Living in Zürich — health, family, schools
+        {
+            "url": "https://www.zuerich.com/de/leben",
+            "name": "Leben in Zürich (zuerich.com)",
+            "lang": "de",
+            "depth": 2,
+            "url_prefix": "https://www.zuerich.com/de/leben",
+        },
+        # Shopping
+        {
+            "url": "https://www.zuerich.com/de/besuchen/shopping",
+            "name": "Zürich Shopping (zuerich.com)",
+            "lang": "de",
+            "depth": 1,
+            "url_prefix": "https://www.zuerich.com/de/besuchen/shopping",
+        },
+    ],
+    "guides": [
+        # Timeout Zürich — English-language city guide, food, nightlife, culture
+        {
+            "url": "https://www.timeout.com/zurich",
+            "name": "Time Out Zürich",
+            "lang": "en",
+            "depth": 2,
+            "url_prefix": "https://www.timeout.com/zurich",
+            "no_law_filter": True,
+        },
+        # Switzerland Tourism (Zürich section)
+        {
+            "url": "https://www.myswitzerland.com/en/destinations/zurich/",
+            "name": "MySwitzerland – Zürich",
+            "lang": "en",
+            "depth": 2,
+            "url_prefix": "https://www.myswitzerland.com/en/destinations/zurich",
+            "no_law_filter": True,
+        },
+        # Expat Savvy — practical expat guide for Zürich and Switzerland
+        {
+            "url": "https://expat-savvy.ch/living-in-switzerland/zurich/",
+            "name": "Expat Savvy – Zürich",
+            "lang": "en",
+            "depth": 2,
+            "url_prefix": "https://expat-savvy.ch",
+            "no_law_filter": True,
+        },
+        # Newly Swissed — expat lifestyle blog about Switzerland
+        {
+            "url": "https://www.newlyswissed.com/category/zurich/",
+            "name": "Newly Swissed – Zürich",
+            "lang": "en",
+            "depth": 2,
+            "url_prefix": "https://www.newlyswissed.com",
+            "no_law_filter": True,
+        },
+        # Zürich Tourism (English)
+        {
+            "url": "https://www.zuerich.com/en/visit",
+            "name": "Zürich Tourism (EN)",
+            "lang": "en",
+            "depth": 2,
+            "url_prefix": "https://www.zuerich.com/en/visit",
+            "no_law_filter": True,
+        },
     ],
 }
 
@@ -639,26 +718,30 @@ def main():
     totals = {"pages": 0, "chunks_added": 0, "chunks_skipped": 0,
               "sources_ok": 0, "sources_skipped": 0}
 
-    categories = SOURCES.keys() if not args.category or args.category == "manual" else [args.category]
+    # "manual" is not a key in SOURCES — handle it separately
+    run_manual = not args.category or args.category == "manual"
+    run_web = args.category != "manual"
 
-    for category in categories:
-        if category not in SOURCES:
-            logger.warning(f"Unknown category: {category}")
-            continue
+    if run_web:
+        categories = list(SOURCES.keys()) if not args.category else [args.category]
+        for category in categories:
+            if category not in SOURCES:
+                logger.warning(f"Unknown category: {category}")
+                continue
 
-        logger.info(f"\n=== Category: {category} ===")
-        for source in SOURCES[category]:
-            logger.info(f"Source: {source['name']} ({source['url']})")
-            stats = crawl_source(store, source, category, dry_run=args.dry_run, limit=limit)
-            for k in ("pages", "chunks_added", "chunks_skipped"):
-                totals[k] += stats[k]
-            if stats["skipped_pages"] and stats["pages"] == 0:
-                totals["sources_skipped"] += 1
-            else:
-                totals["sources_ok"] += 1
+            logger.info(f"\n=== Category: {category} ===")
+            for source in SOURCES[category]:
+                logger.info(f"Source: {source['name']} ({source['url']})")
+                stats = crawl_source(store, source, category, dry_run=args.dry_run, limit=limit)
+                for k in ("pages", "chunks_added", "chunks_skipped"):
+                    totals[k] += stats[k]
+                if stats["skipped_pages"] and stats["pages"] == 0:
+                    totals["sources_skipped"] += 1
+                else:
+                    totals["sources_ok"] += 1
 
     # Manual content
-    if not args.category or args.category == "manual":
+    if run_manual:
         logger.info("\n=== Category: manual ===")
         stats = ingest_manual_content(store, dry_run=args.dry_run)
         for k in ("pages", "chunks_added", "chunks_skipped"):
