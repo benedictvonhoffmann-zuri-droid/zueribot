@@ -1,8 +1,6 @@
+# App dependencies — install after the heavy ML layer.
+# Adding packages here does NOT invalidate the torch/sentence-transformers cache.
 langchain-ollama>=0.3.0
-langchain-huggingface>=0.3.0
-langchain-chroma>=0.2.0
-sentence-transformers>=3.0.0
-chromadb>=1.0.0
 langchain-anthropic>=0.3.0
 langchain-openai>=0.3.0
 langchain-core>=0.3.0

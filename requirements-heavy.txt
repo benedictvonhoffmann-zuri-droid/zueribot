@@ -1,0 +1,7 @@
+# Heavy ML dependencies — rarely change, cached as a separate Docker layer.
+# When these change, the full pip install re-runs. Keep this file stable.
+torch>=2.0.0
+sentence-transformers>=3.0.0
+langchain-huggingface>=0.3.0
+chromadb>=1.0.0
+langchain-chroma>=0.2.0
