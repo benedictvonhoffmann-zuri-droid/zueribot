@@ -16,6 +16,11 @@ from backend.connectors import (
     recycling_connector,
     search_connector,
     knowledge_connector,
+    rent_connector,
+    pedestrian_connector,
+    water_quality_connector,
+    crime_connector,
+    city_stats_connector,
 )
 
 # Tool definitions in OpenAI/Ollama function calling format
@@ -439,6 +444,117 @@ TOOL_DEFINITIONS = [
     {
         "type": "function",
         "function": {
+            "name": "get_rent_prices",
+            "description": "Get rent price statistics for Zürich from the official Mietpreiserhebung (MPE). Shows median, mean and quartile rents by neighbourhood (Quartier/Stadtkreis) and number of rooms. Use when asked about rent costs, housing prices, or how expensive it is to live in a specific area.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "quartier": {
+                        "type": "string",
+                        "description": "Neighbourhood or Stadtkreis (e.g. 'Ganze Stadt', 'Kreis 4', 'Langstrasse', 'Wipkingen'). Leave empty for city-wide overview.",
+                        "default": ""
+                    },
+                    "rooms": {
+                        "type": "string",
+                        "description": "Number of rooms (e.g. '2', '3', '3.5', '4'). Leave empty for all room sizes.",
+                        "default": ""
+                    },
+                    "gemeinnuetzig": {
+                        "type": "boolean",
+                        "description": "If true, return cooperative/social housing prices only.",
+                        "default": False
+                    }
+                },
+                "required": []
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_pedestrian_counts",
+            "description": "Get current pedestrian frequency counts on the Zürich Bahnhofstrasse (Nord, Mitte, Süd) and Lintheschergasse. Updated hourly. Use when asked how busy/crowded Bahnhofstrasse is right now.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "hours": {
+                        "type": "integer",
+                        "description": "Look-back window in hours (1–24). Default 6.",
+                        "default": 6
+                    }
+                },
+                "required": []
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_water_quality",
+            "description": "Get drinking water quality measurements for Zürich from Wasserversorgung Zürich. Shows key parameters (E. coli, pH, nitrate, turbidity) and whether all values comply with legal limits. Use when asked if tap water in Zürich is safe to drink.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "standort": {
+                        "type": "string",
+                        "description": "Measurement location (e.g. 'Moos', 'Hardhof', 'Lengg'). Leave empty for all locations.",
+                        "default": ""
+                    }
+                },
+                "required": []
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_crime_stats",
+            "description": "Get crime statistics (Kriminalstatistik) for Zürich Stadtkreise from the Kantonspolizei. Shows number of offences by category and crime rate per 1,000 residents. Use when asked about safety, crime rates, or how safe a neighbourhood is.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "stadtkreis": {
+                        "type": "string",
+                        "description": "Kreis number or name (e.g. '4', 'Kreis 4'). Leave empty for all city districts.",
+                        "default": ""
+                    },
+                    "category": {
+                        "type": "string",
+                        "description": "Crime category filter (e.g. 'Einbruch', 'Körperverletzung', 'Diebstahl'). Leave empty for all categories.",
+                        "default": ""
+                    }
+                },
+                "required": []
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_recycling_stats",
+            "description": "Get latest recycling and waste statistics for Zürich from ERZ (Entsorgung + Recycling Zürich). Shows Zürisack sales, recycling quota percentage, and monthly waste tonnage. Use when asked about Zürich's recycling rate or waste volumes.",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": []
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_electricity_load",
+            "description": "Get current electricity consumption (Bruttolastgang) for the city of Zürich from EWZ. Shows real-time power demand in megawatts with 15-minute resolution. Use when asked about Zürich's energy consumption or current power demand.",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": []
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "search_law_knowledge_base",
             "description": (
                 "Search the Swiss federal law collection (Bundesverfassung, OR, ZGB, StGB, StPO, ZPO, VRV). "
@@ -602,6 +718,35 @@ def dispatch_tool(name, arguments):
                 query=arguments.get("query", ""),
                 limit=arguments.get("limit", 5)
             )
+
+        elif name == "get_rent_prices":
+            return rent_connector.get_rent_prices(
+                quartier=arguments.get("quartier", ""),
+                rooms=arguments.get("rooms", ""),
+                gemeinnuetzig=arguments.get("gemeinnuetzig", False),
+            )
+
+        elif name == "get_pedestrian_counts":
+            return pedestrian_connector.get_pedestrian_counts(
+                hours=arguments.get("hours", 6),
+            )
+
+        elif name == "get_water_quality":
+            return water_quality_connector.get_water_quality(
+                standort=arguments.get("standort", ""),
+            )
+
+        elif name == "get_crime_stats":
+            return crime_connector.get_crime_stats(
+                stadtkreis=arguments.get("stadtkreis", ""),
+                category=arguments.get("category", ""),
+            )
+
+        elif name == "get_recycling_stats":
+            return city_stats_connector.get_recycling_stats()
+
+        elif name == "get_electricity_load":
+            return city_stats_connector.get_electricity_load()
 
         else:
             return {"success": False, "data": None, "source": None, "error": f"Unknown tool: {name}"}
