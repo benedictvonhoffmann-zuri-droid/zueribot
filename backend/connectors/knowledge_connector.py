@@ -122,14 +122,31 @@ def search_knowledge_base(query: str, limit: int = 5) -> dict:
                 "title": doc.metadata.get("title", ""),
             })
 
+        # Build a deduplicated list of actual sources for citation
+        seen = set()
+        sources = []
+        for c in chunks:
+            key = c["source_name"]
+            if key and key not in seen:
+                seen.add(key)
+                entry = {"name": c["source_name"]}
+                url = c.get("source_url", "")
+                if url and not url.startswith("local://"):
+                    entry["url"] = url
+                sources.append(entry)
+
         return {
             "success": True,
             "data": {
                 "query": query,
                 "results": chunks,
                 "total_chunks_retrieved": len(chunks),
+                "sources": sources,  # Cite these in your answer
             },
-            "source": {"name": "Zürich Knowledge Base", "type": "local-rag"},
+            "source": {
+                "name": ", ".join(s["name"] for s in sources) or "Zürich Knowledge Base",
+                "type": "local-rag",
+            },
             "error": None,
         }
 

@@ -10,6 +10,7 @@ import io
 import logging
 from datetime import datetime, timezone, timedelta
 from functools import lru_cache
+from zoneinfo import ZoneInfo
 
 import requests
 import pandas as pd
@@ -98,27 +99,32 @@ def get_pedestrian_counts(hours: int = 6) -> dict:
     # Latest timestamp in data
     latest_ts = df["timestamp"].max()
 
+    _ZURICH_TZ = ZoneInfo("Europe/Zurich")
+
     results = []
     for loc in df["location_name"].unique():
         loc_df = df[df["location_name"] == loc].sort_values("timestamp")
         latest = loc_df.iloc[-1]
         count_series = pd.to_numeric(loc_df["pedestrians_count"], errors="coerce")
         latest_count = pd.to_numeric(latest.get("pedestrians_count"), errors="coerce")
+        local_ts = latest["timestamp"].astimezone(_ZURICH_TZ)
         results.append({
             "standort": loc,
             "passanten_letzte_stunde": int(latest_count) if pd.notna(latest_count) else None,
             "wetter": latest.get("weather_condition", ""),
             "temperatur_c": round(float(latest["temperature"]), 1) if pd.notna(latest.get("temperature")) else None,
-            "zeitpunkt": latest["timestamp"].strftime("%d.%m.%Y %H:%M UTC"),
+            "zeitpunkt": local_ts.strftime("%d.%m.%Y %H:%M (Zürich-Zeit)"),
             f"durchschnitt_letzte_{hours}h": int(count_series.mean()) if count_series.notna().any() else None,
         })
 
+    latest_ts_local = latest_ts.astimezone(_ZURICH_TZ)
     return {
         "success": True,
         "data": {
             "standorte": results,
-            "letzte_messung": latest_ts.strftime("%d.%m.%Y %H:%M UTC"),
+            "letzte_messung": latest_ts_local.strftime("%d.%m.%Y %H:%M (Zürich-Zeit)"),
             "zeitraum_stunden": hours,
+            "hinweis": "Hystreet-Sensoren publizieren mit ca. 1–2h Verzögerung.",
         },
         "source": SOURCE,
     }

@@ -14,6 +14,7 @@ import io
 import logging
 from datetime import datetime, timezone
 from functools import lru_cache
+from zoneinfo import ZoneInfo
 
 import requests
 import pandas as pd
@@ -137,23 +138,32 @@ def get_electricity_load() -> dict:
     cutoff = last_ts - pd.Timedelta(hours=4)
     recent = df_valid[df_valid["zeitpunkt"] >= cutoff]
 
+    _ZURICH_TZ = ZoneInfo("Europe/Zurich")
+    last_ts_local = last_ts.astimezone(_ZURICH_TZ)
+
     trend = []
     for _, row in recent.iterrows():
         if pd.notna(row.get("bruttolastgang")):
+            local_row_ts = row["zeitpunkt"].astimezone(_ZURICH_TZ)
             trend.append({
-                "zeitpunkt": row["zeitpunkt"].strftime("%H:%M"),
-                "kw": round(float(row["bruttolastgang"]) / 1000, 1),  # convert to MW
+                "zeitpunkt": local_row_ts.strftime("%H:%M"),
+                "mw": round(float(row["bruttolastgang"]) / 1000, 1),
             })
 
     current_mw = round(float(latest["bruttolastgang"]) / 1000, 1) if pd.notna(latest.get("bruttolastgang")) else None
+
+    # Calculate how far behind real-time the dataset is
+    now_utc = datetime.now(timezone.utc)
+    lag_hours = round((now_utc - last_ts.replace(tzinfo=timezone.utc) if last_ts.tzinfo is None else now_utc - last_ts).total_seconds() / 3600, 1)
+    lag_note = f"Letzte verfügbare Messung: {last_ts_local.strftime('%d.%m.%Y %H:%M')} (Zürich-Zeit). EWZ veröffentlicht Daten mit ca. {lag_hours:.0f}h Verzögerung."
 
     return {
         "success": True,
         "data": {
             "aktueller_verbrauch_mw": current_mw,
-            "zeitpunkt": last_ts.strftime("%d.%m.%Y %H:%M UTC"),
+            "zeitpunkt": last_ts_local.strftime("%d.%m.%Y %H:%M (Zürich-Zeit)"),
             "verlauf_4h": trend,
-            "hinweis": "Bruttolastgang = Gesamtstromverbrauch der Stadt Zürich (EWZ-Netz), in Megawatt.",
+            "hinweis": f"Bruttolastgang = Gesamtstromverbrauch der Stadt Zürich (EWZ-Netz), in Megawatt. {lag_note}",
         },
         "source": SOURCE_ELECTRICITY,
     }
