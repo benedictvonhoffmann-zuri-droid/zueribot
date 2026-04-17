@@ -30,6 +30,8 @@ services:
     environment:
       - OPENAI_API_BASE_URL=http://zuribot:8000/v1
       - OPENAI_API_KEY=zuribot
+      - WEBUI_NAME=Bünzli AI
+      - DEFAULT_LOCALE=en-US
     volumes:
       - open-webui-data:/app/backend/data
     depends_on:
@@ -44,6 +46,7 @@ services:
       - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./openwebui-theme.css:/etc/nginx/bz-theme.css:ro
     depends_on:
       - zuribot
       - open-webui

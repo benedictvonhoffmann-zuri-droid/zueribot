@@ -1,0 +1,146 @@
+/* ============================================================
+   Bünzli theme for Open WebUI
+   Aligns OWU with buenzli.space landing page design system.
+   Tokens: zurich-blue #0070B4, zurich-dark #1A1A1A, tram-green
+   #3D8A3E, badi-orange #F26522, Inter Variable typography.
+   ============================================================ */
+
+@font-face {
+  font-family: 'Inter Variable';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('https://cdn.jsdelivr.net/npm/@fontsource-variable/inter@5.0.17/files/inter-latin-wght-normal.woff2') format('woff2');
+}
+
+:root {
+  --bz-blue: #0070B4;
+  --bz-blue-dark: #00407C;
+  --bz-blue-light: #EDF5FA;
+  --bz-dark: #1A1A1A;
+  --bz-gray: #6B7280;
+  --bz-border: #E5E7EB;
+  --bz-bg-5: #F7F7F7;
+  --bz-tram-green: #3D8A3E;
+  --bz-badi-orange: #F26522;
+
+  /* Override OWU's accent tokens where they exist */
+  --color-primary: var(--bz-blue);
+  --color-primary-foreground: #ffffff;
+}
+
+html, body {
+  font-family: 'Inter Variable', Inter, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  font-feature-settings: 'cv11', 'ss01', 'ss03';
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Primary button — blue ───────────────────────────────── */
+button.bg-black,
+button.bg-gray-900,
+button.bg-gray-950,
+.bg-black:not(body):not(html),
+button[class*="bg-black"]:not(.keep-black) {
+  background-color: var(--bz-blue) !important;
+  color: #fff !important;
+  transition: background-color 150ms ease;
+}
+button.bg-black:hover,
+button.bg-gray-900:hover,
+button.bg-gray-950:hover,
+button[class*="bg-black"]:hover:not(.keep-black) {
+  background-color: var(--bz-blue-dark) !important;
+}
+
+/* Outlined / secondary buttons get a blue hover ring */
+button:not([class*="bg-"]):hover,
+button.bg-white:hover,
+button.bg-transparent:hover {
+  color: var(--bz-blue);
+}
+
+/* ── Links and inline accents ────────────────────────────── */
+a:not(.keep-color) {
+  color: var(--bz-blue);
+}
+a:not(.keep-color):hover {
+  color: var(--bz-blue-dark);
+  text-decoration: underline;
+}
+
+/* ── Focus rings ─────────────────────────────────────────── */
+*:focus-visible {
+  outline: 2px solid var(--bz-blue) !important;
+  outline-offset: 2px;
+}
+input:focus,
+textarea:focus,
+[contenteditable]:focus {
+  border-color: var(--bz-blue) !important;
+  box-shadow: 0 0 0 3px rgba(0, 112, 180, 0.12) !important;
+}
+
+/* ── Chat bubbles — user side uses Zürich blue ──────────── */
+.chat-user .bg-gray-50,
+.chat-user .bg-gray-100,
+.chat-user .bg-gray-200,
+[class*="user-message"] .rounded-3xl,
+[class*="user-message"] .rounded-2xl {
+  background-color: var(--bz-blue) !important;
+  color: #fff !important;
+}
+
+/* ── Sidebar branding (title / logo area) ───────────────── */
+.sidebar-title,
+header [class*="logo"] {
+  color: var(--bz-dark);
+  letter-spacing: -0.01em;
+  font-weight: 700;
+}
+
+/* ── Code blocks — soft gray instead of black ───────────── */
+pre, code {
+  font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace !important;
+}
+pre {
+  background-color: var(--bz-bg-5) !important;
+  border: 1px solid var(--bz-border);
+  border-radius: 10px;
+}
+
+/* ── "New chat" / primary CTAs get a subtle shadow ───────── */
+button.bg-black,
+button.bg-gray-900 {
+  box-shadow: 0 1px 2px rgba(0, 64, 124, 0.08),
+              0 2px 8px rgba(0, 64, 124, 0.06);
+}
+
+/* ── Scrollbars — thinner, branded ──────────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--bz-border) transparent;
+}
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background-color: var(--bz-border);
+  border-radius: 4px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--bz-gray);
+}
+
+/* ── Selection ───────────────────────────────────────────── */
+::selection {
+  background-color: rgba(0, 112, 180, 0.2);
+  color: var(--bz-dark);
+}
+
+/* ── Respect reduced motion ──────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
