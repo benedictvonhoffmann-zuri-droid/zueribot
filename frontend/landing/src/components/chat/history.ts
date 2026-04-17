@@ -4,54 +4,19 @@ import type {
   ThreadHistoryAdapter,
 } from "@assistant-ui/react";
 import { encryptJson, decryptJson, type Ciphertext } from "./crypto";
+import {
+  HEAD_PREFIX,
+  STORE_MESSAGES,
+  STORE_META,
+  awaitTx,
+  headKey,
+  msgRowId,
+  openDb,
+  promisify,
+  txOf,
+} from "./db";
 
-const DB_NAME = "bunzli-chat";
-const STORE = "messages";
-const META = "meta";
-const HEAD_KEY = "headId";
-
-function openDb(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, 1);
-    req.onupgradeneeded = () => {
-      const db = req.result;
-      if (!db.objectStoreNames.contains(STORE)) {
-        db.createObjectStore(STORE, { keyPath: "id" });
-      }
-      if (!db.objectStoreNames.contains(META)) {
-        db.createObjectStore(META);
-      }
-    };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-function tx(db: IDBDatabase, mode: IDBTransactionMode, stores: string[]) {
-  const t = db.transaction(stores, mode);
-  return { t, stores: stores.map((s) => t.objectStore(s)) };
-}
-
-function promisify<T>(req: IDBRequest<T>): Promise<T> {
-  return new Promise((resolve, reject) => {
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-export async function clearHistory(): Promise<void> {
-  const db = await openDb();
-  const { t, stores } = tx(db, "readwrite", [STORE, META]);
-  stores[0].clear();
-  stores[1].clear();
-  await new Promise<void>((r, rej) => {
-    t.oncomplete = () => r();
-    t.onerror = () => rej(t.error);
-  });
-  db.close();
-}
-
-// On-disk shape: id is clear (needed as key), payload is AES-GCM ciphertext
+// On-disk shape: key is `${threadId}|${messageId}` (clear), payload is ciphertext.
 type StoredRow = {
   id: string;
   ct: Ciphertext;
@@ -64,74 +29,106 @@ type PlainItem = {
   runConfig?: ExportedMessageRepositoryItem["runConfig"];
 };
 
-export const indexedDbHistory: ThreadHistoryAdapter = {
-  async load(): Promise<ExportedMessageRepository> {
-    try {
-      const db = await openDb();
-      const { t, stores } = tx(db, "readonly", [STORE, META]);
-      const [msgStore, metaStore] = stores;
-      const rows = await promisify<StoredRow[]>(
-        msgStore.getAll() as IDBRequest<StoredRow[]>
-      );
-      const headId =
-        (await promisify<string | undefined>(
-          metaStore.get(HEAD_KEY) as IDBRequest<string | undefined>
-        )) ?? null;
-      await new Promise<void>((r) => {
-        t.oncomplete = () => r();
-      });
-      db.close();
+/**
+ * Per-thread history adapter. Loads and appends messages scoped to a single
+ * thread id. Messages are AES-GCM-256 encrypted before hitting IndexedDB.
+ */
+export function makeThreadHistory(threadId: string): ThreadHistoryAdapter {
+  const prefix = `${threadId}|`;
 
-      const decrypted: PlainItem[] = [];
-      for (const row of rows) {
-        try {
-          const item = await decryptJson<PlainItem>({
-            iv: new Uint8Array(row.ct.iv),
-            data: new Uint8Array(row.ct.data),
-          });
-          decrypted.push(item);
-        } catch {
-          // skip corrupt/undecryptable rows (e.g. key was rotated)
+  return {
+    async load(): Promise<ExportedMessageRepository> {
+      try {
+        const db = await openDb();
+        const { t, stores } = txOf(db, "readonly", [STORE_MESSAGES, STORE_META]);
+        const [msgStore, metaStore] = stores;
+
+        // Scan only rows with our thread prefix.
+        const range = IDBKeyRange.bound(prefix, prefix + "\uffff");
+        const rows = await promisify<StoredRow[]>(
+          msgStore.getAll(range) as IDBRequest<StoredRow[]>
+        );
+        const headId =
+          (await promisify<string | undefined>(
+            metaStore.get(headKey(threadId)) as IDBRequest<string | undefined>
+          )) ?? null;
+        await awaitTx(t);
+        db.close();
+
+        const decrypted: PlainItem[] = [];
+        for (const row of rows) {
+          try {
+            const item = await decryptJson<PlainItem>({
+              iv: new Uint8Array(row.ct.iv),
+              data: new Uint8Array(row.ct.data),
+            });
+            decrypted.push(item);
+          } catch {
+            // skip corrupt/undecryptable rows (e.g. key was rotated)
+          }
         }
+
+        return {
+          headId,
+          messages: decrypted.map((i) => ({
+            message: i.message,
+            parentId: i.parentId,
+            runConfig: i.runConfig,
+          })),
+        };
+      } catch {
+        return { headId: null, messages: [] };
       }
+    },
 
-      return {
-        headId,
-        messages: decrypted.map((i) => ({
-          message: i.message,
-          parentId: i.parentId,
-          runConfig: i.runConfig,
-        })),
-      };
-    } catch {
-      return { headId: null, messages: [] };
-    }
-  },
+    async append(item: ExportedMessageRepositoryItem): Promise<void> {
+      try {
+        const id = (item.message as any).id as string;
+        const plain: PlainItem = {
+          id,
+          parentId: item.parentId,
+          message: item.message,
+          runConfig: item.runConfig,
+        };
+        const ct = await encryptJson(plain);
+        const row: StoredRow = { id: msgRowId(threadId, id), ct };
 
-  async append(item: ExportedMessageRepositoryItem): Promise<void> {
-    try {
-      const id = (item.message as any).id as string;
-      const plain: PlainItem = {
-        id,
-        parentId: item.parentId,
-        message: item.message,
-        runConfig: item.runConfig,
-      };
-      const ct = await encryptJson(plain);
-      const row: StoredRow = { id, ct };
+        const db = await openDb();
+        const { t, stores } = txOf(db, "readwrite", [STORE_MESSAGES, STORE_META]);
+        const [msgStore, metaStore] = stores;
+        msgStore.put(row);
+        metaStore.put(id, headKey(threadId));
+        await awaitTx(t);
+        db.close();
+      } catch {
+        // best-effort; ignore
+      }
+    },
+  };
+}
 
-      const db = await openDb();
-      const { t, stores } = tx(db, "readwrite", [STORE, META]);
-      const [msgStore, metaStore] = stores;
-      msgStore.put(row);
-      metaStore.put(id, HEAD_KEY);
-      await new Promise<void>((r, rej) => {
-        t.oncomplete = () => r();
-        t.onerror = () => rej(t.error);
-      });
-      db.close();
-    } catch {
-      // best-effort; ignore
-    }
-  },
-};
+/** Delete every message belonging to a thread and its head pointer. */
+export async function deleteThreadMessages(threadId: string): Promise<void> {
+  const prefix = `${threadId}|`;
+  const db = await openDb();
+  const { t, stores } = txOf(db, "readwrite", [STORE_MESSAGES, STORE_META]);
+  const [msgStore, metaStore] = stores;
+  const range = IDBKeyRange.bound(prefix, prefix + "\uffff");
+  msgStore.delete(range);
+  metaStore.delete(headKey(threadId));
+  await awaitTx(t);
+  db.close();
+}
+
+/** Wipe every thread's messages + metadata. Used by the "forget everything" action. */
+export async function clearAllHistory(): Promise<void> {
+  const db = await openDb();
+  const { t, stores } = txOf(db, "readwrite", [STORE_MESSAGES, STORE_META]);
+  const [msgStore, metaStore] = stores;
+  msgStore.clear();
+  // Only clear head:* keys, not other meta values.
+  const range = IDBKeyRange.bound(HEAD_PREFIX, HEAD_PREFIX + "\uffff");
+  metaStore.delete(range);
+  await awaitTx(t);
+  db.close();
+}

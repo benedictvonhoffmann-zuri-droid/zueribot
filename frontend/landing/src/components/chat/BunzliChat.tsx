@@ -6,13 +6,17 @@ import {
   ThreadPrimitive,
   useLocalRuntime,
   useMessage,
+  useRemoteThreadListRuntime,
   useThread,
+  useThreadListItem,
   useThreadRuntime,
 } from "@assistant-ui/react";
 import { makeAdapter } from "./adapter";
 import { Markdown } from "./Markdown";
 import { usePrefs, type Prefs } from "./prefs";
-import { clearHistory, indexedDbHistory } from "./history";
+import { makeThreadHistory } from "./history";
+import { localThreadListAdapter } from "./threads";
+import { ThreadSidebar } from "./ThreadSidebar";
 
 // ── helpers ─────────────────────────────────────────────────────────────
 
@@ -327,25 +331,6 @@ function PrivacyButton() {
   );
 }
 
-async function newChat(runtime: any) {
-  await clearHistory();
-  runtime?.reset?.();
-}
-
-function NewChatButton() {
-  const runtime = useThreadRuntime();
-  return (
-    <button
-      onClick={() => newChat(runtime)}
-      title="Neues Gespräch (⌘K)"
-      className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-[12.5px] font-medium text-zurich-gray hover:bg-zh-black-5 hover:text-zurich-dark transition"
-    >
-      <Icon.Plus />
-      <span>Neu</span>
-    </button>
-  );
-}
-
 // ── follow-ups ─────────────────────────────────────────────────────────
 
 function FollowUps() {
@@ -427,25 +412,78 @@ function SmartComposer() {
 
 // ── main ──────────────────────────────────────────────────────────────
 
+/**
+ * Per-thread chat runtime. Called once per active thread by the remote
+ * thread list runtime. The thread id (stored as `remoteId` in the list
+ * adapter; falls back to `id` before `initialize` completes) scopes the
+ * encrypted history adapter to this thread.
+ */
+function useBunzliThreadRuntime(getPrefs: () => Prefs) {
+  const threadId = useThreadListItem(
+    (s) => s.remoteId ?? s.id
+  ) as string;
+
+  const adapter = useMemo(() => makeAdapter(getPrefs), [getPrefs]);
+  const history = useMemo(() => makeThreadHistory(threadId), [threadId]);
+
+  return useLocalRuntime(adapter, { adapters: { history } });
+}
+
+function ChatPane({ prefs, setPrefs }: { prefs: Prefs; setPrefs: (p: Partial<Prefs>) => void }) {
+  return (
+    <ThreadPrimitive.Root className="flex-1 min-w-0 flex flex-col bg-zh-black-5">
+      <header className="flex-none">
+        <div className="mx-auto max-w-3xl px-5 py-3 flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-1 min-w-0 pl-10 md:pl-0">
+            <div className="w-7 h-7 rounded-lg bg-zurich-blue text-white flex items-center justify-center text-[11px] font-bold tracking-tight">
+              B
+            </div>
+            <span className="text-[14.5px] font-semibold text-zurich-dark">Bünzli</span>
+          </div>
+          <PrivacyButton />
+          <LocationButton prefs={prefs} setPrefs={setPrefs} />
+        </div>
+      </header>
+
+      <ThreadPrimitive.Viewport className="chat-scroll flex-1 overflow-y-auto">
+        <div className="mx-auto max-w-3xl px-5">
+          <EmptyState />
+          <ThreadPrimitive.Messages
+            components={{
+              UserMessage,
+              AssistantMessage,
+            }}
+          />
+          <FollowUps />
+          <div className="h-4" />
+        </div>
+      </ThreadPrimitive.Viewport>
+
+      <div className="flex-none">
+        <div className="mx-auto max-w-3xl px-5 pb-5 pt-2">
+          <SmartComposer />
+          <p className="mt-2 text-[11.5px] text-zurich-gray/80 text-center">
+            Bünzli cha Fähler mache. Prüef wichtigi Infos. ·
+            {" "}
+            <span className="inline-flex items-center gap-1 text-zurich-gray">
+              <Icon.Shield /> AES-256 verschlüsslet, nur lokal
+            </span>
+          </p>
+        </div>
+      </div>
+    </ThreadPrimitive.Root>
+  );
+}
+
 export default function BunzliChat() {
   const [prefs, setPrefs] = usePrefs();
   const prefsRef = useRef(prefs);
   prefsRef.current = prefs;
-  const adapter = useMemo(() => makeAdapter(() => prefsRef.current), []);
-  const runtime = useLocalRuntime(adapter, {
-    adapters: { history: indexedDbHistory },
-  });
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        newChat((runtime as any)?.thread ?? runtime);
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [runtime]);
+  const runtime = useRemoteThreadListRuntime({
+    adapter: localThreadListAdapter,
+    runtimeHook: () => useBunzliThreadRuntime(() => prefsRef.current),
+  });
 
   return (
     <AssistantRuntimeProvider runtime={runtime}>
@@ -459,48 +497,10 @@ export default function BunzliChat() {
         .chat-scroll::-webkit-scrollbar-thumb { background: transparent; border-radius: 10px; border: 3px solid transparent; background-clip: padding-box }
         .chat-scroll:hover::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); background-clip: padding-box; border: 3px solid transparent }
       `}</style>
-      <ThreadPrimitive.Root className="h-[100dvh] flex flex-col bg-zh-black-5">
-        <header className="flex-none">
-          <div className="mx-auto max-w-3xl px-5 py-3 flex items-center gap-2">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <div className="w-7 h-7 rounded-lg bg-zurich-blue text-white flex items-center justify-center text-[11px] font-bold tracking-tight">
-                B
-              </div>
-              <span className="text-[14.5px] font-semibold text-zurich-dark">Bünzli</span>
-            </div>
-            <PrivacyButton />
-            <LocationButton prefs={prefs} setPrefs={setPrefs} />
-            <NewChatButton />
-          </div>
-        </header>
-
-        <ThreadPrimitive.Viewport className="chat-scroll flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-3xl px-5">
-            <EmptyState />
-            <ThreadPrimitive.Messages
-              components={{
-                UserMessage,
-                AssistantMessage,
-              }}
-            />
-            <FollowUps />
-            <div className="h-4" />
-          </div>
-        </ThreadPrimitive.Viewport>
-
-        <div className="flex-none">
-          <div className="mx-auto max-w-3xl px-5 pb-5 pt-2">
-            <SmartComposer />
-            <p className="mt-2 text-[11.5px] text-zurich-gray/80 text-center">
-              Bünzli cha Fähler mache. Prüef wichtigi Infos. ·
-              {" "}
-              <span className="inline-flex items-center gap-1 text-zurich-gray">
-                <Icon.Shield /> AES-256 verschlüsslet, nur lokal
-              </span>
-            </p>
-          </div>
-        </div>
-      </ThreadPrimitive.Root>
+      <div className="h-[100dvh] flex">
+        <ThreadSidebar />
+        <ChatPane prefs={prefs} setPrefs={setPrefs} />
+      </div>
     </AssistantRuntimeProvider>
   );
 }
