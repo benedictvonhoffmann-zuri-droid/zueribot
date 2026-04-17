@@ -135,19 +135,20 @@ def search_poi(query, lat=None, lon=None, radius=2000, limit=10):
             if term in q_lower:
                 osm_tag = tag
                 break
-        
-        if not osm_tag:
-            # Default to supermarket if nothing matches
-            osm_tag = ("shop", "supermarket")
-        
+
         # Build Overpass query
-        tk, tv = osm_tag
-        if tk == "name":
-            tag_filter = f'["name"~"{tv}",i]'
+        if osm_tag:
+            tk, tv = osm_tag
+            if tk == "name":
+                tag_filter = f'["name"~"{tv}",i]'
+            else:
+                tag_filter = f'["{tk}"="{tv}"]'
+            overpass_q = f'[out:json][timeout:25];(node{tag_filter}(around:{radius},{search_lat},{search_lon});way{tag_filter}(around:{radius},{search_lat},{search_lon}););out body center {limit};'
         else:
-            tag_filter = f'["{tk}"="{tv}"]'
-        
-        overpass_q = f'[out:json][timeout:25];(node{tag_filter}(around:{radius},{search_lat},{search_lon});way{tag_filter}(around:{radius},{search_lat},{search_lon}););out body center {limit};'
+            # No category matched — search by name across all POI types
+            safe_name = re.sub(r'["\\\n\r]', '', poi_query)
+            tag_filter = f'["name"~"{safe_name}",i]'
+            overpass_q = f'[out:json][timeout:25];(node{tag_filter}(around:{radius},{search_lat},{search_lon});way{tag_filter}(around:{radius},{search_lat},{search_lon});relation{tag_filter}(around:{radius},{search_lat},{search_lon}););out body center {limit};'
         
         elements = _overpass_query(overpass_q)
         

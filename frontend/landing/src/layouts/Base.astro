@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
 import LanguageSwitcher from '../components/LanguageSwitcher.astro';
-import { LOCALES, LOCALE_META, type Locale } from '../i18n/locales';
+import { LOCALE_META, type Locale } from '../i18n/locales';
 import type { TranslationSchema } from '../i18n/translations/de';
 
 interface Props {
@@ -12,6 +12,16 @@ interface Props {
 const { lang, t } = Astro.props;
 const htmlLang = LOCALE_META[lang].htmlLang;
 const canonicalUrl = `https://buenzli.space/${lang}/`;
+
+const betaHref = `mailto:hello@buenzli.space?subject=${encodeURIComponent('Beta Test Request - buenzli.space')}&body=${encodeURIComponent('Hi Buenzli Team,\n\nI would like to beta test buenzli.space!\n\nLinkedIn profile: \nWhy I want to test: \nWhat I would use Bünzli AI for: \n\nBest regards')}`;
+const collabHref = `mailto:hello@buenzli.space?subject=${encodeURIComponent('Collaboration Inquiry - buenzli.space')}&body=${encodeURIComponent('Hi Buenzli Team,\n\nI would like to collaborate on buenzli.space!\n\nLinkedIn profile: \nWhy I want to collaborate: \nSkills I bring: \n\nBest regards')}`;
+
+const navLinks = [
+  { label: t.navScenarios, href: '#scenarios' },
+  { label: t.navHow,       href: '#how' },
+  { label: t.navPrivacy,   href: '#privacy' },
+  { label: t.navCommunity, href: '#community' },
+];
 ---
 
 <!doctype html>
@@ -19,47 +29,81 @@ const canonicalUrl = `https://buenzli.space/${lang}/`;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{t.meta.title}</title>
-    <meta name="description" content={t.meta.description} />
+    <title>{t.metaTitle}</title>
+    <meta name="description" content={t.metaDescription} />
     <link rel="canonical" href={canonicalUrl} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-
-    {LOCALES.map(locale => (
-      <link
-        rel="alternate"
-        hreflang={LOCALE_META[locale].htmlLang}
-        href={`https://buenzli.space/${locale}/`}
-      />
-    ))}
-    <link rel="alternate" hreflang="x-default" href="https://buenzli.space/de/" />
-
-    <meta property="og:title" content={t.meta.title} />
-    <meta property="og:description" content={t.meta.description} />
+    <link rel="alternate" hreflang="gsw"   href={`https://buenzli.space/zh/`} />
+    <link rel="alternate" hreflang="en-GB" href={`https://buenzli.space/en/`} />
+    <link rel="alternate" hreflang="x-default" href="https://buenzli.space/zh/" />
+    <meta property="og:title" content={t.metaTitle} />
+    <meta property="og:description" content={t.metaDescription} />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:type" content="website" />
-    <meta property="og:locale" content={htmlLang.replace('-', '_')} />
   </head>
   <body>
     <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-zurich-blue text-white px-4 py-2 rounded z-50">
-      {t.nav.skip}
+      {t.navSkip}
     </a>
 
     <!-- Navigation -->
-    <header id="site-header" class="fixed top-0 left-0 right-0 z-40 transition-all duration-300">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
-        <!-- Wordmark -->
-        <a href={`/${lang}/`} class="flex items-center gap-2 group" aria-label="Bünzli — Home">
-          <!-- B mark -->
-          <span class="wordmark-mark flex items-center justify-center w-8 h-8 rounded-lg text-white text-sm font-bold transition-transform duration-150 group-hover:scale-105">
-            B
-          </span>
-          <!-- Name -->
-          <span class="wordmark-text font-bold text-lg tracking-tight transition-colors duration-150">
-            Bünzli
+    <header id="site-header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
+
+        <!-- Logo -->
+        <a href={`/${lang}/`} class="flex items-center gap-2">
+          <img src="/zh-lion.svg" alt="" aria-hidden="true" class="w-5 h-5 opacity-90 nav-lion" />
+          <span class="font-bold text-lg tracking-tight nav-wordmark">
+            bünzli<span class="nav-dot">.</span>
           </span>
         </a>
 
-        <LanguageSwitcher currentLang={lang} />
+        <!-- Desktop nav -->
+        <nav class="hidden md:flex items-center gap-8" aria-label="Main navigation">
+          {navLinks.map(({ label, href }) => (
+            <a href={href} class="text-[13px] nav-link transition-colors">
+              {label}
+            </a>
+          ))}
+        </nav>
+
+        <!-- Right controls -->
+        <div class="flex items-center gap-2">
+          <LanguageSwitcher currentLang={lang} />
+          <a
+            href={betaHref}
+            class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-zurich-blue text-white hover:bg-zurich-blue-dark transition-colors duration-150"
+          >
+            {t.navBetaCta}
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+          <!-- Mobile hamburger -->
+          <button id="mobile-menu-btn" aria-label="Menu" class="md:hidden w-8 h-8 flex items-center justify-center nav-hamburger">
+            <svg id="menu-icon-open" width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M2 4.5h14M2 9h14M2 13.5h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <svg id="menu-icon-close" class="hidden" width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M3 3l12 12M15 3L3 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile menu -->
+      <div id="mobile-menu" class="hidden md:hidden border-b px-4 pb-4 mobile-menu-bg">
+        {navLinks.map(({ label, href }) => (
+          <a href={href} class="block py-2.5 text-sm nav-link transition-colors border-b border-white/10 last:border-0">
+            {label}
+          </a>
+        ))}
+        <a
+          href={betaHref}
+          class="mt-3 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold bg-zurich-blue text-white"
+        >
+          {t.navBetaCta}
+        </a>
       </div>
     </header>
 
@@ -68,25 +112,67 @@ const canonicalUrl = `https://buenzli.space/${lang}/`;
     </main>
 
     <!-- Footer -->
-    <footer class="bg-[#08111f] text-white/40 py-12 border-t border-white/5">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
-        <div class="flex items-center gap-2">
-          <span class="wordmark-mark flex items-center justify-center w-6 h-6 rounded text-white text-xs font-bold opacity-60">B</span>
-          <span class="font-semibold text-white/60">{t.footer.tagline}</span>
+    <footer class="bg-zurich-blue text-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-14">
+
+          <!-- Brand -->
+          <div class="col-span-2 sm:col-span-1">
+            <div class="flex items-center gap-2 mb-3">
+              <img src="/zh-lion.svg" alt="" aria-hidden="true" class="w-5 h-5 brightness-0 invert opacity-80" />
+              <span class="font-bold text-lg text-white">bünzli<span class="text-white/60">.</span></span>
+            </div>
+            <p class="text-xs text-white/60 leading-relaxed">{t.footerTagline}</p>
+          </div>
+
+          <!-- Product -->
+          <div>
+            <h4 class="text-xs font-semibold text-white/50 uppercase tracking-wider mb-3">{t.footerProduct}</h4>
+            <ul class="space-y-2">
+              <li><a href="#scenarios" class="text-sm text-white/70 hover:text-white transition-colors">{t.navScenarios}</a></li>
+              <li><a href="#how"       class="text-sm text-white/70 hover:text-white transition-colors">{t.navHow}</a></li>
+              <li><a href="#privacy"   class="text-sm text-white/70 hover:text-white transition-colors">{t.navPrivacy}</a></li>
+            </ul>
+          </div>
+
+          <!-- Community -->
+          <div>
+            <h4 class="text-xs font-semibold text-white/50 uppercase tracking-wider mb-3">{t.footerCommunity}</h4>
+            <ul class="space-y-2">
+              <li><a href={betaHref}    class="text-sm text-white/70 hover:text-white transition-colors">{t.footerBeta}</a></li>
+              <li><a href={collabHref}  class="text-sm text-white/70 hover:text-white transition-colors">{t.footerCollaborate}</a></li>
+              <li><a href="https://github.com" target="_blank" rel="noopener noreferrer" class="text-sm text-white/70 hover:text-white transition-colors">{t.footerGitHub}</a></li>
+            </ul>
+          </div>
+
+          <!-- Legal -->
+          <div>
+            <h4 class="text-xs font-semibold text-white/50 uppercase tracking-wider mb-3">{t.footerLegal}</h4>
+            <ul class="space-y-2">
+              <li><a href="#" class="text-sm text-white/70 hover:text-white transition-colors">{t.footerImpressum}</a></li>
+              <li><a href="#" class="text-sm text-white/70 hover:text-white transition-colors">{t.footerDatenschutz}</a></li>
+            </ul>
+          </div>
         </div>
-        <p class="text-white/30">{t.footer.madeIn}</p>
+
+        <div class="border-t border-white/20 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p class="text-xs text-white/50 font-mono">{t.footerMade}</p>
+          <p class="text-xs text-white/50">© 2026 bünzli.space</p>
+        </div>
       </div>
     </footer>
 
-    <!-- Scroll animation script (~1KB) -->
     <script>
-      // Sticky nav: transparent on hero, solid after scroll
-      const header = document.getElementById('site-header');
-      const THRESHOLD = 80;
+      const header = document.getElementById('site-header') as HTMLElement;
+      const mobileMenuBtn = document.getElementById('mobile-menu-btn') as HTMLButtonElement;
+      const mobileMenu = document.getElementById('mobile-menu') as HTMLElement;
+      const iconOpen = document.getElementById('menu-icon-open') as HTMLElement;
+      const iconClose = document.getElementById('menu-icon-close') as HTMLElement;
 
+      // Sticky nav
       function updateNav() {
         if (!header) return;
-        if (window.scrollY > THRESHOLD) {
+        if (window.scrollY > 20) {
           header.classList.add('nav-solid');
           header.classList.remove('nav-transparent');
         } else {
@@ -94,11 +180,27 @@ const canonicalUrl = `https://buenzli.space/${lang}/`;
           header.classList.remove('nav-solid');
         }
       }
-
       updateNav();
       window.addEventListener('scroll', updateNav, { passive: true });
 
-      // Scroll animations: trigger [data-animate] and [data-animate-stagger] on intersection
+      // Mobile menu toggle
+      mobileMenuBtn?.addEventListener('click', () => {
+        const isOpen = !mobileMenu.classList.contains('hidden');
+        mobileMenu.classList.toggle('hidden', isOpen);
+        iconOpen.classList.toggle('hidden', !isOpen);
+        iconClose.classList.toggle('hidden', isOpen);
+      });
+
+      // Close mobile menu on nav link click
+      mobileMenu?.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+          mobileMenu.classList.add('hidden');
+          iconOpen.classList.remove('hidden');
+          iconClose.classList.add('hidden');
+        });
+      });
+
+      // Scroll animations
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach(entry => {
@@ -110,10 +212,7 @@ const canonicalUrl = `https://buenzli.space/${lang}/`;
         },
         { threshold: 0.1, rootMargin: '0px 0px -60px 0px' }
       );
-
-      document.querySelectorAll('[data-animate], [data-animate-stagger]').forEach(el => {
-        observer.observe(el);
-      });
+      document.querySelectorAll('[data-animate], [data-animate-stagger]').forEach(el => observer.observe(el));
     </script>
 
     <style>
@@ -121,32 +220,43 @@ const canonicalUrl = `https://buenzli.space/${lang}/`;
         background: transparent;
         border-bottom: 1px solid transparent;
       }
-
       .nav-solid {
-        background: rgba(8, 17, 31, 0.85);
+        background: rgba(255, 255, 255, 0.92);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
-        border-bottom: 1px solid rgba(255,255,255,0.06);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
       }
 
-      /* Wordmark: adapts to dark/light context */
-      .nav-transparent .wordmark-mark {
-        background: rgba(255,255,255,0.15);
-        border: 1px solid rgba(255,255,255,0.2);
-      }
-      .nav-transparent .wordmark-text { color: white; }
+      /* Lion icon color */
+      .nav-transparent .nav-lion { filter: brightness(0) invert(1); }
+      .nav-solid .nav-lion { filter: none; }
+      #site-header:not(.nav-solid):not(.nav-transparent) .nav-lion { filter: brightness(0) invert(1); }
 
-      .nav-solid .wordmark-mark {
-        background: var(--color-zurich-blue);
-      }
-      .nav-solid .wordmark-text { color: white; }
+      /* Wordmark color */
+      .nav-transparent .nav-wordmark { color: white; }
+      .nav-solid .nav-wordmark { color: var(--color-zurich-dark); }
+      #site-header:not(.nav-solid):not(.nav-transparent) .nav-wordmark { color: white; }
 
-      /* Default (before JS runs) — match hero dark */
-      #site-header:not(.nav-solid):not(.nav-transparent) .wordmark-mark {
-        background: rgba(255,255,255,0.15);
-        border: 1px solid rgba(255,255,255,0.2);
-      }
-      #site-header:not(.nav-solid):not(.nav-transparent) .wordmark-text { color: white; }
+      .nav-transparent .nav-dot { color: rgba(255,255,255,0.6); }
+      .nav-solid .nav-dot { color: var(--color-zurich-blue); }
+      #site-header:not(.nav-solid):not(.nav-transparent) .nav-dot { color: rgba(255,255,255,0.6); }
+
+      /* Nav links */
+      .nav-transparent .nav-link { color: rgba(255,255,255,0.7); }
+      .nav-transparent .nav-link:hover { color: white; }
+      .nav-solid .nav-link { color: var(--color-zurich-gray); }
+      .nav-solid .nav-link:hover { color: var(--color-zurich-dark); }
+      #site-header:not(.nav-solid):not(.nav-transparent) .nav-link { color: rgba(255,255,255,0.7); }
+
+      /* Hamburger icon */
+      .nav-transparent .nav-hamburger svg path { stroke: white; }
+      .nav-solid .nav-hamburger svg path { stroke: var(--color-zurich-dark); }
+      #site-header:not(.nav-solid):not(.nav-transparent) .nav-hamburger svg path { stroke: white; }
+
+      /* Mobile menu background */
+      .nav-transparent .mobile-menu-bg { background: rgba(8,17,31,0.95); backdrop-filter: blur(16px); }
+      .nav-solid .mobile-menu-bg { background: rgba(255,255,255,0.96); backdrop-filter: blur(16px); }
+      #site-header:not(.nav-solid):not(.nav-transparent) .mobile-menu-bg { background: rgba(8,17,31,0.95); }
     </style>
   </body>
 </html>

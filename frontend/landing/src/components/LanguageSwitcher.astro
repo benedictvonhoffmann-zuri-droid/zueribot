@@ -16,45 +16,37 @@ const { currentLang } = Astro.props;
       aria-current={locale === currentLang ? 'page' : undefined}
       title={LOCALE_META[locale].label}
       class:list={[
-        'lang-link px-2 py-1 rounded-md text-sm font-medium transition-all duration-150',
+        'lang-link px-2 py-1 rounded-md text-xs font-semibold transition-all duration-150',
         locale === currentLang ? 'lang-active' : 'lang-inactive',
       ]}
     >
-      <span aria-hidden="true">{LOCALE_META[locale].flag}</span>
-      <span class="sr-only">{LOCALE_META[locale].label}</span>
+      {locale.toUpperCase()}
     </a>
   ))}
 </nav>
 
 <style>
-  /* Active state */
   .lang-active {
-    background: rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.15);
     color: white;
   }
-
-  /* Inactive: adapts via nav state classes set by JS */
   .lang-inactive {
-    color: rgba(255,255,255,0.45);
+    color: rgba(255,255,255,0.5);
   }
-
   .lang-inactive:hover {
     background: rgba(255,255,255,0.08);
     color: rgba(255,255,255,0.85);
   }
 
-  /* When nav is solid (scrolled into light sections) */
   :global(.nav-solid) .lang-active {
     background: var(--color-zurich-blue);
     color: white;
   }
-
   :global(.nav-solid) .lang-inactive {
-    color: rgba(255,255,255,0.5);
+    color: var(--color-zurich-gray);
   }
-
   :global(.nav-solid) .lang-inactive:hover {
-    background: rgba(255,255,255,0.08);
-    color: white;
+    background: var(--color-zurich-blue-light);
+    color: var(--color-zurich-blue);
   }
 </style>

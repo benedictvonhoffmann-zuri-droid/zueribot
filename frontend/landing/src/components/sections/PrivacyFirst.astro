@@ -1,5 +1,4 @@
 ---
-import SectionWrapper from '../ui/SectionWrapper.astro';
 import type { TranslationSchema } from '../../i18n/translations/de';
 
 interface Props {
@@ -7,38 +6,82 @@ interface Props {
 }
 
 const { t } = Astro.props;
-const { privacy } = t;
+
+const comparisons = [
+  { them: t.privacyThem1, us: t.privacyUs1 },
+  { them: t.privacyThem2, us: t.privacyUs2 },
+  { them: t.privacyThem3, us: t.privacyUs3 },
+  { them: t.privacyThem4, us: t.privacyUs4 },
+  { them: t.privacyThem5, us: t.privacyUs5 },
+];
 ---
 
-<!-- Privacy gets the dark treatment — important enough to stand out -->
-<section id="privacy" class="relative py-24 sm:py-32 overflow-hidden" style="background: #08111f;">
+<section id="privacy" class="relative py-20 sm:py-28 overflow-hidden" style="background: hsl(222,47%,11%);">
 
-  <!-- Subtle grid -->
-  <div class="absolute inset-0 pointer-events-none" style="background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px); background-size: 60px 60px;"></div>
-
-  <!-- Green orb -->
-  <div class="absolute bottom-0 right-0 w-96 h-96 pointer-events-none" style="background: radial-gradient(ellipse, rgba(61,138,62,0.12) 0%, transparent 70%); filter: blur(60px);"></div>
+  <!-- Subtle dot grid -->
+  <div
+    class="absolute inset-0 pointer-events-none opacity-10"
+    style="background-image: radial-gradient(rgba(255,255,255,0.3) 1px, transparent 1px); background-size: 28px 28px;"
+  ></div>
 
   <div class="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
-    <div class="text-center mb-14" data-animate>
-      <p class="section-label mb-3" style="color: #3D8A3E;">06</p>
-      <h2 class="section-heading text-white mb-4">{privacy.heading}</h2>
-      <p class="text-white/50 text-lg max-w-xl mx-auto">{privacy.subline}</p>
+
+    <!-- Header -->
+    <div class="max-w-3xl mx-auto text-center mb-14" data-animate>
+      <p class="font-mono text-xs text-tram-green tracking-widest uppercase mb-4">{t.privacyTagline}</p>
+      <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-white">
+        {t.privacyTitle1}
+        <br />
+        <span class="text-white/50">{t.privacyTitle2}</span>
+      </h2>
+      <p class="text-xl font-bold text-white mb-2">{t.privacyPledge}</p>
+      <p class="text-white/60">{t.privacySubtitle}</p>
+
+      <!-- Sovereign badge -->
+      <div class="mt-6 inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-2 text-sm text-white/80 font-medium">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M7 1L2 3.5V7c0 3 2.5 5 5 5.5C12 12 14 9 14 7V3.5L7 1z" fill="none" stroke="#3D8A3E" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+        <span class="text-tram-green font-semibold">{t.featureSovereign}</span>
+        — {t.featureSovereignDesc}
+      </div>
     </div>
 
-    <div class="grid sm:grid-cols-2 gap-4 max-w-4xl mx-auto" data-animate-stagger>
-      {privacy.pillars.map(pillar => (
-        <div class="group relative p-6 rounded-2xl border border-white/8 bg-white/3 hover:bg-white/6 hover:border-white/15 transition-all duration-300 overflow-hidden">
-          <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-tram-green/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          <div class="flex gap-4">
-            <span class="text-2xl shrink-0 mt-0.5">{pillar.icon}</span>
-            <div>
-              <h3 class="font-bold text-white text-base mb-2">{pillar.title}</h3>
-              <p class="text-white/50 text-sm leading-relaxed">{pillar.desc}</p>
-            </div>
+    <!-- Comparison table -->
+    <div class="max-w-2xl mx-auto" data-animate>
+      <div class="bg-white/5 border border-white/10 rounded-xl overflow-hidden backdrop-blur-sm">
+
+        <!-- Table header -->
+        <div class="grid grid-cols-2 border-b border-white/10">
+          <div class="px-5 py-3 text-xs font-mono text-white/40 uppercase tracking-wider">
+            {t.privacyThemLabel}
+          </div>
+          <div class="px-5 py-3 text-xs font-mono text-tram-green uppercase tracking-wider border-l border-white/10 flex items-center gap-1.5">
+            <img src="/zh-lion.svg" alt="" aria-hidden="true" class="w-3 h-3 brightness-0 invert opacity-70" />
+            {t.privacyUsLabel}
           </div>
         </div>
-      ))}
+
+        <!-- Comparison rows -->
+        {comparisons.map((row, i) => (
+          <div class:list={['grid grid-cols-2', i < comparisons.length - 1 ? 'border-b border-white/10' : '']}>
+            <div class="px-5 py-3.5 flex items-center gap-2">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" class="shrink-0">
+                <path d="M3 3l8 8M11 3l-8 8" stroke="rgba(248,113,113,0.6)" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              <span class="text-sm text-white/50">{row.them}</span>
+            </div>
+            <div class="px-5 py-3.5 border-l border-tram-green/20 bg-tram-green/5 flex items-center gap-2">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" class="shrink-0">
+                <path d="M2 7l4 4 6-7" stroke="#3D8A3E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="text-sm text-white font-semibold">{row.us}</span>
+            </div>
+          </div>
+        ))}
+
+      </div>
     </div>
+
   </div>
 </section>
