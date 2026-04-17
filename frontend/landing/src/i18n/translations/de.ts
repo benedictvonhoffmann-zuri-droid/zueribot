@@ -125,7 +125,7 @@ export const de = {
   privDiagramISP: 'Schwizer ISP',
   privDiagramHost: 'Infomaniak · Gämf',
   privDiagramModel: 'Apertus 70B',
-  privDiagramCaption: 'De ganz Wäg vo dinere Aafrog bis zum Modell und zrugg. Null US-Infrastruktur. Null Drittaabieter-Telemetrie.',
+  privDiagramCaption: 'De ganz Wäg vo dinere Aafrog bis zum Modell und zrugg. Dini Chats wärded mit AES-256 i dim Browser verschlüsslet — si verlönd en nie. Null US-Infrastruktur. Null Drittaabieter-Telemetrie.',
   privPillar1Title: 'Schwizer Modell',
   privPillar1Body: 'Apertus 70B isch es offes Schwizer LLM vo de EPFL und ETHZ. Kei OpenAI. Kei Anthropic. Kei Google.',
   privPillar1Link: 'Meh zu Apertus',
@@ -137,7 +137,7 @@ export const de = {
   privPillar3Link: 'Meh zum DSG',
   privVerifyLabel: 'Prüef s sälber',
   privVerify: 'Drück F12 wänn du schribsch. Luegs Netzwerk-Tab aa. Kei Request verlaht .ch.',
-  privZeros: 'Null Training mit dine Date · Null Drittaabieter-Cookies · Null US-Dateiibertragig · Null Tracking-Scripts',
+  privZeros: 'Null Training mit dine Date · Null Drittaabieter-Cookies · Null US-Dateiibertragig · Null Tracking-Scripts · Null Server-Logs vo dine Chats',
 
   // Open source
   openEyebrow: 'Offe vo Tag eis',

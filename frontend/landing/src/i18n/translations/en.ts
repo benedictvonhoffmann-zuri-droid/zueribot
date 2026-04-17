@@ -127,7 +127,7 @@ export const en: TranslationSchema = {
   privDiagramISP: 'Swiss ISP',
   privDiagramHost: 'Infomaniak · Geneva',
   privDiagramModel: 'Apertus 70B',
-  privDiagramCaption: 'The entire request path — from your browser to the model and back. Zero US infrastructure. Zero third-party telemetry.',
+  privDiagramCaption: 'The entire request path — from your browser to the model and back. Chat history is AES-256 encrypted in your browser and never leaves it. Zero US infrastructure. Zero third-party telemetry.',
   privPillar1Title: 'Swiss Model',
   privPillar1Body: 'Apertus 70B is an open-weight Swiss LLM built by EPFL and ETHZ. Not OpenAI. Not Anthropic. Not Google.',
   privPillar1Link: 'About Apertus',
@@ -139,7 +139,7 @@ export const en: TranslationSchema = {
   privPillar3Link: 'About FADP',
   privVerifyLabel: 'Verify it yourself',
   privVerify: 'Press F12 while asking. Watch the network tab. No request leaves .ch.',
-  privZeros: 'Zero training on your data · Zero third-party cookies · Zero US data transfer · Zero tracking scripts',
+  privZeros: 'Zero training on your data · Zero third-party cookies · Zero US data transfer · Zero tracking scripts · Zero server-side chat logs',
 
   // Open source
   openEyebrow: 'Open from day one',

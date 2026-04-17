@@ -1,0 +1,17 @@
+---
+import '../styles/global.css';
+import BunzliChat from '../components/chat/BunzliChat';
+---
+<!doctype html>
+<html lang="de" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bünzli — Chat</title>
+    <meta name="robots" content="noindex" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body class="h-full antialiased">
+    <BunzliChat client:only="react" />
+  </body>
+</html>
