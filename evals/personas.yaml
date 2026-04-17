@@ -1,0 +1,180 @@
+# Bünzli self-play personas.
+# Each persona drives the user-simulator. Seed questions cover the 21 connectors
+# and KB topics (Mietrecht, events, venues, transit, Badi, weather, air, parking,
+# waste, voting, crime, city stats, etc.).
+#
+# register:
+#   zueridütsch | hochdeutsch | english | tourist-english
+#
+# The simulator model is instructed to stay in register and ask natural
+# follow-ups that a real person would.
+
+personas:
+  - id: ana_kreis4
+    name: Ana
+    age: 28
+    quartier: Kreis 4 (Langstrasse)
+    register: zueridütsch
+    context: |
+      Grafikerin, wohnt in WG an der Langstrasse, hat gerade eine Mietzins-
+      erhöhung bekommen und will wissen ob das legal ist. Geht viel ins
+      Letten schwimmen im Sommer.
+    seeds:
+      - "Mini Vermieterin wott de Mietzins um 80 Stutz pro Monet erhöhe wäge ere Sanierig. Isch das zulässig?"
+      - "Wie warm isch s Wasser im Letten grad?"
+      - "Wenn mached d Migros an de Langstrass zue am Samstig?"
+      - "Was isch d Sache mit de neue Pop-up-Bar am Helvetiaplatz?"
+
+  - id: markus_uster
+    name: Markus
+    age: 54
+    quartier: Uster commuter, works in Enge
+    register: hochdeutsch
+    context: |
+      Versicherungsmanager, pendelt täglich mit der S-Bahn, fährt am
+      Wochenende in die Stadt. Interessiert an Stau, Parking, Luftqualität.
+    seeds:
+      - "Wann fährt die nächste S5 von Uster nach Zürich HB?"
+      - "Wie voll ist das Parkhaus Sihlcity heute Nachmittag?"
+      - "Wie ist die Luftqualität in Enge gerade?"
+      - "Gibt es heute Abend Störungen bei der VBZ?"
+
+  - id: priya_tourist
+    name: Priya
+    age: 31
+    quartier: Tourist, staying in Hotel at Bahnhofstrasse
+    register: english
+    context: |
+      Software engineer from Bangalore, 3 days in Zurich, vegetarian,
+      wants a mix of sights, food, and a bit of nature.
+    seeds:
+      - "How do I get up to Uetliberg from the main station?"
+      - "Any good vegetarian lunch places near Bahnhofstrasse, under 30 francs?"
+      - "Is the lake clean enough to swim in right now?"
+      - "What's happening in Zurich this weekend?"
+
+  - id: reto_retiree
+    name: Reto
+    age: 67
+    quartier: Wollishofen
+    register: zueridütsch
+    context: |
+      Pensionierte Velomech, liebt de Grüngut-Kalender und bestellt
+      gern Papier-Abholung. Unsicher mit digitale Sache.
+    seeds:
+      - "Wenn chunnt s nächscht Mol de Grüenguet-Wage id Wollishofe?"
+      - "Wo chan i alti Batterie abgäh in mim Quartier?"
+      - "Was choschtet d Krankekasse im Moment so im Durchschnitt für 67-Jährigi?"
+      - "Wenn isch di nöchscht Abstimmig und worum gahts?"
+
+  - id: sofia_student
+    name: Sofia
+    age: 22
+    quartier: Oerlikon, ETH student
+    register: hochdeutsch
+    context: |
+      Informatik-Bachelor, tight budget, sucht günstige Mensen, Events,
+      und Velorouten. Fährt nie Auto.
+    seeds:
+      - "Welche Events sind diese Woche unter 20 Franken?"
+      - "Wie ist das Wetter morgen zum Velofahren?"
+      - "Wo gibt's günstige Mittagessen in der Nähe vom ETH Hönggerberg?"
+      - "Gibt es ein Schwimmbad, das auch abends offen ist?"
+
+  - id: tom_expat
+    name: Tom
+    age: 38
+    quartier: Seefeld, British expat
+    register: english
+    context: |
+      Moved to Zurich 6 weeks ago for a finance job, navigating Swiss
+      bureaucracy, apartment stuff, figuring out neighbourhoods.
+    seeds:
+      - "I got a letter about Anmeldung — what exactly do I need to do?"
+      - "What's the Kronenhalle restaurant — is it worth the hype?"
+      - "Which neighbourhood is best for families — Seefeld or Wollishofen?"
+      - "Do I need to separate PET bottles from other plastic for recycling?"
+
+  - id: lea_parent
+    name: Lea
+    age: 41
+    quartier: Affoltern (Zürich)
+    register: hochdeutsch
+    context: |
+      Zwei Kinder (6 & 9), arbeitet Teilzeit, plant Familienausflüge und
+      fragt nach Ferien-Events, Spielplätzen, Wetter.
+    seeds:
+      - "Welche Familien-Events gibt es am Samstag in Zürich?"
+      - "Ist das Strandbad Mythenquai schon offen und wie warm ist das Wasser?"
+      - "Wie wird das Wetter am Wochenende?"
+      - "Gibt es in Affoltern einen guten Spielplatz in der Nähe vom Katzensee?"
+
+  - id: hans_hb
+    name: Hans
+    age: 48
+    quartier: works near HB, lives in Winterthur
+    register: zueridütsch
+    context: |
+      Bauleiter, pendelt, stresst sich über Baustellen, Umleitige,
+      Pedestrian-Zahle für d Bahnhofstrass.
+    seeds:
+      - "Wie vill Lüt laufed grad über d Bahnhofstrass?"
+      - "Git's Polizeimeldige oder Iibrüch diese Wuche in mim Quartier Unterstrass?"
+      - "Wenn fahrt di letscht S-Bahn nach Winterthur?"
+      - "Gits no freii Park-Plätz bim HB grad?"
+
+  - id: meera_researcher
+    name: Meera
+    age: 34
+    quartier: Uni Zürich researcher
+    register: english
+    context: |
+      Political scientist studying Swiss direct democracy, digs into
+      referendum results, voting patterns, demographics.
+    seeds:
+      - "What were the results of the last federal referendum?"
+      - "How many people live in Kreis 5 right now?"
+      - "Where can I find statistics on rent prices per Kreis?"
+      - "Which articles of the ZGB cover landlord duties?"
+
+  - id: jonas_nightlife
+    name: Jonas
+    age: 26
+    quartier: Zürich-West
+    register: zueridütsch
+    context: |
+      Barkeeper, arbeitet Abends, sucht Konzerte, Clubs, Afterhours,
+      und weiss gern was bi sine Stammgäscht los isch.
+    seeds:
+      - "Was lauft hüt Abig i de Zürich-Wescht-Clubs?"
+      - "Isch d Hive no offe oder hends am Sunntig zue?"
+      - "Wann fahrt de Nachtbus N4?"
+      - "Wo chan i no um zwei am Morge öppis z Ässe übercho?"
+
+  - id: claudia_legal
+    name: Claudia
+    age: 45
+    quartier: Wipkingen
+    register: hochdeutsch
+    context: |
+      Juristin, Fachfrau Mietrecht, testet den Bot mit präzisen juristischen
+      Fragen — erwartet Artikel-Nummern und keine Ausreden.
+    seeds:
+      - "Welcher OR-Artikel regelt die Mängelrüge im Mietverhältnis?"
+      - "Ab wann gilt eine Mietzinserhöhung bei bestehendem Vertrag als missbräuchlich?"
+      - "Welche Kündigungsfristen gelten für möblierte Zimmer?"
+      - "Was sagt das ZGB zur Herausgabe der Kaution?"
+
+  - id: sven_cyclist
+    name: Sven
+    age: 29
+    quartier: Wiedikon
+    register: hochdeutsch
+    context: |
+      Grafiker, fährt jeden Tag Velo, will Routen, Baustellen auf dem
+      Velo-Netz, Luftqualität und Wetter.
+    seeds:
+      - "Gibt's heute Baustellen auf dem Velo-Weg Richtung Altstetten?"
+      - "Wie ist die Luftqualität in Wiedikon heute morgen?"
+      - "Regnet's heute Abend um 18 Uhr?"
+      - "Wann wird der Sihl-Uferweg wieder freigegeben?"
