@@ -58,9 +58,9 @@ export const en: TranslationSchema = {
   scenario3Desc: "You don't fully get the ballot text. Bünzli explains the key points simply and neutrally — in plain language.",
 
   // How it works
-  howTagline: 'What powers Bünzli',
-  howTitle: 'Three layers of intelligence.',
-  howSubtitle: 'A Swiss AI brain, deep Zürich knowledge, and real-time data — all working together.',
+  howTagline: 'How it works',
+  howTitle: 'Ask. Route. Answer.',
+  howSubtitle: 'Three steps from your question to a grounded answer — with real Zürich data.',
   howLayer1Title: 'The Brain — Apertus 70B',
   howLayer1Desc: 'Swiss AI model with 70 billion parameters, hosted by Infomaniak in Switzerland. Understands German, English, French, Italian, and Züridütsch.',
   howLayer2Title: 'Knowledge Base — 10,335 chunks',
@@ -147,7 +147,10 @@ export const en: TranslationSchema = {
   connectorWebSearch: 'Web Search',
   connectorWebSearchDesc: 'SearXNG-powered web search as automatic fallback when no live connector covers the topic.',
 
-  // Tech stack (collapsible)
+  // Tech stack (own section)
+  techSectionTagline: 'Tech Stack',
+  techSectionTitle: 'Open. Transparent. Swiss-Made.',
+  techSectionSubtitle: 'Every line of code is public. From the AI to the hosting — no black boxes.',
   techTagline: 'Tech Stack',
   techFrontend: 'Frontend',
   techFrontendDesc: 'Fast, lean, zero-JS where possible. Because bloat is not very Bünzli.',

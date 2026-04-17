@@ -1,4 +1,5 @@
 ---
+import SectionHeader from '../ui/SectionHeader.astro';
 import type { TranslationSchema } from '../../i18n/translations/de';
 
 interface Props {
@@ -17,17 +18,17 @@ const scenarios = [
 <section id="scenarios" class="py-20 sm:py-28 bg-white">
   <div class="max-w-6xl mx-auto px-4 sm:px-6">
 
-    <div class="max-w-3xl mx-auto text-center mb-14" data-animate>
-      <p class="font-mono text-xs text-zurich-blue tracking-widest uppercase mb-4">{t.scenariosTagline}</p>
-      <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-zurich-dark">
-        {t.scenariosTitle}
-      </h2>
-      <p class="text-zurich-gray text-lg">{t.scenariosSubtitle}</p>
+    <div class="mb-14" data-animate>
+      <SectionHeader
+        eyebrow={t.scenariosTagline}
+        heading={t.scenariosTitle}
+        subtext={t.scenariosSubtitle}
+      />
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto" data-animate-stagger>
       {scenarios.map(s => (
-        <div class="group bg-zurich-blue/[0.04] border border-zurich-blue/15 rounded-xl p-6 hover:bg-zurich-blue/[0.08] hover:border-zurich-blue/30 transition-all duration-200">
+        <div class="group bg-zurich-blue/5 border border-zurich-blue/15 rounded-xl p-6 hover:bg-zurich-blue/10 hover:border-zurich-blue/30 hover:shadow-short transition-all duration-200">
           <span class="inline-block font-mono text-[10px] text-zurich-blue/70 tracking-wider uppercase mb-3">{s.time}</span>
           <h3 class="font-semibold text-sm text-zurich-dark mb-2 leading-snug">{s.title}</h3>
           <p class="text-xs text-zurich-gray leading-relaxed">{s.desc}</p>

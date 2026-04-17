@@ -1,4 +1,5 @@
 ---
+import SectionHeader from '../ui/SectionHeader.astro';
 import type { TranslationSchema } from '../../i18n/translations/de';
 
 interface Props {
@@ -27,169 +28,103 @@ const knowledgeTopics = [
 ];
 
 const connectors = [
-  { emoji: '🚃', label: t.connectorDepartures,     desc: t.connectorDeparturesDesc,     dashed: false },
-  { emoji: '🗺️', label: t.connectorConnections,    desc: t.connectorConnectionsDesc,    dashed: false },
-  { emoji: '🌦️', label: t.connectorWeather,         desc: t.connectorWeatherDesc,         dashed: false },
-  { emoji: '💨', label: t.connectorAirQuality,      desc: t.connectorAirQualityDesc,      dashed: false },
-  { emoji: '🚰', label: t.connectorDrinkingWater,   desc: t.connectorDrinkingWaterDesc,   dashed: false },
-  { emoji: '🌡️', label: t.connectorWaterTemp,       desc: t.connectorWaterTempDesc,       dashed: false },
-  { emoji: '⚡', label: t.connectorElectricity,     desc: t.connectorElectricityDesc,     dashed: false },
-  { emoji: '📍', label: t.connectorPOI,             desc: t.connectorPOIDesc,             dashed: false },
-  { emoji: '🍽️', label: t.connectorVenues,          desc: t.connectorVenuesDesc,          dashed: false },
-  { emoji: '🎪', label: t.connectorEvents,          desc: t.connectorEventsDesc,          dashed: false },
-  { emoji: '🚶', label: t.connectorPedestrians,     desc: t.connectorPedestriansDesc,     dashed: false },
-  { emoji: '🅿️', label: t.connectorParking,         desc: t.connectorParkingDesc,         dashed: false },
-  { emoji: '🏠', label: t.connectorRent,            desc: t.connectorRentDesc,            dashed: false },
-  { emoji: '🔒', label: t.connectorCrime,           desc: t.connectorCrimeDesc,           dashed: false },
-  { emoji: '🗑️', label: t.connectorWasteSchedule,  desc: t.connectorWasteScheduleDesc,   dashed: false },
-  { emoji: '♻️', label: t.connectorRecyclingPoints, desc: t.connectorRecyclingPointsDesc, dashed: false },
-  { emoji: '🚛', label: t.connectorMobileRecycling, desc: t.connectorMobileRecyclingDesc, dashed: false },
-  { emoji: '📊', label: t.connectorRecyclingStats,  desc: t.connectorRecyclingStatsDesc,  dashed: false },
-  { emoji: '🗳️', label: t.connectorVoting,          desc: t.connectorVotingDesc,          dashed: false },
-  { emoji: '🏊', label: t.connectorBadi,            desc: t.connectorBadiDesc,            dashed: false },
-  { emoji: '🔍', label: t.connectorWebSearch,       desc: t.connectorWebSearchDesc,       dashed: true  },
-];
-
-const techLayers = [
-  { emoji: '🌐', label: t.techFrontend,  tech: 'Astro + Tailwind · Open WebUI', desc: t.techFrontendDesc },
-  { emoji: '🔑', label: t.techAuth,      tech: 'ZITADEL',                        desc: t.techAuthDesc },
-  { emoji: '⚡', label: t.techAPI,       tech: 'FastAPI (Python)',                desc: t.techAPIDesc },
-  { emoji: '🧠', label: t.techAI,        tech: 'Apertus 70B · Infomaniak',       desc: t.techAIDesc },
-  { emoji: '📚', label: t.techKnowledge, tech: 'ChromaDB',                        desc: t.techKnowledgeDesc },
-  { emoji: '🏔️', label: t.techHosting,   tech: 'Infomaniak · Zürich',             desc: t.techHostingDesc },
+  { emoji: '🚃', label: t.connectorDepartures,     desc: t.connectorDeparturesDesc },
+  { emoji: '🗺️', label: t.connectorConnections,    desc: t.connectorConnectionsDesc },
+  { emoji: '🌦️', label: t.connectorWeather,         desc: t.connectorWeatherDesc },
+  { emoji: '💨', label: t.connectorAirQuality,      desc: t.connectorAirQualityDesc },
+  { emoji: '🚰', label: t.connectorDrinkingWater,   desc: t.connectorDrinkingWaterDesc },
+  { emoji: '🌡️', label: t.connectorWaterTemp,       desc: t.connectorWaterTempDesc },
+  { emoji: '⚡', label: t.connectorElectricity,     desc: t.connectorElectricityDesc },
+  { emoji: '📍', label: t.connectorPOI,             desc: t.connectorPOIDesc },
+  { emoji: '🍽️', label: t.connectorVenues,          desc: t.connectorVenuesDesc },
+  { emoji: '🎪', label: t.connectorEvents,          desc: t.connectorEventsDesc },
+  { emoji: '🚶', label: t.connectorPedestrians,     desc: t.connectorPedestriansDesc },
+  { emoji: '🅿️', label: t.connectorParking,         desc: t.connectorParkingDesc },
+  { emoji: '🏠', label: t.connectorRent,            desc: t.connectorRentDesc },
+  { emoji: '🔒', label: t.connectorCrime,           desc: t.connectorCrimeDesc },
+  { emoji: '🗑️', label: t.connectorWasteSchedule,  desc: t.connectorWasteScheduleDesc },
+  { emoji: '♻️', label: t.connectorRecyclingPoints, desc: t.connectorRecyclingPointsDesc },
+  { emoji: '🚛', label: t.connectorMobileRecycling, desc: t.connectorMobileRecyclingDesc },
+  { emoji: '📊', label: t.connectorRecyclingStats,  desc: t.connectorRecyclingStatsDesc },
+  { emoji: '🗳️', label: t.connectorVoting,          desc: t.connectorVotingDesc },
+  { emoji: '🏊', label: t.connectorBadi,            desc: t.connectorBadiDesc },
+  { emoji: '🔍', label: t.connectorWebSearch,       desc: t.connectorWebSearchDesc, dashed: true },
 ];
 ---
 
-<section id="how" class="py-20 sm:py-28 bg-gray-50/50">
+<section id="how" class="py-20 sm:py-28 bg-zh-black-5">
   <div class="max-w-6xl mx-auto px-4 sm:px-6">
 
     <!-- Header -->
-    <div class="max-w-3xl mx-auto text-center mb-14" data-animate>
-      <p class="font-mono text-xs text-zurich-blue tracking-widest uppercase mb-4">{t.howTagline}</p>
-      <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-zurich-dark">
-        {t.howTitle}
-      </h2>
-      <p class="text-zurich-gray text-lg">{t.howSubtitle}</p>
+    <div class="mb-14" data-animate>
+      <SectionHeader
+        eyebrow={t.howTagline}
+        heading={t.howTitle}
+        subtext={t.howSubtitle}
+      />
     </div>
 
-    <div class="max-w-4xl mx-auto space-y-14" data-animate>
-
-      <!-- 3-step process -->
-      <div>
-        <p class="font-mono text-xs text-zurich-blue tracking-widest uppercase mb-6 text-center font-semibold">{t.howProcessTitle}</p>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
-          {steps.map((s, i) => (
-            <div class="relative flex flex-col items-center text-center">
-              {i < 2 && (
-                <span class="hidden md:block absolute top-4 -right-2 text-zurich-gray/30 text-xl leading-none select-none">›</span>
-              )}
-              <div class="w-10 h-10 rounded-full border-2 border-zurich-blue/20 bg-zurich-blue/5 flex items-center justify-center mb-3 text-sm font-bold text-zurich-blue">
-                {s.num}
-              </div>
-              <h4 class="text-sm font-bold text-zurich-dark mb-1.5">{s.title}</h4>
-              <p class="text-xs text-zurich-gray leading-relaxed">{s.desc}</p>
-            </div>
-          ))}
+    <!-- 3 Steps -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto mb-16" data-animate>
+      {steps.map((s, i) => (
+        <div class="relative bg-white border border-zurich-border rounded-xl p-5 text-center hover:border-zurich-blue/30 hover:shadow-short transition-all duration-200">
+          {i < 2 && (
+            <span class="hidden sm:block absolute top-1/2 -right-3 -translate-y-1/2 text-zurich-gray/30 text-xl select-none z-10">›</span>
+          )}
+          <div class="w-9 h-9 rounded-full border-2 border-zurich-blue/20 bg-zurich-blue/5 flex items-center justify-center mx-auto mb-3 text-sm font-bold text-zurich-blue">
+            {s.num}
+          </div>
+          <h4 class="text-sm font-bold text-zurich-dark mb-1.5">{s.title}</h4>
+          <p class="text-xs text-zurich-gray leading-relaxed">{s.desc}</p>
         </div>
-      </div>
+      ))}
+    </div>
 
-      <!-- Layer 1: Brain -->
-      <div class="text-center">
-        <div class="flex items-center gap-2 mb-2 justify-center">
-          <span class="text-lg" aria-hidden="true">🧠</span>
-          <h3 class="font-mono text-xs text-zurich-blue tracking-widest uppercase font-semibold">{t.howLayer1Title}</h3>
+    <!-- Knowledge + Connectors -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" data-animate>
+
+      <!-- Knowledge Base -->
+      <div class="bg-white border border-zurich-border rounded-2xl overflow-hidden">
+        <div class="px-5 py-4 border-b border-zurich-border flex items-center gap-2">
+          <span class="text-base" aria-hidden="true">📚</span>
+          <h3 class="font-semibold text-sm text-zurich-dark">{t.howLayer2Title}</h3>
         </div>
-        <p class="text-sm text-zurich-gray max-w-2xl mx-auto">{t.howLayer1Desc}</p>
-      </div>
-
-      <!-- Layer 2: Knowledge Base -->
-      <div>
-        <div class="flex items-center gap-2 mb-2 justify-center">
-          <span class="text-lg" aria-hidden="true">📚</span>
-          <h3 class="font-mono text-xs text-zurich-blue tracking-widest uppercase font-semibold">{t.howLayer2Title}</h3>
-        </div>
-        <p class="text-sm text-zurich-gray text-center mb-6">{t.howLayer2Desc}</p>
-
-        <div class="flex flex-wrap justify-center gap-2 max-w-3xl mx-auto">
+        <ul class="divide-y divide-zurich-border">
           {knowledgeTopics.map(kb => (
-            <span
-              title={kb.desc}
-              class="inline-flex items-center gap-2 bg-white border border-zurich-border rounded-full px-3 py-1.5 hover:border-zurich-blue/30 hover:shadow-sm transition-all duration-200 cursor-default"
-            >
-              <span class="text-base" aria-hidden="true">{kb.emoji}</span>
-              <span class="text-xs font-medium text-zurich-dark whitespace-nowrap">{kb.label}</span>
-              <span class="text-[10px] font-mono text-zurich-gray">{kb.count}</span>
-            </span>
+            <li class="flex items-center gap-3 px-5 py-3 hover:bg-zh-black-5 transition-colors duration-150 cursor-default group" title={kb.desc}>
+              <span class="text-base w-6 text-center shrink-0" aria-hidden="true">{kb.emoji}</span>
+              <span class="text-sm text-zurich-dark flex-1 group-hover:text-zurich-blue transition-colors">{kb.label}</span>
+              <span class="text-xs font-mono text-zurich-gray tabular-nums">{kb.count}</span>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
 
-      <!-- Layer 3: Live Connectors -->
-      <div>
-        <div class="flex items-center gap-2 mb-2 justify-center">
-          <span class="text-lg" aria-hidden="true">⚡</span>
-          <h3 class="font-mono text-xs text-zurich-blue tracking-widest uppercase font-semibold">{t.howLayer3Title}</h3>
+      <!-- Live Connectors -->
+      <div class="bg-white border border-zurich-border rounded-2xl overflow-hidden">
+        <div class="px-5 py-4 border-b border-zurich-border flex items-center gap-2">
+          <span class="text-base" aria-hidden="true">⚡</span>
+          <h3 class="font-semibold text-sm text-zurich-dark">{t.howLayer3Title}</h3>
         </div>
-        <p class="text-sm text-zurich-gray text-center mb-6">{t.howLayer3Desc}</p>
-
-        <div class="flex flex-wrap justify-center gap-2 max-w-4xl mx-auto">
+        <div class="grid grid-cols-3 divide-x divide-y divide-zurich-border">
           {connectors.map(c => (
-            <span
+            <div
               title={c.desc}
               class:list={[
-                'inline-flex items-center gap-2 bg-white rounded-full px-3 py-1.5 hover:border-zurich-blue/30 hover:shadow-sm transition-all duration-200 cursor-default',
-                c.dashed ? 'border border-dashed border-zurich-gray/40' : 'border border-zurich-border',
+                'flex flex-col items-center gap-1.5 px-2 py-3 hover:bg-zh-black-5 transition-colors duration-150 cursor-default text-center',
+                c.dashed ? 'opacity-50' : '',
               ]}
             >
-              <span class="text-base" aria-hidden="true">{c.emoji}</span>
-              <span class="text-xs font-medium text-zurich-dark whitespace-nowrap">{c.label}</span>
-            </span>
+              <span class="text-xl leading-none" aria-hidden="true">{c.emoji}</span>
+              <span class="text-[10px] text-zurich-gray leading-tight">{c.label}</span>
+            </div>
           ))}
         </div>
-
-        <div class="text-center mt-3">
+        <div class="px-5 py-3 border-t border-zurich-border">
           <a href={suggestMailto} class="text-xs text-zurich-gray hover:text-zurich-blue transition-colors">
-            {t.connectorSuggest}
+            {t.connectorSuggest} →
           </a>
         </div>
-      </div>
-
-      <!-- Collapsible tech stack -->
-      <div class="text-center" id="tech">
-        <details class="group">
-          <summary class="inline-flex items-center gap-1.5 text-sm text-zurich-blue hover:underline font-medium cursor-pointer list-none">
-            {t.howTechDetails}
-            <svg class="h-4 w-4 transition-transform duration-200 group-open:rotate-180" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </summary>
-
-          <div class="mt-6 max-w-2xl mx-auto space-y-3 text-left">
-            <p class="font-mono text-xs text-zurich-blue tracking-widest uppercase mb-4 text-center">{t.techTagline}</p>
-            {techLayers.map(layer => (
-              <div class="bg-white border border-zurich-border rounded-xl px-5 py-4 hover:border-zurich-blue/30 hover:shadow-sm transition-all duration-200">
-                <div class="flex items-start gap-4">
-                  <div class="w-8 h-8 rounded-lg bg-zurich-blue/10 flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">
-                    {layer.emoji}
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2 mb-0.5">
-                      <span class="font-mono text-[10px] text-zurich-blue uppercase tracking-wider font-semibold">{layer.label}</span>
-                      <span class="text-[11px] text-zurich-gray font-mono">· {layer.tech}</span>
-                    </div>
-                    <p class="text-sm text-zurich-gray leading-relaxed">{layer.desc}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            <div class="text-center pt-4">
-              <span class="inline-flex items-center gap-2 bg-zurich-blue/5 border border-zurich-blue/20 rounded-full px-4 py-2 text-sm text-zurich-blue font-medium">
-                {t.techOpenSource}
-              </span>
-            </div>
-          </div>
-        </details>
       </div>
 
     </div>

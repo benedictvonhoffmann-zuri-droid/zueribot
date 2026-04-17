@@ -1,25 +1,52 @@
 ---
 interface Props {
-  href: string;
-  variant?: 'primary' | 'secondary';
-  label: string;
-  note?: string;
+  href?: string;
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  size?: 'sm' | 'md' | 'lg';
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
+  class?: string;
+  [key: string]: unknown;
 }
 
-const { href, variant = 'primary', label, note } = Astro.props;
+const {
+  href,
+  variant = 'primary',
+  size = 'md',
+  type = 'button',
+  disabled = false,
+  class: className,
+  ...rest
+} = Astro.props;
+
+const sizeClasses = {
+  sm: 'px-4 py-2 text-xs gap-1.5',
+  md: 'px-5 py-2.5 text-sm gap-2',
+  lg: 'px-6 py-3 text-base gap-2',
+};
+
+const variantClasses = {
+  primary: 'bg-zurich-blue text-white hover:bg-zurich-blue-dark focus-visible:outline-zurich-blue shadow-short',
+  secondary: 'bg-badi-orange text-white hover:bg-badi-orange-dark focus-visible:outline-badi-orange shadow-short',
+  outline: 'border border-zurich-blue text-zurich-blue hover:bg-zurich-blue/5 focus-visible:outline-zurich-blue',
+  ghost: 'text-zurich-blue hover:bg-zurich-blue/8 focus-visible:outline-zurich-blue',
+};
+
+const baseClasses = [
+  'inline-flex items-center justify-center font-semibold rounded-lg transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2',
+  sizeClasses[size],
+  variantClasses[variant],
+  disabled ? 'opacity-50 pointer-events-none' : '',
+  className ?? '',
+].filter(Boolean).join(' ');
 ---
 
-<div class="flex flex-col items-start gap-1">
-  <a
-    href={href}
-    class:list={[
-      'inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-base transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2',
-      variant === 'primary'
-        ? 'bg-zurich-blue text-white hover:bg-zurich-blue-dark focus-visible:outline-zurich-blue'
-        : 'bg-badi-orange text-white hover:bg-badi-orange-dark focus-visible:outline-badi-orange',
-    ]}
-  >
-    {label}
+{href ? (
+  <a href={href} class={baseClasses} {...rest}>
+    <slot />
   </a>
-  {note && <p class="text-xs text-zurich-gray">{note}</p>}
-</div>
+) : (
+  <button type={type} disabled={disabled} class={baseClasses} {...rest}>
+    <slot />
+  </button>
+)}

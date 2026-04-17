@@ -1,0 +1,326 @@
+---
+import Button from '../components/ui/Button.astro';
+import Badge from '../components/ui/Badge.astro';
+import Card from '../components/ui/Card.astro';
+import Pill from '../components/ui/Pill.astro';
+import SectionHeader from '../components/ui/SectionHeader.astro';
+import '../styles/global.css';
+---
+
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bünzli Design System</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+</head>
+<body class="bg-zh-black-5 font-sans text-zurich-dark">
+
+  <!-- Header -->
+  <div class="bg-zurich-navy text-white px-8 py-10 mb-12">
+    <div class="max-w-5xl mx-auto">
+      <div class="flex items-center gap-3 mb-3">
+        <img src="/zh-lion.svg" alt="" aria-hidden="true" class="w-8 h-8 brightness-0 invert opacity-80" />
+        <span class="font-bold text-2xl">bünzli<span class="text-white/40">.</span> design system</span>
+      </div>
+      <p class="text-white/50 text-sm font-mono">Inspired by zh.ch · v1.0 · Internal reference</p>
+    </div>
+  </div>
+
+  <div class="max-w-5xl mx-auto px-8 pb-24 space-y-20">
+
+    <!-- ── Colors ─────────────────────────────────────────────────── -->
+    <section>
+      <h2 class="text-xl font-bold mb-1">Colors</h2>
+      <p class="text-sm text-zurich-gray mb-8">Brand palette + ZH canton gray scale</p>
+
+      <div class="space-y-6">
+        <!-- Brand blues -->
+        <div>
+          <p class="text-xs font-mono text-zurich-gray uppercase tracking-wider mb-3">Brand — Zürich Blue</p>
+          <div class="flex gap-3 flex-wrap">
+            <div class="text-center">
+              <div class="w-16 h-16 rounded-xl bg-zurich-blue mb-2"></div>
+              <p class="text-[10px] font-mono text-zurich-gray">blue</p>
+              <p class="text-[10px] font-mono text-zurich-gray">#0070B4</p>
+            </div>
+            <div class="text-center">
+              <div class="w-16 h-16 rounded-xl bg-zurich-blue-dark mb-2"></div>
+              <p class="text-[10px] font-mono text-zurich-gray">blue-dark</p>
+              <p class="text-[10px] font-mono text-zurich-gray">#00407C</p>
+            </div>
+            <div class="text-center">
+              <div class="w-16 h-16 rounded-xl bg-zurich-blue-light border border-zurich-border mb-2"></div>
+              <p class="text-[10px] font-mono text-zurich-gray">blue-light</p>
+              <p class="text-[10px] font-mono text-zurich-gray">#EDF5FA</p>
+            </div>
+            <div class="text-center">
+              <div class="w-16 h-16 rounded-xl bg-zurich-navy mb-2"></div>
+              <p class="text-[10px] font-mono text-zurich-gray">navy</p>
+              <p class="text-[10px] font-mono text-zurich-gray">#08111F</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Accent colors -->
+        <div>
+          <p class="text-xs font-mono text-zurich-gray uppercase tracking-wider mb-3">Accents</p>
+          <div class="flex gap-3 flex-wrap">
+            <div class="text-center">
+              <div class="w-16 h-16 rounded-xl bg-badi-orange mb-2"></div>
+              <p class="text-[10px] font-mono text-zurich-gray">badi-orange</p>
+              <p class="text-[10px] font-mono text-zurich-gray">#F26522</p>
+            </div>
+            <div class="text-center">
+              <div class="w-16 h-16 rounded-xl bg-tram-green mb-2"></div>
+              <p class="text-[10px] font-mono text-zurich-gray">tram-green</p>
+              <p class="text-[10px] font-mono text-zurich-gray">#3D8A3E</p>
+            </div>
+            <div class="text-center">
+              <div class="w-16 h-16 rounded-xl mb-2" style="background:#1A7F1F"></div>
+              <p class="text-[10px] font-mono text-zurich-gray">zh-success</p>
+              <p class="text-[10px] font-mono text-zurich-gray">#1A7F1F</p>
+            </div>
+            <div class="text-center">
+              <div class="w-16 h-16 rounded-xl mb-2" style="background:#D93C1A"></div>
+              <p class="text-[10px] font-mono text-zurich-gray">zh-error</p>
+              <p class="text-[10px] font-mono text-zurich-gray">#D93C1A</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ZH Gray scale -->
+        <div>
+          <p class="text-xs font-mono text-zurich-gray uppercase tracking-wider mb-3">ZH Gray Scale (zh-black-*)</p>
+          <div class="flex gap-2 flex-wrap">
+            {[
+              { name: '100', hex: '#000000' },
+              { name: '90',  hex: '#1A1A1A' },
+              { name: '80',  hex: '#333333' },
+              { name: '60',  hex: '#666666' },
+              { name: '40',  hex: '#999999' },
+              { name: '20',  hex: '#CCCCCC' },
+              { name: '10',  hex: '#E5E5E5' },
+              { name: '5',   hex: '#F7F7F7' },
+            ].map(s => (
+              <div class="text-center">
+                <div
+                  class="w-14 h-14 rounded-lg mb-1 border border-black/5"
+                  style={`background-color: ${s.hex}`}
+                ></div>
+                <p class="text-[9px] font-mono text-zurich-gray">{s.name}</p>
+                <p class="text-[9px] font-mono text-zurich-gray">{s.hex}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Typography ─────────────────────────────────────────────── -->
+    <section>
+      <h2 class="text-xl font-bold mb-1">Typography</h2>
+      <p class="text-sm text-zurich-gray mb-8">Inter Variable — weights 400 / 600 / 700 / 800</p>
+
+      <div class="space-y-4 bg-white border border-zurich-border rounded-xl p-6">
+        <div class="border-b border-zurich-border pb-4">
+          <p class="text-[10px] font-mono text-zurich-gray mb-1">Display — 7xl / extrabold / tracking -0.04em</p>
+          <p class="text-7xl font-extrabold tracking-tight leading-none">Zürich</p>
+        </div>
+        <div class="border-b border-zurich-border pb-4">
+          <p class="text-[10px] font-mono text-zurich-gray mb-1">H1 — 5xl / extrabold</p>
+          <h1 class="text-5xl font-extrabold tracking-tight">Willkommen</h1>
+        </div>
+        <div class="border-b border-zurich-border pb-4">
+          <p class="text-[10px] font-mono text-zurich-gray mb-1">H2 — 3xl / bold</p>
+          <h2 class="text-3xl font-bold tracking-tight">Bünzli AI</h2>
+        </div>
+        <div class="border-b border-zurich-border pb-4">
+          <p class="text-[10px] font-mono text-zurich-gray mb-1">Body — base / normal</p>
+          <p class="text-base leading-relaxed text-zurich-gray">Die schlausti KI für Zürich. Dini Frage, üsi Stadt.</p>
+        </div>
+        <div class="border-b border-zurich-border pb-4">
+          <p class="text-[10px] font-mono text-zurich-gray mb-1">Small — sm / normal</p>
+          <p class="text-sm text-zurich-gray">Daten vo Züri. Hosting in dr Schwiiz. Open Source.</p>
+        </div>
+        <div>
+          <p class="text-[10px] font-mono text-zurich-gray mb-1">Mono label — xs / semibold / tracking widest / uppercase</p>
+          <p class="font-mono text-xs text-zurich-blue tracking-widest uppercase font-semibold">Live connectors</p>
+        </div>
+      </div>
+
+      <div class="mt-4 bg-white border border-zurich-border rounded-xl p-6 flex flex-wrap gap-4 items-baseline">
+        <p class="text-[10px] font-mono text-zurich-gray w-full mb-2">Text gradients</p>
+        <span class="text-4xl font-extrabold text-gradient">Zürich</span>
+        <span class="stat-number">47</span>
+      </div>
+    </section>
+
+    <!-- ── Shadows ────────────────────────────────────────────────── -->
+    <section>
+      <h2 class="text-xl font-bold mb-1">Shadows</h2>
+      <p class="text-sm text-zurich-gray mb-8">3-level system matching zh.ch</p>
+
+      <div class="flex gap-8 flex-wrap">
+        <div class="text-center">
+          <div class="w-32 h-20 bg-white rounded-xl shadow-short mb-3"></div>
+          <p class="text-xs font-mono text-zurich-gray">shadow-short</p>
+          <p class="text-[10px] text-zurich-gray/60">hover states</p>
+        </div>
+        <div class="text-center">
+          <div class="w-32 h-20 bg-white rounded-xl shadow-regular mb-3"></div>
+          <p class="text-xs font-mono text-zurich-gray">shadow-regular</p>
+          <p class="text-[10px] text-zurich-gray/60">cards, panels</p>
+        </div>
+        <div class="text-center">
+          <div class="w-32 h-20 bg-white rounded-xl shadow-long mb-3"></div>
+          <p class="text-xs font-mono text-zurich-gray">shadow-long</p>
+          <p class="text-[10px] text-zurich-gray/60">modals, dropdowns</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Buttons ────────────────────────────────────────────────── -->
+    <section>
+      <h2 class="text-xl font-bold mb-1">Buttons</h2>
+      <p class="text-sm text-zurich-gray mb-8">4 variants × 3 sizes · href → &lt;a&gt;, no href → &lt;button&gt;</p>
+
+      <div class="space-y-6 bg-white border border-zurich-border rounded-xl p-6">
+        <div>
+          <p class="text-[10px] font-mono text-zurich-gray uppercase tracking-wider mb-3">Variants (md)</p>
+          <div class="flex flex-wrap gap-3">
+            <Button variant="primary">Primary</Button>
+            <Button variant="secondary">Secondary</Button>
+            <Button variant="outline">Outline</Button>
+            <Button variant="ghost">Ghost</Button>
+            <Button variant="primary" disabled>Disabled</Button>
+          </div>
+        </div>
+        <div>
+          <p class="text-[10px] font-mono text-zurich-gray uppercase tracking-wider mb-3">Sizes (primary)</p>
+          <div class="flex flex-wrap items-center gap-3">
+            <Button variant="primary" size="sm">Small</Button>
+            <Button variant="primary" size="md">Medium</Button>
+            <Button variant="primary" size="lg">Large</Button>
+          </div>
+        </div>
+        <div>
+          <p class="text-[10px] font-mono text-zurich-gray uppercase tracking-wider mb-3">As link (href)</p>
+          <div class="flex flex-wrap gap-3">
+            <Button href="#" variant="primary" size="sm">Beta testen →</Button>
+            <Button href="#" variant="outline" size="sm">Mitmache →</Button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Badges ─────────────────────────────────────────────────── -->
+    <section>
+      <h2 class="text-xl font-bold mb-1">Badges</h2>
+      <p class="text-sm text-zurich-gray mb-8">4 variants · optional count suffix</p>
+
+      <div class="bg-white border border-zurich-border rounded-xl p-6 flex flex-wrap gap-3">
+        <Badge variant="blue">Open Source</Badge>
+        <Badge variant="green">Swiss Hosted</Badge>
+        <Badge variant="orange">Beta</Badge>
+        <Badge variant="gray">Coming Soon</Badge>
+        <Badge variant="blue" count="12">Connectors</Badge>
+        <Badge variant="green" count="8">KB Topics</Badge>
+      </div>
+    </section>
+
+    <!-- ── Cards ─────────────────────────────────────────────────── -->
+    <section>
+      <h2 class="text-xl font-bold mb-1">Cards</h2>
+      <p class="text-sm text-zurich-gray mb-8">3 variants × 3 padding sizes · optional hover</p>
+
+      <div class="grid sm:grid-cols-3 gap-4">
+        <Card variant="default" padding="lg" hover>
+          <p class="text-[10px] font-mono text-zurich-gray uppercase tracking-wider mb-2">default + hover</p>
+          <h3 class="font-bold text-zurich-dark mb-1">Card Title</h3>
+          <p class="text-sm text-zurich-gray">Default card with hover shadow and border transition.</p>
+        </Card>
+        <Card variant="blue-tint" padding="lg" hover>
+          <p class="text-[10px] font-mono text-zurich-gray uppercase tracking-wider mb-2">blue-tint + hover</p>
+          <h3 class="font-bold text-zurich-dark mb-1">Card Title</h3>
+          <p class="text-sm text-zurich-gray">Blue-tinted card used for scenario highlights.</p>
+        </Card>
+        <div class="bg-zurich-navy p-2 rounded-xl">
+          <Card variant="dark" padding="lg" hover>
+            <p class="text-[10px] font-mono text-white/40 uppercase tracking-wider mb-2">dark + hover</p>
+            <h3 class="font-bold text-white mb-1">Card Title</h3>
+            <p class="text-sm text-white/60">Dark card for use on navy backgrounds.</p>
+          </Card>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Pills ─────────────────────────────────────────────────── -->
+    <section>
+      <h2 class="text-xl font-bold mb-1">Pills</h2>
+      <p class="text-sm text-zurich-gray mb-8">KB topics + connector chips · optional emoji, count, dashed</p>
+
+      <div class="bg-white border border-zurich-border rounded-xl p-6 space-y-4">
+        <div>
+          <p class="text-[10px] font-mono text-zurich-gray uppercase tracking-wider mb-3">KB Topics (emoji + count)</p>
+          <div class="flex flex-wrap gap-2">
+            <Pill emoji="🏠" label="Miete & Wohne" count="47" tooltip="Rental law, tenant rights, deposit rules" />
+            <Pill emoji="🏛️" label="Behörde" count="23" tooltip="Government services and forms" />
+            <Pill emoji="⚖️" label="Schwiizer Rächt" count="18" tooltip="Swiss law essentials for residents" />
+            <Pill emoji="🧳" label="Expats" count="12" tooltip="Relocation, permits, banking" />
+          </div>
+        </div>
+        <div>
+          <p class="text-[10px] font-mono text-zurich-gray uppercase tracking-wider mb-3">Connectors (solid + dashed)</p>
+          <div class="flex flex-wrap gap-2">
+            <Pill emoji="🚃" label="Abfahrte" tooltip="Live SBB departures" />
+            <Pill emoji="🌦️" label="Wetter" tooltip="MeteoSwiss live weather" />
+            <Pill emoji="⚡" label="Strom" tooltip="Electricity grid data" />
+            <Pill emoji="🔍" label="Web Search" tooltip="Coming soon" dashed />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Section Headers ────────────────────────────────────────── -->
+    <section>
+      <h2 class="text-xl font-bold mb-1">Section Headers</h2>
+      <p class="text-sm text-zurich-gray mb-8">eyebrow + heading + subtext · light/dark themes · left/center align</p>
+
+      <div class="space-y-8">
+        <div class="bg-white border border-zurich-border rounded-xl p-8">
+          <p class="text-[10px] font-mono text-zurich-gray uppercase tracking-wider mb-4">Light · center (default)</p>
+          <SectionHeader
+            eyebrow="Use cases"
+            heading="Was chasch du frage?"
+            subtext="Alles rund um Zürich — in echtem Züridütsch."
+          />
+        </div>
+
+        <div class="bg-white border border-zurich-border rounded-xl p-8">
+          <p class="text-[10px] font-mono text-zurich-gray uppercase tracking-wider mb-4">Light · left align</p>
+          <SectionHeader
+            eyebrow="Use cases"
+            heading="Was chasch du frage?"
+            subtext="Alles rund um Zürich — in echtem Züridütsch."
+            align="left"
+          />
+        </div>
+
+        <div class="bg-zurich-navy rounded-xl p-8">
+          <p class="text-[10px] font-mono text-white/40 uppercase tracking-wider mb-4">Dark theme · center</p>
+          <SectionHeader
+            eyebrow="Dateschutz"
+            heading="Dini Date ghöre dir."
+            subtext="Kei Training, kei Tracking, kei Clouds im Usland."
+            theme="dark"
+          />
+        </div>
+      </div>
+    </section>
+
+  </div>
+</body>
+</html>

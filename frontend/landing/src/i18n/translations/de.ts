@@ -56,9 +56,9 @@ export const de = {
   scenario3Desc: 'Du verstahsch de Vorlagstext nöd ganz. Bünzli erklärt dir d Kernpünkt eifach und neutral — uf Züridütsch.',
 
   // How it works
-  howTagline: 'Was Bünzli atreibt',
-  howTitle: 'Drü Schichte Intelligenz.',
-  howSubtitle: 'Es Schwizer AI-Hirni, tiefs Züri-Wüsse und Echtzeit-Date — alles zäme.',
+  howTagline: 'Wie funktionierts',
+  howTitle: 'Frog. Route. Antwort.',
+  howSubtitle: 'Drü Schritt vo dinere Frog zur Antwort — mit echte Date us Züri.',
   howLayer1Title: 'S Hirni — Apertus 70B',
   howLayer1Desc: 'Schwizer AI-Modell mit 70 Milliarde Parameter, gheostet vo Infomaniak i de Schwiz. Verstahd Dütsch, Englisch, Französisch, Italiänisch und Züridütsch.',
   howLayer2Title: "Wüssensbasis — 10'335 Stück",
@@ -145,7 +145,10 @@ export const de = {
   connectorWebSearch: 'Websuech',
   connectorWebSearchDesc: 'SearXNG-basierti Websuech als automatische Fallback wänn kein Live-Connector s Thema abdeckt.',
 
-  // Tech stack (collapsible)
+  // Tech stack (own section)
+  techSectionTagline: 'Tech Stack',
+  techSectionTitle: 'Offe. Transparent. Schwiizer Made.',
+  techSectionSubtitle: 'Jedi Zile Code isch öffentlich. Vo de AI bis zum Hosting — kei Blackbox.',
   techTagline: 'Tech Stack',
   techFrontend: 'Frontend',
   techFrontendDesc: 'Schnäll, schlank, null JS wo möglich. Wil Bloat nöd sehr Bünzli isch.',

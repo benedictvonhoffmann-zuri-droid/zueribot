@@ -6,6 +6,7 @@ import Base from '../../layouts/Base.astro';
 import Hero from '../../components/sections/Hero.astro';
 import Scenarios from '../../components/sections/Scenarios.astro';
 import HowItWorks from '../../components/sections/HowItWorks.astro';
+import TechStack from '../../components/sections/TechStack.astro';
 import PrivacyFirst from '../../components/sections/PrivacyFirst.astro';
 import CommunityFuture from '../../components/sections/CommunityFuture.astro';
 
@@ -21,6 +22,7 @@ const t = useTranslations(lang);
   <Hero t={t} lang={lang} />
   <Scenarios t={t} />
   <HowItWorks t={t} />
+  <TechStack t={t} />
   <PrivacyFirst t={t} />
   <CommunityFuture t={t} />
 </Base>
