@@ -76,6 +76,55 @@ function extractText(message: any): string {
     .trim();
 }
 
+const TITLE_ENDPOINT = import.meta.env.DEV
+  ? "http://localhost/zuribot/v1/chat/completions"
+  : "/zuribot/v1/chat/completions";
+
+const TITLE_SYSTEM_PROMPT =
+  "Du gibsch en churzä Titel für en Chat zrugg. Max. 5 Wörter, Schwizerdütsch, kei Aafüehrigszeiche, kei Satzzeiche am Schluss. Nur de Titel, süsch nüüt.";
+
+/**
+ * Ask the LLM for a short title based on the opening exchange. Returns null on
+ * any failure so the caller can fall back to a heuristic.
+ */
+async function llmTitle(
+  userText: string,
+  assistantText: string
+): Promise<string | null> {
+  try {
+    const ctrl = new AbortController();
+    const timeout = setTimeout(() => ctrl.abort(), 8000);
+    const r = await fetch(TITLE_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "zuribot",
+        stream: false,
+        messages: [
+          { role: "system", content: TITLE_SYSTEM_PROMPT },
+          { role: "user", content: userText },
+          { role: "assistant", content: assistantText },
+          { role: "user", content: "Gib jetzt de Titel." },
+        ],
+      }),
+      signal: ctrl.signal,
+    });
+    clearTimeout(timeout);
+    if (!r.ok) return null;
+    const j = await r.json();
+    const raw: string = j?.choices?.[0]?.message?.content ?? "";
+    const cleaned = raw
+      .trim()
+      .replace(/^["'«»„"']+|["'«»„"'.,!?]+$/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!cleaned) return null;
+    return truncateTitle(cleaned, 48);
+  } catch {
+    return null;
+  }
+}
+
 /**
  * RemoteThreadListAdapter backed by IndexedDB. Thread metadata is AES-GCM-256
  * encrypted; only the thread id is in clear (it's the IDB key).
@@ -164,10 +213,17 @@ export const localThreadListAdapter: RemoteThreadListAdapter = {
   },
 
   async generateTitle(remoteId, messages) {
-    // Heuristic title from the first user message. No LLM round-trip.
     const firstUser = messages.find((m: any) => m.role === "user");
-    const source = firstUser ? extractText(firstUser) : "";
-    const title = source ? truncateTitle(source) : "Neui Chat";
+    const firstAssistant = messages.find((m: any) => m.role === "assistant");
+    const userText = firstUser ? extractText(firstUser) : "";
+    const assistantText = firstAssistant ? extractText(firstAssistant) : "";
+
+    // Try LLM first; fall back to truncated user message on any failure.
+    const fallback = userText ? truncateTitle(userText) : "Neui Chat";
+    const fromLlm =
+      userText && assistantText ? await llmTitle(userText, assistantText) : null;
+    const title = fromLlm ?? fallback;
+
     await this.rename(remoteId, title);
     return createAssistantStream((ctrl) => {
       ctrl.appendText(title);
