@@ -1,8 +1,10 @@
 /* ============================================================
    Bünzli theme for Open WebUI
-   Aligns OWU with buenzli.space landing page design system.
-   Tokens: zurich-blue #0070B4, zurich-dark #1A1A1A, tram-green
-   #3D8A3E, badi-orange #F26522, Inter Variable typography.
+   OWU is Svelte + Tailwind. The dark theme is keyed off
+   `html.dark` and consumes CSS custom properties
+   `--color-gray-50..950`. We re-tint those to navy-blue grays,
+   override Tailwind color primitives used for primary actions,
+   and retype the app in Inter Variable.
    ============================================================ */
 
 @font-face {
@@ -17,56 +19,87 @@
   --bz-blue: #0070B4;
   --bz-blue-dark: #00407C;
   --bz-blue-light: #EDF5FA;
-  --bz-dark: #1A1A1A;
-  --bz-gray: #6B7280;
-  --bz-border: #E5E7EB;
-  --bz-bg-5: #F7F7F7;
   --bz-tram-green: #3D8A3E;
   --bz-badi-orange: #F26522;
-
-  /* Override OWU's accent tokens where they exist */
-  --color-primary: var(--bz-blue);
-  --color-primary-foreground: #ffffff;
 }
 
-html, body {
+/* ── Typography ──────────────────────────────────────────── */
+html, body, button, input, textarea {
   font-family: 'Inter Variable', Inter, -apple-system, BlinkMacSystemFont,
     'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
   font-feature-settings: 'cv11', 'ss01', 'ss03';
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── Primary button — blue ───────────────────────────────── */
-button.bg-black,
-button.bg-gray-900,
-button.bg-gray-950,
-.bg-black:not(body):not(html),
-button[class*="bg-black"]:not(.keep-black) {
-  background-color: var(--bz-blue) !important;
-  color: #fff !important;
-  transition: background-color 150ms ease;
+/* ── Re-tint the dark-mode gray scale toward Zürich navy ─── */
+html.dark {
+  --color-gray-50:  #F3F5F8;
+  --color-gray-100: #E2E6EC;
+  --color-gray-200: #C4CAD4;
+  --color-gray-300: #9AA2B2;
+  --color-gray-400: #6F7889;
+  --color-gray-500: #505A6E;
+  --color-gray-600: #3B4356;
+  --color-gray-700: #2A3142;
+  --color-gray-800: #1E2433;
+  --color-gray-850: #171C29;
+  --color-gray-900: #10141E;
+  --color-gray-950: #0A0D15;
 }
-button.bg-black:hover,
-button.bg-gray-900:hover,
-button.bg-gray-950:hover,
-button[class*="bg-black"]:hover:not(.keep-black) {
+
+/* Light mode stays white but with cooler neutrals */
+html.light {
+  --color-gray-50:  #F7F8FA;
+  --color-gray-100: #EDF1F5;
+  --color-gray-200: #DDE3EB;
+  --color-gray-300: #C2CAD4;
+}
+
+/* ── Primary action color — override Tailwind black/white utils ── */
+html.dark .bg-white,
+html.dark button.bg-white,
+html.dark .bg-gray-50\/0\.5,
+.bg-black,
+button.bg-black,
+.bg-gray-900.text-white,
+button.bg-gray-900:not(.sidebar) {
+  background-color: var(--bz-blue) !important;
+  color: #ffffff !important;
+}
+html.dark .bg-white:hover,
+html.dark button.bg-white:hover,
+.bg-black:hover,
+button.bg-black:hover {
   background-color: var(--bz-blue-dark) !important;
 }
 
-/* Outlined / secondary buttons get a blue hover ring */
-button:not([class*="bg-"]):hover,
-button.bg-white:hover,
-button.bg-transparent:hover {
-  color: var(--bz-blue);
+/* Text-black on light backgrounds — swap to blue */
+html.dark .text-black {
+  color: #ffffff !important;
 }
 
-/* ── Links and inline accents ────────────────────────────── */
-a:not(.keep-color) {
+/* ── User chat bubble — Zürich blue ──────────────────────── */
+.user-message .rounded-3xl,
+.user-message .rounded-2xl,
+[class*="chat-user"] .rounded-3xl,
+[class*="chat-user"] .rounded-2xl,
+div[class*="user"] > .bg-gray-50,
+div[class*="user"] > .bg-gray-100,
+div[class*="user"] > .bg-gray-850 {
+  background-color: var(--bz-blue) !important;
+  background-image: none !important;
+  color: #ffffff !important;
+}
+
+/* ── Links ───────────────────────────────────────────────── */
+a:not(.keep-color):not([role="button"]) {
   color: var(--bz-blue);
 }
-a:not(.keep-color):hover {
+a:not(.keep-color):not([role="button"]):hover {
   color: var(--bz-blue-dark);
-  text-decoration: underline;
+}
+html.dark a:not(.keep-color):not([role="button"]) {
+  color: #4FAEE4;
 }
 
 /* ── Focus rings ─────────────────────────────────────────── */
@@ -78,66 +111,57 @@ input:focus,
 textarea:focus,
 [contenteditable]:focus {
   border-color: var(--bz-blue) !important;
-  box-shadow: 0 0 0 3px rgba(0, 112, 180, 0.12) !important;
+  box-shadow: 0 0 0 3px rgba(0, 112, 180, 0.2) !important;
 }
 
-/* ── Chat bubbles — user side uses Zürich blue ──────────── */
-.chat-user .bg-gray-50,
-.chat-user .bg-gray-100,
-.chat-user .bg-gray-200,
-[class*="user-message"] .rounded-3xl,
-[class*="user-message"] .rounded-2xl {
-  background-color: var(--bz-blue) !important;
-  color: #fff !important;
+/* ── Accent for active sidebar items ─────────────────────── */
+nav a.selected,
+nav button[aria-current="page"],
+[class*="active"][class*="bg-gray"] {
+  border-left: 2px solid var(--bz-blue) !important;
 }
 
-/* ── Sidebar branding (title / logo area) ───────────────── */
-.sidebar-title,
-header [class*="logo"] {
-  color: var(--bz-dark);
-  letter-spacing: -0.01em;
-  font-weight: 700;
-}
-
-/* ── Code blocks — soft gray instead of black ───────────── */
+/* ── Code blocks — branded border ────────────────────────── */
 pre, code {
   font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace !important;
 }
-pre {
-  background-color: var(--bz-bg-5) !important;
-  border: 1px solid var(--bz-border);
+html.dark pre {
+  border: 1px solid var(--color-gray-700);
   border-radius: 10px;
 }
 
-/* ── "New chat" / primary CTAs get a subtle shadow ───────── */
-button.bg-black,
-button.bg-gray-900 {
-  box-shadow: 0 1px 2px rgba(0, 64, 124, 0.08),
-              0 2px 8px rgba(0, 64, 124, 0.06);
-}
-
-/* ── Scrollbars — thinner, branded ──────────────────────── */
+/* ── Scrollbars ──────────────────────────────────────────── */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--bz-border) transparent;
+}
+html.dark * {
+  scrollbar-color: var(--color-gray-700) transparent;
+}
+html.light * {
+  scrollbar-color: #DDE3EB transparent;
 }
 *::-webkit-scrollbar { width: 8px; height: 8px; }
 *::-webkit-scrollbar-track { background: transparent; }
-*::-webkit-scrollbar-thumb {
-  background-color: var(--bz-border);
-  border-radius: 4px;
-}
-*::-webkit-scrollbar-thumb:hover {
-  background-color: var(--bz-gray);
-}
+*::-webkit-scrollbar-thumb { border-radius: 4px; }
+html.dark *::-webkit-scrollbar-thumb { background-color: var(--color-gray-700); }
+html.light *::-webkit-scrollbar-thumb { background-color: #DDE3EB; }
+*::-webkit-scrollbar-thumb:hover { background-color: var(--bz-blue); }
 
 /* ── Selection ───────────────────────────────────────────── */
 ::selection {
-  background-color: rgba(0, 112, 180, 0.2);
-  color: var(--bz-dark);
+  background-color: rgba(0, 112, 180, 0.3);
 }
 
-/* ── Respect reduced motion ──────────────────────────────── */
+/* ── Meta theme-color override is handled by JS, but we set
+     the body bg as a safety net for the very first paint ──── */
+html.dark body {
+  background-color: var(--color-gray-900);
+}
+html.light body {
+  background-color: #ffffff;
+}
+
+/* ── Reduced motion ──────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
