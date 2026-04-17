@@ -7,156 +7,216 @@ interface Props {
   lang: Locale;
 }
 
-const { t, lang } = Astro.props;
-const { hero, cta } = t;
+const { t } = Astro.props;
 
-const betaHref = `mailto:sali@buenzli.space?subject=${encodeURIComponent(cta.betaSubject)}&body=${encodeURIComponent(cta.betaBody)}`;
-const collabHref = `mailto:sali@buenzli.space?subject=${encodeURIComponent(cta.collabSubject)}&body=${encodeURIComponent(cta.collabBody)}`;
+const betaHref = `mailto:hello@buenzli.space?subject=${encodeURIComponent('Beta Test Request - buenzli.space')}&body=${encodeURIComponent('Hi Buenzli Team,\n\nI would like to beta test buenzli.space!\n\nLinkedIn profile: \nWhy I want to test: \nWhat I would use Bünzli AI for: \n\nBest regards')}`;
+const collabHref = `mailto:hello@buenzli.space?subject=${encodeURIComponent('Collaboration Inquiry - buenzli.space')}&body=${encodeURIComponent('Hi Buenzli Team,\n\nI would like to collaborate on buenzli.space!\n\nLinkedIn profile: \nWhy I want to collaborate: \nSkills I bring: \n\nBest regards')}`;
+
+const trust = [
+  { icon: '🔐', label: t.trustEncrypted },
+  { icon: '🇨🇭', label: t.trustSwiss },
+  { icon: '🚫', label: t.trustZeroData },
+  { icon: '👁️', label: t.trustNoTracking },
+  { icon: '💻', label: t.trustOpenSource },
+];
 ---
 
-<section class="hero-section relative overflow-hidden bg-hero-dark text-white min-h-[90vh] flex items-center">
+<section class="relative min-h-[85vh] flex items-center pt-14 pb-20 overflow-hidden bg-white">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 w-full">
+    <div class="grid lg:grid-cols-2 gap-16 items-center">
 
-  <!-- Grid lines -->
-  <div class="hero-grid absolute inset-0 pointer-events-none" aria-hidden="true"></div>
+      <!-- Left: copy -->
+      <div class="max-w-xl">
+        <div class="animate-fade-up">
+          <div class="inline-flex items-center gap-2 border border-zurich-border rounded-full px-3 py-1 text-xs font-mono text-zurich-gray mb-8 bg-white/60">
+            <span class="w-1.5 h-1.5 rounded-full bg-tram-green animate-pulse"></span>
+            {t.heroBadge}
+          </div>
+        </div>
 
-  <!-- Gradient orbs -->
-  <div class="orb orb-blue absolute pointer-events-none" aria-hidden="true"></div>
-  <div class="orb orb-orange absolute pointer-events-none" aria-hidden="true"></div>
-  <div class="orb orb-teal absolute pointer-events-none" aria-hidden="true"></div>
+        <h1 class="animate-fade-up stagger-1 text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.05] mb-6 text-zurich-dark">
+          {t.heroTitle1}
+          <br />
+          <span class="text-gradient">{t.heroTitle2}</span>
+        </h1>
 
-  <!-- Bottom fade -->
-  <div class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-hero-dark to-transparent pointer-events-none" aria-hidden="true"></div>
+        <p class="animate-fade-up stagger-2 text-lg text-zurich-gray leading-relaxed mb-8 max-w-md">
+          {t.heroDescription}
+        </p>
 
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 relative z-10 py-28 sm:py-36">
+        <div class="animate-fade-up stagger-2 flex flex-wrap gap-3 mb-8">
+          <a
+            href={betaHref}
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-zurich-blue text-white hover:bg-zurich-blue-dark transition-colors duration-150 shadow-sm"
+          >
+            {t.heroCta}
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+          <a
+            href={collabHref}
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm border border-zurich-border text-zurich-dark hover:border-zurich-blue/40 hover:bg-zurich-blue/5 transition-colors duration-150"
+          >
+            {t.heroCollab}
+          </a>
+        </div>
 
-    <!-- Pill badge -->
-    <div class="hero-fade-in mb-8 flex">
-      <span class="hero-pill inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border border-white/15 bg-white/5 text-white/70 backdrop-blur-sm">
-        <span class="w-1.5 h-1.5 rounded-full bg-badi-orange animate-pulse"></span>
-        {hero.eyebrow}
-      </span>
-    </div>
+        <div class="animate-fade-up stagger-3 space-y-1.5">
+          <p class="text-sm text-zurich-gray flex items-center gap-2">
+            <span class="inline-flex -space-x-1.5">
+              <span class="w-6 h-6 rounded-full bg-zurich-blue/20 border-2 border-white"></span>
+              <span class="w-6 h-6 rounded-full bg-badi-orange/20 border-2 border-white"></span>
+              <span class="w-6 h-6 rounded-full bg-tram-green/20 border-2 border-white"></span>
+              <span class="w-6 h-6 rounded-full bg-zurich-blue/30 border-2 border-white"></span>
+            </span>
+            <span>47 {t.heroSocialProof}</span>
+          </p>
+          <p class="text-[11px] font-mono text-zurich-gray/60">{t.heroBetaPhase}</p>
+        </div>
+      </div>
 
-    <!-- Headline -->
-    <h1 class="hero-fade-in hero-delay-1 text-5xl sm:text-7xl lg:text-8xl font-bold leading-[1.05] tracking-tight max-w-4xl mb-6">
-      {hero.headline.split('Zürich').length > 1
-        ? <>
-            {hero.headline.split('Zürich')[0]}<span class="hero-gradient-text">Zürich</span>{hero.headline.split('Zürich')[1]}
-          </>
-        : hero.headline.split('Züri').length > 1
-          ? <>
-              {hero.headline.split('Züri')[0]}<span class="hero-gradient-text">Züri</span>{hero.headline.split('Züri')[1]}
-            </>
-          : hero.headline
-      }
-    </h1>
+      <!-- Right: Chat UI -->
+      <div class="animate-fade-up stagger-3">
+        <div class="relative">
+          <img src="/zh-lion.svg" alt="" aria-hidden="true" class="absolute -top-6 -right-6 w-24 h-24 opacity-[0.05] hidden lg:block" />
+          <div class="bg-white border border-zurich-border rounded-2xl shadow-xl overflow-hidden">
 
-    <!-- Subline -->
-    <p class="hero-fade-in hero-delay-2 text-lg sm:text-xl text-white/55 max-w-xl mb-10 leading-relaxed font-normal">
-      {hero.subline}
-    </p>
+            <!-- Chat header -->
+            <div class="flex items-center gap-3 px-5 py-3.5 border-b border-zurich-border bg-gray-50/60">
+              <button
+                id="lion-btn"
+                aria-label="Bünzli"
+                class="w-8 h-8 rounded-full bg-zurich-blue/10 flex items-center justify-center hover:bg-zurich-blue/20 transition-colors cursor-pointer"
+              >
+                <img src="/zh-lion.svg" alt="" aria-hidden="true" class="w-4 h-4" />
+              </button>
+              <div>
+                <p class="text-sm font-semibold text-zurich-dark">Bünzli AI</p>
+                <p class="text-[10px] text-tram-green font-mono">{t.chatOnline}</p>
+              </div>
+            </div>
 
-    <!-- CTAs -->
-    <div class="hero-fade-in hero-delay-3 flex flex-col sm:flex-row items-start gap-4">
-      <a
-        href={betaHref}
-        class="hero-btn-primary inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-white text-zurich-dark hover:bg-white/90 transition-colors duration-150"
-      >
-        {hero.ctaBeta}
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </a>
-      <a
-        href={collabHref}
-        class="hero-btn-secondary inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm border border-white/20 text-white/80 hover:border-white/40 hover:text-white transition-all duration-150 backdrop-blur-sm"
-      >
-        {hero.ctaCollaborate}
-      </a>
-    </div>
+            <!-- Chat messages -->
+            <div class="p-5 space-y-4 min-h-[200px] lg:min-h-[280px]">
+              <div id="msg-1" class="flex justify-end opacity-0">
+                <div class="bg-zurich-blue text-white rounded-2xl rounded-tr-sm px-4 py-2.5 max-w-[80%]">
+                  <p class="text-sm">{t.chatUser1}</p>
+                </div>
+              </div>
 
-    <!-- Note lines -->
-    <div class="hero-fade-in hero-delay-4 flex flex-col sm:flex-row gap-4 mt-4">
-      <p class="text-xs text-white/30">{hero.ctaBetaNote}</p>
-      <p class="text-xs text-white/30 sm:ml-4">{hero.ctaCollabNote}</p>
-    </div>
+              <div id="msg-2" class="flex justify-start opacity-0">
+                <div class="bg-gray-100 rounded-2xl rounded-tl-sm px-4 py-2.5 max-w-[85%]">
+                  <p class="text-sm text-zurich-dark leading-relaxed" set:html={t.chatBot1} />
+                  <p class="text-[10px] text-zurich-gray mt-1.5 font-mono">{t.chatBot1Source}</p>
+                </div>
+              </div>
 
-    <!-- Floating connector pills -->
-    <div class="hero-fade-in hero-delay-4 mt-20 hidden sm:flex flex-wrap gap-2">
-      {['🚋 ZVV', '🌤️ Wetter', '🏊 Badi', '🗳️ Abstimmungen', '🍽️ Restaurants', '♻️ Recycling', '📍 POIs', '…'].map(pill => (
-        <span class="connector-pill inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border border-white/10 bg-white/5 text-white/50">
-          {pill}
-        </span>
-      ))}
+              <div id="msg-3" class="hidden lg:flex justify-end opacity-0">
+                <div class="bg-zurich-blue text-white rounded-2xl rounded-tr-sm px-4 py-2.5 max-w-[80%]">
+                  <p class="text-sm">{t.chatUser2}</p>
+                </div>
+              </div>
+
+              <div id="msg-4" class="hidden lg:flex justify-start opacity-0">
+                <div class="bg-gray-100 rounded-2xl rounded-tl-sm px-4 py-2.5 max-w-[85%]">
+                  <p class="text-sm text-zurich-dark leading-relaxed" set:html={t.chatBot2} />
+                  <p class="text-[10px] text-zurich-gray mt-1.5 font-mono">{t.chatBot2Source}</p>
+                </div>
+              </div>
+
+              <!-- Typing indicator -->
+              <div id="typing-indicator" class="hidden flex justify-start">
+                <div class="bg-gray-100 rounded-2xl rounded-tl-sm px-4 py-3">
+                  <div class="flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-zurich-gray/40 animate-bounce" style="animation-delay:0ms"></span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-zurich-gray/40 animate-bounce" style="animation-delay:150ms"></span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-zurich-gray/40 animate-bounce" style="animation-delay:300ms"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
 
-<style>
-  .bg-hero-dark {
-    background-color: #08111f;
-  }
+<!-- Trust bar -->
+<div class="border-y border-zurich-border bg-gray-50/60 py-4">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6">
+    <div class="flex flex-wrap items-center justify-center gap-x-8 gap-y-2">
+      {trust.map(({ icon, label }) => (
+        <span class="flex items-center gap-2 text-sm text-zurich-gray">
+          <span aria-hidden="true">{icon}</span>
+          {label}
+        </span>
+      ))}
+    </div>
+  </div>
+</div>
 
-  .hero-grid {
-    background-image:
-      linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-    background-size: 60px 60px;
-    mask-image: radial-gradient(ellipse 80% 80% at 50% 0%, black 40%, transparent 100%);
-  }
+<!-- Easter egg overlay -->
+<div
+  id="easter-egg"
+  class="hidden fixed inset-0 z-50 flex flex-col items-center justify-center cursor-pointer"
+  style="background:rgba(0,0,0,0.75);backdrop-filter:blur(4px)"
+>
+  <div class="relative text-center">
+    <img src="/zh-lion.svg" alt="" aria-hidden="true"
+      class="absolute top-1/2 left-1/2 w-48 h-48 opacity-10"
+      style="filter:brightness(0) invert(1);transform:translate(-50%,-50%) rotate(-8deg)" />
+    <h2 class="relative text-6xl sm:text-8xl font-extrabold text-white" style="text-shadow:0 4px 30px rgba(0,0,0,0.5)">
+      {t.easterEggMessage}
+    </h2>
+    <p class="mt-4 text-white/50 text-sm font-mono">— Bünzli AI, 2026</p>
+  </div>
+</div>
 
-  .orb {
-    border-radius: 50%;
-    filter: blur(80px);
-  }
+<script>
+  // Chat animation
+  const showMsg = (id: string, delay: number) => {
+    setTimeout(() => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+      el.style.transform = 'translateY(8px)';
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          el.style.opacity = '1';
+          el.style.transform = 'translateY(0)';
+        });
+      });
+    }, delay);
+  };
 
-  .orb-blue {
-    width: 600px;
-    height: 600px;
-    top: -200px;
-    left: -100px;
-    background: radial-gradient(ellipse, rgba(0, 100, 180, 0.35) 0%, transparent 70%);
-  }
+  const typing = document.getElementById('typing-indicator');
+  const showTyping = (at: number, hide: number) => {
+    setTimeout(() => typing?.classList.remove('hidden'), at);
+    setTimeout(() => typing?.classList.add('hidden'), hide);
+  };
 
-  .orb-orange {
-    width: 500px;
-    height: 500px;
-    top: -100px;
-    right: -100px;
-    background: radial-gradient(ellipse, rgba(242, 101, 34, 0.2) 0%, transparent 70%);
-  }
+  showMsg('msg-1', 400);
+  showTyping(1200, 2200);
+  showMsg('msg-2', 2200);
+  showMsg('msg-3', 3200);
+  showTyping(3800, 4800);
+  showMsg('msg-4', 4800);
 
-  .orb-teal {
-    width: 400px;
-    height: 400px;
-    bottom: 0;
-    right: 20%;
-    background: radial-gradient(ellipse, rgba(61, 138, 62, 0.15) 0%, transparent 70%);
-  }
+  // Easter egg (3 clicks on lion)
+  let lionClicks = 0;
+  const lionBtn = document.getElementById('lion-btn');
+  const easterEgg = document.getElementById('easter-egg');
 
-  .hero-gradient-text {
-    background: linear-gradient(135deg, #60a5fa 0%, #0064B4 50%, #38bdf8 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .hero-fade-in {
-    opacity: 0;
-    transform: translateY(20px);
-    animation: heroFadeUp 0.7s ease forwards;
-  }
-
-  .hero-delay-1 { animation-delay: 0.1s; }
-  .hero-delay-2 { animation-delay: 0.2s; }
-  .hero-delay-3 { animation-delay: 0.35s; }
-  .hero-delay-4 { animation-delay: 0.5s; }
-
-  @keyframes heroFadeUp {
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .connector-pill {
-    backdrop-filter: blur(4px);
-  }
-</style>
+  lionBtn?.addEventListener('click', () => {
+    lionClicks++;
+    if (lionClicks >= 3 && easterEgg) {
+      easterEgg.classList.remove('hidden');
+      lionClicks = 0;
+      setTimeout(() => easterEgg?.classList.add('hidden'), 3000);
+    }
+  });
+  easterEgg?.addEventListener('click', () => easterEgg.classList.add('hidden'));
+</script>

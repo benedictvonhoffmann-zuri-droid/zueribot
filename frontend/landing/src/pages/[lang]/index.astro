@@ -4,15 +4,10 @@ import { useTranslations } from '../../i18n/ui';
 import Base from '../../layouts/Base.astro';
 
 import Hero from '../../components/sections/Hero.astro';
-import WhyBuenzli from '../../components/sections/WhyBuenzli.astro';
-import WhatMakesDifferent from '../../components/sections/WhatMakesDifferent.astro';
+import Scenarios from '../../components/sections/Scenarios.astro';
 import HowItWorks from '../../components/sections/HowItWorks.astro';
-import LiveConnectors from '../../components/sections/LiveConnectors.astro';
 import PrivacyFirst from '../../components/sections/PrivacyFirst.astro';
-import TechExplained from '../../components/sections/TechExplained.astro';
 import CommunityFuture from '../../components/sections/CommunityFuture.astro';
-import LanguageSection from '../../components/sections/LanguageSection.astro';
-import CtaSection from '../../components/sections/CtaSection.astro';
 
 export function getStaticPaths() {
   return LOCALES.map(lang => ({ params: { lang } }));
@@ -24,13 +19,8 @@ const t = useTranslations(lang);
 
 <Base lang={lang} t={t}>
   <Hero t={t} lang={lang} />
-  <WhyBuenzli t={t} />
-  <WhatMakesDifferent t={t} />
+  <Scenarios t={t} />
   <HowItWorks t={t} />
-  <LiveConnectors t={t} />
   <PrivacyFirst t={t} />
-  <TechExplained t={t} />
   <CommunityFuture t={t} />
-  <LanguageSection t={t} currentLang={lang} />
-  <CtaSection t={t} lang={lang} />
 </Base>

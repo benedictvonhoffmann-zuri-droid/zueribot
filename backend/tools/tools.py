@@ -243,7 +243,7 @@ TOOL_DEFINITIONS = [
         "type": "function",
         "function": {
             "name": "get_venues",
-            "description": "Get venues in Zürich: restaurants, bars, cafes, hotels, attractions, museums, activities, shopping, etc. from zuerich.com.",
+            "description": "Get venues in Zürich: restaurants, bars, cafes, hotels, attractions, museums, activities, shopping, etc. from zuerich.com. Supports filtering by name — use name_filter when looking for a specific restaurant or venue by name.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -251,6 +251,11 @@ TOOL_DEFINITIONS = [
                         "type": "string",
                         "description": "Category: gastronomy, american, asian, swiss, italian, french, mediterranean, steakhouse, seafood, dinner, lunch, bar, cafe, breakfast, bars, nightlife, accommodation, hotel, attractions, museums, art, churches, nature, parks, viewpoints, activities, tours, shopping, fashion, souvenirs",
                         "default": "gastronomy"
+                    },
+                    "name_filter": {
+                        "type": "string",
+                        "description": "Optional: filter results to venues whose name contains this string (case-insensitive). Use when looking for a specific restaurant by name, e.g. 'Vallocaia', 'Kronenhalle'.",
+                        "default": ""
                     },
                     "limit": {
                         "type": "integer",
@@ -666,7 +671,8 @@ def dispatch_tool(name, arguments):
         elif name == "get_venues":
             return venues_connector.get_venues(
                 category=arguments.get("category", "gastronomy"),
-                limit=arguments.get("limit", 10)
+                limit=arguments.get("limit", 10),
+                name_filter=arguments.get("name_filter", ""),
             )
         
         elif name == "get_waste_schedule":

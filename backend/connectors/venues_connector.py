@@ -179,39 +179,49 @@ def _parse_venue(item):
     }
 
 
-def get_venues(category="gastronomy", limit=10):
+def get_venues(category="gastronomy", limit=10, name_filter=""):
     """Get venues from zuerich.com Open Data API.
-    
+
     Args:
         category: Category name or ID (see CATEGORIES dict)
         limit: Max number of results
-    
-    Returns venues of type: restaurants, bars, cafes, hotels, attractions, 
+        name_filter: Optional name substring to filter results (case-insensitive)
+
+    Returns venues of type: restaurants, bars, cafes, hotels, attractions,
     museums, parks, viewpoints, activities, tours, shopping, etc.
     """
     try:
         # Look up category ID
         cat_id = CATEGORIES.get(category.lower(), category)
-        
+
         params = {"id": cat_id}
         resp = requests.get(ZUERICH_API, params=params, timeout=15,
                            headers={"User-Agent": "ZuriBot/1.0", "Accept": "application/json"})
         resp.raise_for_status()
         data = resp.json()
-        
+
         if not isinstance(data, list):
             data = [data]
-        
+
+        # When searching by name, scan all results before applying limit
+        scan_all = bool(name_filter)
+        name_lower = name_filter.lower()
+
         venues = []
-        for item in data[:limit]:
+        for item in data if scan_all else data[:limit]:
             venue = _parse_venue(item)
-            if venue:
-                venues.append(venue)
-        
+            if not venue:
+                continue
+            if name_filter and name_lower not in venue["name"].lower():
+                continue
+            venues.append(venue)
+            if not scan_all and len(venues) >= limit:
+                break
+
         return {
             "success": True,
             "data": {
-                "venues": venues,
+                "venues": venues[:limit],
                 "category": category,
                 "total_available": len(data) if isinstance(data, list) else 1,
             },

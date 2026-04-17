@@ -12,13 +12,10 @@ export default defineConfig({
   integrations: [
     sitemap({
       i18n: {
-        defaultLocale: 'de',
+        defaultLocale: 'zh',
         locales: {
-          de: 'de-CH',
-          en: 'en-GB',
-          fr: 'fr-CH',
-          it: 'it-CH',
           zh: 'gsw',
+          en: 'en-GB',
         },
       },
     }),
