@@ -179,6 +179,54 @@ html.dark body { background-color: var(--color-gray-900); }
 html.light body,
 html:not(.dark) body { background-color: #ffffff; }
 
+/* ── Sidebar — force dark text on the light gray surface ── */
+html.light aside,
+html:not(.dark) aside,
+html.light nav,
+html:not(.dark) nav {
+  color: var(--bz-dark) !important;
+}
+html.light aside *,
+html:not(.dark) aside *,
+html.light nav *,
+html:not(.dark) nav * {
+  color: inherit !important;
+}
+/* Keep muted/placeholder tones muted, not black */
+html.light aside .text-gray-400,
+html:not(.dark) aside .text-gray-400,
+html.light aside .text-gray-500,
+html:not(.dark) aside .text-gray-500,
+html.light nav .text-gray-400,
+html:not(.dark) nav .text-gray-400,
+html.light nav .text-gray-500,
+html:not(.dark) nav .text-gray-500 {
+  color: var(--bz-gray) !important;
+}
+
+/* ── Chat input bar — separate it from the white canvas ─── */
+html.light [class*="chat-input"],
+html:not(.dark) [class*="chat-input"],
+html.light textarea[placeholder],
+html:not(.dark) textarea[placeholder] {
+  background-color: var(--bz-black-5) !important;
+  border: 1px solid var(--bz-border) !important;
+  border-radius: 16px !important;
+  box-shadow: var(--bz-shadow-short) !important;
+}
+/* The outer wrapper that sits above the page bottom */
+html.light form.flex,
+html:not(.dark) form.flex {
+  background-color: transparent !important;
+}
+html.light form.flex > div,
+html:not(.dark) form.flex > div {
+  background-color: var(--bz-black-5) !important;
+  border: 1px solid var(--bz-border) !important;
+  border-radius: 16px !important;
+  box-shadow: var(--bz-shadow-short) !important;
+}
+
 /* ── Reduced motion ──────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
