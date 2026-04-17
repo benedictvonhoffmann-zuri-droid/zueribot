@@ -1,10 +1,8 @@
 /* ============================================================
-   Bünzli theme for Open WebUI
-   OWU is Svelte + Tailwind. The dark theme is keyed off
-   `html.dark` and consumes CSS custom properties
-   `--color-gray-50..950`. We re-tint those to navy-blue grays,
-   override Tailwind color primitives used for primary actions,
-   and retype the app in Inter Variable.
+   Bünzli theme for Open WebUI — restraint-first
+   Principle: retint the neutral scale toward navy, use Zürich
+   blue ONLY as a signature accent (focus, user bubble, links,
+   brand mark). Do not blanket-override button colors.
    ============================================================ */
 
 @font-face {
@@ -18,148 +16,108 @@
 :root {
   --bz-blue: #0070B4;
   --bz-blue-dark: #00407C;
-  --bz-blue-light: #EDF5FA;
-  --bz-tram-green: #3D8A3E;
-  --bz-badi-orange: #F26522;
+  --bz-blue-50: rgba(0, 112, 180, 0.08);
+  --bz-blue-20: rgba(0, 112, 180, 0.20);
 }
 
 /* ── Typography ──────────────────────────────────────────── */
-html, body, button, input, textarea {
+html, body, button, input, textarea, select {
   font-family: 'Inter Variable', Inter, -apple-system, BlinkMacSystemFont,
     'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
-  font-feature-settings: 'cv11', 'ss01', 'ss03';
+  font-feature-settings: 'cv11', 'ss01';
   -webkit-font-smoothing: antialiased;
 }
+pre, code, kbd, samp {
+  font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace !important;
+}
 
-/* ── Re-tint the dark-mode gray scale toward Zürich navy ─── */
+/* ── Dark-mode surfaces: subtle navy tint, not pure gray ─── */
 html.dark {
-  --color-gray-50:  #F3F5F8;
-  --color-gray-100: #E2E6EC;
-  --color-gray-200: #C4CAD4;
-  --color-gray-300: #9AA2B2;
-  --color-gray-400: #6F7889;
-  --color-gray-500: #505A6E;
-  --color-gray-600: #3B4356;
-  --color-gray-700: #2A3142;
-  --color-gray-800: #1E2433;
-  --color-gray-850: #171C29;
-  --color-gray-900: #10141E;
-  --color-gray-950: #0A0D15;
+  --color-gray-50:  #F4F6F9 !important;
+  --color-gray-100: #E3E7ED !important;
+  --color-gray-200: #C8CFD9 !important;
+  --color-gray-300: #A0A9B8 !important;
+  --color-gray-400: #7A8394 !important;
+  --color-gray-500: #5B6478 !important;
+  --color-gray-600: #434B5E !important;
+  --color-gray-700: #303749 !important;
+  --color-gray-800: #222837 !important;
+  --color-gray-850: #1B2030 !important;
+  --color-gray-900: #131826 !important;
+  --color-gray-950: #0B0F1A !important;
 }
 
-/* Light mode stays white but with cooler neutrals */
-html.light {
-  --color-gray-50:  #F7F8FA;
-  --color-gray-100: #EDF1F5;
-  --color-gray-200: #DDE3EB;
-  --color-gray-300: #C2CAD4;
-}
-
-/* ── Primary action color — override Tailwind black/white utils ── */
-html.dark .bg-white,
-html.dark button.bg-white,
-html.dark .bg-gray-50\/0\.5,
-.bg-black,
-button.bg-black,
-.bg-gray-900.text-white,
-button.bg-gray-900:not(.sidebar) {
-  background-color: var(--bz-blue) !important;
-  color: #ffffff !important;
-}
-html.dark .bg-white:hover,
-html.dark button.bg-white:hover,
-.bg-black:hover,
-button.bg-black:hover {
-  background-color: var(--bz-blue-dark) !important;
-}
-
-/* Text-black on light backgrounds — swap to blue */
-html.dark .text-black {
-  color: #ffffff !important;
-}
-
-/* ── User chat bubble — Zürich blue ──────────────────────── */
-.user-message .rounded-3xl,
-.user-message .rounded-2xl,
-[class*="chat-user"] .rounded-3xl,
-[class*="chat-user"] .rounded-2xl,
-div[class*="user"] > .bg-gray-50,
-div[class*="user"] > .bg-gray-100,
-div[class*="user"] > .bg-gray-850 {
-  background-color: var(--bz-blue) !important;
-  background-image: none !important;
-  color: #ffffff !important;
-}
-
-/* ── Links ───────────────────────────────────────────────── */
-a:not(.keep-color):not([role="button"]) {
-  color: var(--bz-blue);
-}
-a:not(.keep-color):not([role="button"]):hover {
-  color: var(--bz-blue-dark);
-}
-html.dark a:not(.keep-color):not([role="button"]) {
-  color: #4FAEE4;
-}
-
-/* ── Focus rings ─────────────────────────────────────────── */
+/* ── Focus ring: brand blue, consistent everywhere ──────── */
 *:focus-visible {
   outline: 2px solid var(--bz-blue) !important;
   outline-offset: 2px;
+  border-radius: 2px;
 }
 input:focus,
 textarea:focus,
-[contenteditable]:focus {
+[contenteditable="true"]:focus {
   border-color: var(--bz-blue) !important;
-  box-shadow: 0 0 0 3px rgba(0, 112, 180, 0.2) !important;
+  box-shadow: 0 0 0 3px var(--bz-blue-20) !important;
 }
 
-/* ── Accent for active sidebar items ─────────────────────── */
-nav a.selected,
-nav button[aria-current="page"],
-[class*="active"][class*="bg-gray"] {
-  border-left: 2px solid var(--bz-blue) !important;
+/* ── Links — blue, but only real anchors ─────────────────── */
+a[href]:not([role="button"]):not(.no-brand) {
+  color: var(--bz-blue);
+  text-decoration: none;
+}
+a[href]:not([role="button"]):not(.no-brand):hover {
+  color: var(--bz-blue-dark);
+  text-decoration: underline;
+}
+html.dark a[href]:not([role="button"]):not(.no-brand) {
+  color: #5BB3E6;
+}
+html.dark a[href]:not([role="button"]):not(.no-brand):hover {
+  color: #8FCCEF;
 }
 
-/* ── Code blocks — branded border ────────────────────────── */
-pre, code {
-  font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace !important;
+/* ── User chat bubble — the single brand signature ────────
+   OWU renders user messages in .user-message containers with
+   a rounded container bg. Target tightly; leave everything
+   else alone. ─────────────────────────────────────────── */
+.user-message .bg-gray-50,
+.user-message .bg-gray-100,
+.user-message .bg-gray-850,
+.user-message .bg-gray-800,
+[class*="chat-user"] .rounded-3xl,
+[class*="chat-user"] .rounded-2xl {
+  background-color: var(--bz-blue) !important;
+  color: #ffffff !important;
 }
-html.dark pre {
-  border: 1px solid var(--color-gray-700);
-  border-radius: 10px;
+.user-message .bg-gray-50 *,
+.user-message .bg-gray-100 *,
+.user-message .bg-gray-850 *,
+.user-message .bg-gray-800 *,
+[class*="chat-user"] .rounded-3xl *,
+[class*="chat-user"] .rounded-2xl * {
+  color: #ffffff !important;
 }
 
-/* ── Scrollbars ──────────────────────────────────────────── */
-* {
-  scrollbar-width: thin;
-}
-html.dark * {
-  scrollbar-color: var(--color-gray-700) transparent;
-}
-html.light * {
-  scrollbar-color: #DDE3EB transparent;
-}
+/* ── Scrollbars — thin, neutral, blue on hover ──────────── */
+* { scrollbar-width: thin; }
+html.dark * { scrollbar-color: #303749 transparent; }
+html.light * { scrollbar-color: #D7DCE4 transparent; }
 *::-webkit-scrollbar { width: 8px; height: 8px; }
 *::-webkit-scrollbar-track { background: transparent; }
 *::-webkit-scrollbar-thumb { border-radius: 4px; }
-html.dark *::-webkit-scrollbar-thumb { background-color: var(--color-gray-700); }
-html.light *::-webkit-scrollbar-thumb { background-color: #DDE3EB; }
+html.dark *::-webkit-scrollbar-thumb { background-color: #303749; }
+html.light *::-webkit-scrollbar-thumb { background-color: #D7DCE4; }
 *::-webkit-scrollbar-thumb:hover { background-color: var(--bz-blue); }
 
-/* ── Selection ───────────────────────────────────────────── */
+/* ── Text selection ──────────────────────────────────────── */
 ::selection {
-  background-color: rgba(0, 112, 180, 0.3);
+  background-color: var(--bz-blue-20);
+  color: inherit;
 }
 
-/* ── Meta theme-color override is handled by JS, but we set
-     the body bg as a safety net for the very first paint ──── */
-html.dark body {
-  background-color: var(--color-gray-900);
-}
-html.light body {
-  background-color: #ffffff;
-}
+/* ── First-paint body bg for no-FOUC ─────────────────────── */
+html.dark body { background-color: var(--color-gray-900); }
+html.light body { background-color: #ffffff; }
 
 /* ── Reduced motion ──────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
