@@ -1,0 +1,73 @@
+---
+import type { TranslationSchema } from '../../i18n/translations/de';
+
+interface Props {
+  t: TranslationSchema;
+}
+
+const { t } = Astro.props;
+
+const betaHref = `mailto:hello@buenzli.space?subject=${encodeURIComponent('Beta access request — buenzli.space')}&body=${encodeURIComponent('Hi Bünzli team,\n\nI\'d like early access.\n\nWho I am:\nHow I\'d use Bünzli:\n\nCheers')}`;
+
+// Static beta counter — wire to real signup list once it exists
+const taken = 47;
+const total = 500;
+const pct = Math.round((taken / total) * 100);
+---
+
+<section id="join" class="py-20 sm:py-28 bg-zh-black-5 border-t border-zurich-border">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 text-center">
+
+    <div class="inline-flex items-center gap-2 border border-zurich-border rounded-full px-3 py-1 text-[11px] font-mono text-zurich-gray mb-6 bg-white" data-animate>
+      <span class="w-1.5 h-1.5 rounded-full bg-tram-green animate-pulse"></span>
+      {t.joinEyebrow}
+    </div>
+
+    <h2 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-zurich-dark mb-4" data-animate>
+      {t.joinHeadline}
+    </h2>
+
+    <p class="text-lg text-zurich-gray mb-8 max-w-xl mx-auto" data-animate>
+      {t.joinSub}
+    </p>
+
+    <form
+      action={betaHref}
+      method="get"
+      class="flex flex-col sm:flex-row gap-2 max-w-md mx-auto mb-6"
+      data-animate
+    >
+      <label class="sr-only" for="join-email">{t.joinEmailLabel}</label>
+      <input
+        id="join-email"
+        type="email"
+        required
+        placeholder={t.joinEmailPlaceholder}
+        class="flex-1 px-4 py-3 rounded-lg border border-zurich-border bg-white text-zurich-dark placeholder:text-zurich-gray/60 focus:outline-none focus:border-zurich-blue focus:ring-2 focus:ring-zurich-blue/10 text-sm"
+      />
+      <a
+        href={betaHref}
+        class="inline-flex items-center justify-center gap-1.5 px-5 py-3 rounded-lg text-sm font-semibold bg-zurich-blue text-white hover:bg-zurich-blue-dark transition-colors shadow-short whitespace-nowrap"
+      >
+        {t.joinCta}
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </form>
+
+    <!-- Live counter -->
+    <div class="max-w-sm mx-auto mb-4" data-animate>
+      <div class="flex items-center justify-between text-[11px] font-mono text-zurich-gray mb-1.5">
+        <span>{t.joinCounter}</span>
+        <span>{pct}%</span>
+      </div>
+      <div class="h-1.5 bg-zurich-border rounded-full overflow-hidden">
+        <div class="h-full bg-zurich-blue rounded-full" style={`width: ${pct}%`}></div>
+      </div>
+    </div>
+
+    <p class="text-xs text-zurich-gray/70" data-animate>{t.joinPromise}</p>
+
+  </div>
+</section>

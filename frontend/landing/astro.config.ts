@@ -11,6 +11,7 @@ export default defineConfig({
   },
   integrations: [
     sitemap({
+      filter: (page) => !page.includes('/design-system/'),
       i18n: {
         defaultLocale: 'zh',
         locales: {

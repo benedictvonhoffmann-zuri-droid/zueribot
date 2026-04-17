@@ -2,10 +2,11 @@
 @import "@fontsource-variable/inter";
 
 @theme {
-  /* Brand palette */
-  --color-zurich-blue:       #0064B4;
-  --color-zurich-blue-dark:  #004F8C;
-  --color-zurich-blue-light: #E5F0FA;
+  /* Brand palette — primary aligned to zh.ch */
+  --color-zurich-blue:       #0070B4;
+  --color-zurich-blue-dark:  #00407C;
+  --color-zurich-blue-light: #EDF5FA;
+  --color-zurich-navy:       #08111F;
   --color-badi-orange:       #F26522;
   --color-badi-orange-dark:  #D4541A;
   --color-badi-orange-light: #FEF0E8;
@@ -17,8 +18,19 @@
   --color-zurich-gray:       #6B7280;
   --color-zurich-border:     #E5E7EB;
 
+  /* ZH canton gray scale (only values that Tailwind v4 generates correctly) */
+  --color-zh-black-60: #666666;
+  --color-zh-black-20: #CCCCCC;
+  --color-zh-black-10: #E5E5E5;
+  --color-zh-black-5:  #F7F7F7;
+
   /* Typography */
   --font-sans: 'Inter Variable', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+  /* Shadow scale (zh.ch 3-level system) */
+  --shadow-short:   0 1px 3px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+  --shadow-regular: 0 4px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06);
+  --shadow-long:    0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
 }
 
 @layer base {
@@ -143,7 +155,7 @@
 /* ── Text gradient ───────────────────────────────────────────────────── */
 
 .text-gradient {
-  background: linear-gradient(135deg, var(--color-zurich-blue) 0%, #38bdf8 100%);
+  background: linear-gradient(135deg, #0070B4 0%, #38bdf8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -171,7 +183,7 @@
   font-weight: 800;
   letter-spacing: -0.04em;
   line-height: 1;
-  background: linear-gradient(135deg, var(--color-zurich-blue) 0%, #38bdf8 100%);
+  background: linear-gradient(135deg, #0070B4 0%, #38bdf8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

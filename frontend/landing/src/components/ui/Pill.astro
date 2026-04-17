@@ -1,0 +1,27 @@
+---
+interface Props {
+  emoji?: string;
+  label: string;
+  count?: string | number;
+  tooltip?: string;
+  dashed?: boolean;
+  class?: string;
+}
+
+const { emoji, label, count, tooltip, dashed = false, class: className } = Astro.props;
+---
+
+<span
+  title={tooltip}
+  class:list={[
+    'inline-flex items-center gap-2 bg-white rounded-full px-3 py-1.5 hover:border-zurich-blue/30 hover:shadow-short transition-all duration-200 cursor-default',
+    dashed ? 'border border-dashed border-zurich-gray/40' : 'border border-zurich-border',
+    className,
+  ]}
+>
+  {emoji && <span class="text-base leading-none" aria-hidden="true">{emoji}</span>}
+  <span class="text-xs font-medium text-zurich-dark whitespace-nowrap">{label}</span>
+  {count != null && (
+    <span class="text-[10px] font-mono text-zurich-gray">{count}</span>
+  )}
+</span>

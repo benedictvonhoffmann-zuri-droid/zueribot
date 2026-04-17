@@ -4,10 +4,12 @@ import { useTranslations } from '../../i18n/ui';
 import Base from '../../layouts/Base.astro';
 
 import Hero from '../../components/sections/Hero.astro';
-import Scenarios from '../../components/sections/Scenarios.astro';
-import HowItWorks from '../../components/sections/HowItWorks.astro';
-import PrivacyFirst from '../../components/sections/PrivacyFirst.astro';
-import CommunityFuture from '../../components/sections/CommunityFuture.astro';
+import LiveStatusBoard from '../../components/sections/LiveStatusBoard.astro';
+import DayWithBunzli from '../../components/sections/DayWithBunzli.astro';
+import CompareAI from '../../components/sections/CompareAI.astro';
+import PrivacyArchitecture from '../../components/sections/PrivacyArchitecture.astro';
+import OpenSource from '../../components/sections/OpenSource.astro';
+import JoinStrip from '../../components/sections/JoinStrip.astro';
 
 export function getStaticPaths() {
   return LOCALES.map(lang => ({ params: { lang } }));
@@ -19,8 +21,10 @@ const t = useTranslations(lang);
 
 <Base lang={lang} t={t}>
   <Hero t={t} lang={lang} />
-  <Scenarios t={t} />
-  <HowItWorks t={t} />
-  <PrivacyFirst t={t} />
-  <CommunityFuture t={t} />
+  <LiveStatusBoard t={t} />
+  <DayWithBunzli t={t} />
+  <CompareAI t={t} />
+  <PrivacyArchitecture t={t} />
+  <OpenSource t={t} />
+  <JoinStrip t={t} />
 </Base>

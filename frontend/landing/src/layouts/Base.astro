@@ -17,10 +17,11 @@ const betaHref = `mailto:hello@buenzli.space?subject=${encodeURIComponent('Beta 
 const collabHref = `mailto:hello@buenzli.space?subject=${encodeURIComponent('Collaboration Inquiry - buenzli.space')}&body=${encodeURIComponent('Hi Buenzli Team,\n\nI would like to collaborate on buenzli.space!\n\nLinkedIn profile: \nWhy I want to collaborate: \nSkills I bring: \n\nBest regards')}`;
 
 const navLinks = [
-  { label: t.navScenarios, href: '#scenarios' },
-  { label: t.navHow,       href: '#how' },
-  { label: t.navPrivacy,   href: '#privacy' },
-  { label: t.navCommunity, href: '#community' },
+  { label: t.navBoard,   href: '#board' },
+  { label: t.navDay,     href: '#day' },
+  { label: t.navCompare, href: '#compare' },
+  { label: t.navPrivacy, href: '#privacy' },
+  { label: t.navOpen,    href: '#open' },
 ];
 ---
 
@@ -72,7 +73,7 @@ const navLinks = [
           <LanguageSwitcher currentLang={lang} />
           <a
             href={betaHref}
-            class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-zurich-blue text-white hover:bg-zurich-blue-dark transition-colors duration-150"
+            class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-zurich-blue text-white hover:bg-zurich-blue-dark transition-colors duration-150 shadow-short"
           >
             {t.navBetaCta}
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
@@ -129,9 +130,10 @@ const navLinks = [
           <div>
             <h4 class="text-xs font-semibold text-white/50 uppercase tracking-wider mb-3">{t.footerProduct}</h4>
             <ul class="space-y-2">
-              <li><a href="#scenarios" class="text-sm text-white/70 hover:text-white transition-colors">{t.navScenarios}</a></li>
-              <li><a href="#how"       class="text-sm text-white/70 hover:text-white transition-colors">{t.navHow}</a></li>
-              <li><a href="#privacy"   class="text-sm text-white/70 hover:text-white transition-colors">{t.navPrivacy}</a></li>
+              <li><a href="#board"   class="text-sm text-white/70 hover:text-white transition-colors">{t.navBoard}</a></li>
+              <li><a href="#day"     class="text-sm text-white/70 hover:text-white transition-colors">{t.navDay}</a></li>
+              <li><a href="#compare" class="text-sm text-white/70 hover:text-white transition-colors">{t.navCompare}</a></li>
+              <li><a href="#privacy" class="text-sm text-white/70 hover:text-white transition-colors">{t.navPrivacy}</a></li>
             </ul>
           </div>
 
@@ -169,16 +171,12 @@ const navLinks = [
       const iconOpen = document.getElementById('menu-icon-open') as HTMLElement;
       const iconClose = document.getElementById('menu-icon-close') as HTMLElement;
 
-      // Sticky nav
+      // Sticky nav — always solid on light hero
+      if (header) header.classList.add('nav-solid');
       function updateNav() {
         if (!header) return;
-        if (window.scrollY > 20) {
-          header.classList.add('nav-solid');
-          header.classList.remove('nav-transparent');
-        } else {
-          header.classList.add('nav-transparent');
-          header.classList.remove('nav-solid');
-        }
+        header.classList.add(window.scrollY > 20 ? 'nav-scrolled' : 'nav-top');
+        header.classList.remove(window.scrollY > 20 ? 'nav-top' : 'nav-scrolled');
       }
       updateNav();
       window.addEventListener('scroll', updateNav, { passive: true });
@@ -216,47 +214,23 @@ const navLinks = [
     </script>
 
     <style>
-      .nav-transparent {
-        background: transparent;
-        border-bottom: 1px solid transparent;
-      }
-      .nav-solid {
-        background: rgba(255, 255, 255, 0.92);
+      #site-header {
+        background: rgba(255, 255, 255, 0.85);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
-        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        border-bottom: 1px solid transparent;
+        transition: background 200ms ease, border-color 200ms ease;
       }
-
-      /* Lion icon color */
-      .nav-transparent .nav-lion { filter: brightness(0) invert(1); }
-      .nav-solid .nav-lion { filter: none; }
-      #site-header:not(.nav-solid):not(.nav-transparent) .nav-lion { filter: brightness(0) invert(1); }
-
-      /* Wordmark color */
-      .nav-transparent .nav-wordmark { color: white; }
-      .nav-solid .nav-wordmark { color: var(--color-zurich-dark); }
-      #site-header:not(.nav-solid):not(.nav-transparent) .nav-wordmark { color: white; }
-
-      .nav-transparent .nav-dot { color: rgba(255,255,255,0.6); }
-      .nav-solid .nav-dot { color: var(--color-zurich-blue); }
-      #site-header:not(.nav-solid):not(.nav-transparent) .nav-dot { color: rgba(255,255,255,0.6); }
-
-      /* Nav links */
-      .nav-transparent .nav-link { color: rgba(255,255,255,0.7); }
-      .nav-transparent .nav-link:hover { color: white; }
-      .nav-solid .nav-link { color: var(--color-zurich-gray); }
-      .nav-solid .nav-link:hover { color: var(--color-zurich-dark); }
-      #site-header:not(.nav-solid):not(.nav-transparent) .nav-link { color: rgba(255,255,255,0.7); }
-
-      /* Hamburger icon */
-      .nav-transparent .nav-hamburger svg path { stroke: white; }
-      .nav-solid .nav-hamburger svg path { stroke: var(--color-zurich-dark); }
-      #site-header:not(.nav-solid):not(.nav-transparent) .nav-hamburger svg path { stroke: white; }
-
-      /* Mobile menu background */
-      .nav-transparent .mobile-menu-bg { background: rgba(8,17,31,0.95); backdrop-filter: blur(16px); }
-      .nav-solid .mobile-menu-bg { background: rgba(255,255,255,0.96); backdrop-filter: blur(16px); }
-      #site-header:not(.nav-solid):not(.nav-transparent) .mobile-menu-bg { background: rgba(8,17,31,0.95); }
+      #site-header.nav-scrolled {
+        background: rgba(255, 255, 255, 0.94);
+        border-bottom-color: rgba(0, 0, 0, 0.06);
+      }
+      .nav-wordmark { color: var(--color-zurich-dark); }
+      .nav-dot { color: var(--color-zurich-blue); }
+      .nav-link { color: var(--color-zurich-gray); }
+      .nav-link:hover { color: var(--color-zurich-dark); }
+      .nav-hamburger svg path { stroke: var(--color-zurich-dark); }
+      .mobile-menu-bg { background: rgba(255, 255, 255, 0.97); backdrop-filter: blur(16px); }
     </style>
   </body>
 </html>

@@ -1,0 +1,45 @@
+---
+interface Props {
+  variant?: 'default' | 'blue-tint' | 'dark';
+  padding?: 'sm' | 'md' | 'lg';
+  hover?: boolean;
+  class?: string;
+}
+
+const {
+  variant = 'default',
+  padding = 'md',
+  hover = false,
+  class: className,
+} = Astro.props;
+
+const paddingClasses = {
+  sm: 'p-4',
+  md: 'p-5',
+  lg: 'p-6',
+};
+
+const variantClasses = {
+  default:    'bg-white border border-zurich-border',
+  'blue-tint':'bg-zurich-blue/5 border border-zurich-blue/15',
+  dark:       'bg-white/5 border border-white/10',
+};
+
+const hoverClasses = hover
+  ? variant === 'blue-tint'
+    ? 'hover:bg-zurich-blue/10 hover:border-zurich-blue/30 hover:shadow-short'
+    : variant === 'dark'
+    ? 'hover:bg-white/8 hover:border-white/20'
+    : 'hover:border-zurich-blue/30 hover:shadow-short'
+  : '';
+---
+
+<div class:list={[
+  'rounded-xl transition-all duration-200',
+  variantClasses[variant],
+  paddingClasses[padding],
+  hoverClasses,
+  className,
+]}>
+  <slot />
+</div>

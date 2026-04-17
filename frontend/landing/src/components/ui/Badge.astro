@@ -1,0 +1,27 @@
+---
+interface Props {
+  variant?: 'blue' | 'green' | 'orange' | 'gray';
+  count?: string | number;
+  class?: string;
+}
+
+const { variant = 'blue', count, class: className } = Astro.props;
+
+const variantClasses = {
+  blue:   'bg-zurich-blue/10 text-zurich-blue border-zurich-blue/20',
+  green:  'bg-tram-green/10 text-tram-green border-tram-green/20',
+  orange: 'bg-badi-orange/10 text-badi-orange border-badi-orange/20',
+  gray:   'bg-zh-black-10 text-zh-black-60 border-zh-black-20',
+};
+---
+
+<span class:list={[
+  'inline-flex items-center gap-1.5 text-xs font-medium border rounded-full px-3 py-1',
+  variantClasses[variant],
+  className,
+]}>
+  <slot />
+  {count != null && (
+    <span class="font-mono opacity-70">{count}</span>
+  )}
+</span>
