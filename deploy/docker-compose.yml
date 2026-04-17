@@ -33,7 +33,7 @@ services:
       - WEBUI_NAME=Bünzli AI
       - DEFAULT_LOCALE=en-US
     volumes:
-      - open-webui-data:/app/backend/data
+      - owui-data:/app/backend/data
     depends_on:
       - zuribot
     restart: unless-stopped
@@ -55,7 +55,9 @@ services:
       - zuribot-net
 
 volumes:
-  open-webui-data:
+  owui-data:
+    name: open-webui
+    external: true
 
 networks:
   zuribot-net:
