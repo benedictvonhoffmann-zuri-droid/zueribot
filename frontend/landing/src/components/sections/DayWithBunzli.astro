@@ -1,0 +1,77 @@
+---
+import SectionHeader from '../ui/SectionHeader.astro';
+import type { TranslationSchema } from '../../i18n/translations/de';
+
+interface Props {
+  t: TranslationSchema;
+}
+
+const { t } = Astro.props;
+
+const scenes = [
+  { key: 'morning',   emoji: '☀️', time: t.dayMorningTime,   q: t.dayMorningQ,   a: t.dayMorningA,   sources: t.dayMorningSources },
+  { key: 'noon',      emoji: '🥗', time: t.dayNoonTime,      q: t.dayNoonQ,      a: t.dayNoonA,      sources: t.dayNoonSources },
+  { key: 'afternoon', emoji: '🗑️', time: t.dayAfternoonTime, q: t.dayAfternoonQ, a: t.dayAfternoonA, sources: t.dayAfternoonSources },
+  { key: 'evening',   emoji: '🌃', time: t.dayEveningTime,   q: t.dayEveningQ,   a: t.dayEveningA,   sources: t.dayEveningSources },
+];
+---
+
+<section id="day" class="py-20 sm:py-28 bg-white">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6">
+
+    <div class="mb-16" data-animate>
+      <SectionHeader
+        eyebrow={t.dayEyebrow}
+        heading={t.dayHeadline}
+        subtext={t.daySub}
+      />
+    </div>
+
+    <div class="relative">
+      <!-- Timeline spine (desktop only) -->
+      <div class="hidden lg:block absolute left-1/2 top-4 bottom-4 w-px bg-gradient-to-b from-zurich-blue/0 via-zurich-blue/30 to-zurich-blue/0 -translate-x-1/2"></div>
+
+      <div class="space-y-10 lg:space-y-16">
+        {scenes.map((s, i) => (
+          <div
+            class:list={[
+              'relative grid lg:grid-cols-2 gap-6 lg:gap-16 items-center day-scene',
+              i % 2 === 1 ? 'lg:[&>*:first-child]:order-2' : '',
+            ]}
+            data-animate
+          >
+            <!-- Timeline dot -->
+            <div class="hidden lg:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white border-2 border-zurich-blue z-10"></div>
+
+            <!-- Vignette / scene description -->
+            <div class:list={['lg:text-right', i % 2 === 1 ? 'lg:text-left' : '']}>
+              <div class:list={['inline-flex items-center gap-2 mb-3', i % 2 === 1 ? '' : 'lg:flex-row-reverse']}>
+                <span class="text-xs font-mono text-zurich-gray uppercase tracking-wider">{s.time}</span>
+                <span class="text-2xl" aria-hidden="true">{s.emoji}</span>
+              </div>
+              <p class="text-2xl sm:text-3xl font-bold text-zurich-dark leading-tight">{s.q}</p>
+            </div>
+
+            <!-- Chat bubble -->
+            <div>
+              <div class="bg-white border border-zurich-border rounded-2xl shadow-short overflow-hidden">
+                <div class="flex items-center gap-2 px-4 py-2.5 border-b border-zurich-border bg-zh-black-5/60">
+                  <img src="/zh-lion.svg" alt="" aria-hidden="true" class="w-4 h-4" />
+                  <span class="text-xs font-semibold text-zurich-dark">Bünzli</span>
+                  <span class="ml-auto text-[10px] font-mono text-tram-green flex items-center gap-1">
+                    <span class="w-1 h-1 rounded-full bg-tram-green animate-pulse"></span>live
+                  </span>
+                </div>
+                <div class="px-5 py-4">
+                  <p class="text-sm text-zurich-dark leading-relaxed" set:html={s.a} />
+                  <p class="text-[10px] text-zurich-gray/70 mt-3 font-mono">{s.sources}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+  </div>
+</section>

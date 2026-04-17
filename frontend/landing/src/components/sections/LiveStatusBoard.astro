@@ -1,0 +1,94 @@
+---
+import SectionHeader from '../ui/SectionHeader.astro';
+import type { TranslationSchema } from '../../i18n/translations/de';
+
+interface Props {
+  t: TranslationSchema;
+}
+
+const { t } = Astro.props;
+
+const cells = [
+  { key: 'tram',         emoji: '🚃', title: t.boardTramTitle,         value: t.boardTramValue,         unit: t.boardTramUnit,         meta: t.boardTramMeta,         accent: 'blue' },
+  { key: 'water',        emoji: '🌡️', title: t.boardWaterTitle,        value: t.boardWaterValue,        unit: t.boardWaterUnit,        meta: t.boardWaterMeta,        accent: 'orange' },
+  { key: 'air',          emoji: '💨', title: t.boardAirTitle,          value: t.boardAirValue,          unit: t.boardAirUnit,          meta: t.boardAirMeta,          accent: 'green' },
+  { key: 'electricity',  emoji: '⚡', title: t.boardElectricityTitle,  value: t.boardElectricityValue,  unit: t.boardElectricityUnit,  meta: t.boardElectricityMeta,  accent: 'blue' },
+  { key: 'parking',      emoji: '🅿️', title: t.boardParkingTitle,      value: t.boardParkingValue,      unit: t.boardParkingUnit,      meta: t.boardParkingMeta,      accent: 'blue' },
+  { key: 'pedestrians',  emoji: '🚶', title: t.boardPedestriansTitle,  value: t.boardPedestriansValue,  unit: t.boardPedestriansUnit,  meta: t.boardPedestriansMeta,  accent: 'blue' },
+  { key: 'badi',         emoji: '🏊', title: t.boardBadiTitle,         value: t.boardBadiValue,         unit: t.boardBadiUnit,         meta: t.boardBadiMeta,         accent: 'orange' },
+  { key: 'waste',        emoji: '🗑️', title: t.boardWasteTitle,        value: t.boardWasteValue,        unit: t.boardWasteUnit,        meta: t.boardWasteMeta,        accent: 'green' },
+];
+
+const accentClass: Record<string, string> = {
+  blue: 'text-zurich-blue',
+  orange: 'text-badi-orange',
+  green: 'text-tram-green',
+};
+---
+
+<section id="board" class="py-20 sm:py-28 bg-zh-black-5 relative overflow-hidden">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6">
+
+    <div class="mb-12" data-animate>
+      <SectionHeader
+        eyebrow={t.boardEyebrow}
+        heading={t.boardHeadline}
+        subtext={t.boardSub}
+      />
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4" data-animate>
+      {cells.map((c) => (
+        <div class="group relative bg-white border border-zurich-border rounded-xl p-4 sm:p-5 hover:shadow-regular hover:border-zurich-blue/30 transition-all duration-200 cursor-default">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xl" aria-hidden="true">{c.emoji}</span>
+            <span class="flex items-center gap-1 text-[10px] font-mono text-tram-green">
+              <span class="w-1.5 h-1.5 rounded-full bg-tram-green animate-pulse"></span>
+              {t.boardLiveLabel}
+            </span>
+          </div>
+          <p class="text-[11px] font-mono text-zurich-gray/80 uppercase tracking-wide mb-2 leading-tight">
+            {c.title}
+          </p>
+          <p class:list={['text-2xl sm:text-3xl font-extrabold tabular-nums leading-none mb-1', accentClass[c.accent] || 'text-zurich-dark']}>
+            {c.value}
+            <span class="text-sm font-medium text-zurich-gray ml-1">{c.unit}</span>
+          </p>
+          <p class="text-xs text-zurich-gray/70 mt-1.5">{c.meta}</p>
+        </div>
+      ))}
+    </div>
+
+    <p class="text-center text-xs font-mono text-zurich-gray/60 mt-8" id="board-updated">
+      {t.boardUpdatedLabel} just now
+    </p>
+  </div>
+</section>
+
+<script>
+  // Subtle "update" pulse every ~30s — simulates live refresh
+  const cells = document.querySelectorAll('#board .group');
+  const stamp = document.getElementById('board-updated');
+
+  let seconds = 0;
+  function tick() {
+    seconds++;
+    if (stamp) {
+      const text = seconds < 60
+        ? `updated ${seconds}s ago`
+        : `updated ${Math.floor(seconds / 60)}m ago`;
+      stamp.textContent = text;
+    }
+    // Every 30s, briefly highlight a random cell to simulate a refresh
+    if (seconds % 30 === 0 && cells.length) {
+      const idx = Math.floor(Math.random() * cells.length);
+      const cell = cells[idx] as HTMLElement;
+      cell.style.transition = 'box-shadow 300ms ease';
+      cell.style.boxShadow = '0 0 0 2px rgba(0,112,180,0.25)';
+      setTimeout(() => { cell.style.boxShadow = ''; }, 900);
+      seconds = 0;
+      if (stamp) stamp.textContent = 'updated just now';
+    }
+  }
+  setInterval(tick, 1000);
+</script>

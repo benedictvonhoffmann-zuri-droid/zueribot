@@ -10,126 +10,115 @@ interface Props {
 
 const { t } = Astro.props;
 
-const betaHref = `mailto:hello@buenzli.space?subject=${encodeURIComponent('Beta Test Request - buenzli.space')}&body=${encodeURIComponent('Hi Buenzli Team,\n\nI would like to beta test buenzli.space!\n\nLinkedIn profile: \nWhy I want to test: \nWhat I would use Bünzli AI for: \n\nBest regards')}`;
-const collabHref = `mailto:hello@buenzli.space?subject=${encodeURIComponent('Collaboration Inquiry - buenzli.space')}&body=${encodeURIComponent('Hi Buenzli Team,\n\nI would like to collaborate on buenzli.space!\n\nLinkedIn profile: \nWhy I want to collaborate: \nSkills I bring: \n\nBest regards')}`;
+const betaHref = `mailto:hello@buenzli.space?subject=${encodeURIComponent('Beta access request — buenzli.space')}&body=${encodeURIComponent('Hi Bünzli team,\n\nI\'d like early access.\n\nWho I am:\nHow I\'d use Bünzli:\n\nCheers')}`;
+const repoHref = 'https://github.com/benedictvonhoffmann-zuri-droid/zueribot';
 
-const trust = [
-  { icon: '🔐', label: t.trustEncrypted },
-  { icon: '🇨🇭', label: t.trustSwiss },
-  { icon: '🚫', label: t.trustZeroData },
-  { icon: '👁️', label: t.trustNoTracking },
-  { icon: '💻', label: t.trustOpenSource },
+const prompts = [
+  { q: t.heroPrompt1, a: t.heroReply1, src: t.heroReply1Source },
+  { q: t.heroPrompt2, a: t.heroReply2, src: t.heroReply2Source },
+  { q: t.heroPrompt3, a: t.heroReply3, src: t.heroReply3Source },
+  { q: t.heroPrompt4, a: t.heroReply4, src: t.heroReply4Source },
 ];
 ---
 
-<section class="relative min-h-[85vh] flex items-center pt-14 pb-20 overflow-hidden bg-white">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 w-full">
-    <div class="grid lg:grid-cols-2 gap-16 items-center">
+<section class="relative pt-24 pb-16 sm:pt-28 sm:pb-20 overflow-hidden bg-white">
+  <!-- Subtle tram-line SVG in background -->
+  <svg class="absolute inset-0 w-full h-full opacity-[0.04] pointer-events-none" aria-hidden="true" viewBox="0 0 1200 800" preserveAspectRatio="none">
+    <defs>
+      <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
+        <path d="M80 0L0 0 0 80" fill="none" stroke="currentColor" stroke-width="1"/>
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#grid)" class="text-zurich-blue"/>
+    <path d="M0 200 Q300 180 600 240 T1200 220" fill="none" stroke="currentColor" stroke-width="2" class="text-zurich-blue"/>
+    <path d="M0 520 Q400 480 700 540 T1200 500" fill="none" stroke="currentColor" stroke-width="2" class="text-zurich-blue"/>
+  </svg>
+
+  <div class="relative max-w-6xl mx-auto px-4 sm:px-6">
+    <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
       <!-- Left: copy -->
-      <div class="max-w-xl">
-        <div class="animate-fade-up">
-          <div class="inline-flex items-center gap-2 border border-zurich-border rounded-full px-3 py-1 text-xs font-mono text-zurich-gray mb-8 bg-white/60">
-            <span class="w-1.5 h-1.5 rounded-full bg-tram-green animate-pulse"></span>
-            {t.heroBadge}
-          </div>
+      <div>
+        <div class="inline-flex items-center gap-2 border border-zurich-border rounded-full px-3 py-1 text-[11px] font-mono text-zurich-gray mb-6 bg-white">
+          <span class="w-1.5 h-1.5 rounded-full bg-tram-green animate-pulse"></span>
+          {t.heroEyebrow}
         </div>
 
-        <h1 class="animate-fade-up stagger-1 text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.05] mb-6 text-zurich-dark">
-          {t.heroTitle1}
+        <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.02] mb-6 text-zurich-dark">
+          {t.heroHeadline1}
           <br />
-          <span class="text-gradient">{t.heroTitle2}</span>
+          <span class="text-gradient">{t.heroHeadline2}</span>
         </h1>
 
-        <p class="animate-fade-up stagger-2 text-lg text-zurich-gray leading-relaxed mb-8 max-w-md">
-          {t.heroDescription}
+        <p class="text-lg text-zurich-gray leading-relaxed mb-8 max-w-md">
+          {t.heroSub}
         </p>
 
-        <div class="animate-fade-up stagger-2 flex flex-col sm:flex-row gap-3 mb-8">
+        <div class="flex flex-col sm:flex-row gap-3 mb-10">
           <Button href={betaHref} variant="primary" size="lg" class="w-full sm:w-auto">
-            {t.heroCta}
+            {t.heroCtaPrimary}
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
               <path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </Button>
-          <Button href={collabHref} variant="outline" size="lg" class="w-full sm:w-auto">
-            {t.heroCollab}
+          <Button href={repoHref} variant="outline" size="lg" class="w-full sm:w-auto">
+            {t.heroCtaSecondary}
           </Button>
         </div>
 
-        <div class="animate-fade-up stagger-3 space-y-1.5">
-          <p class="text-sm text-zurich-gray flex items-center gap-2">
-            <span class="inline-flex -space-x-1.5">
-              <span class="w-6 h-6 rounded-full bg-zurich-blue/20 border-2 border-white"></span>
-              <span class="w-6 h-6 rounded-full bg-badi-orange/20 border-2 border-white"></span>
-              <span class="w-6 h-6 rounded-full bg-tram-green/20 border-2 border-white"></span>
-              <span class="w-6 h-6 rounded-full bg-zurich-blue/30 border-2 border-white"></span>
-            </span>
-            <span>47 {t.heroSocialProof}</span>
-          </p>
-          <p class="text-[11px] font-mono text-zurich-gray/60">{t.heroBetaPhase}</p>
+        <div class="flex items-center gap-5 text-xs text-zurich-gray/70 font-mono">
+          <span class="flex items-center gap-1.5">🔐 end-to-end encrypted</span>
+          <span class="flex items-center gap-1.5">🇨🇭 swiss hosted</span>
+          <span class="hidden sm:flex items-center gap-1.5">💻 open source</span>
         </div>
       </div>
 
-      <!-- Right: Chat UI -->
-      <div class="animate-fade-up stagger-3">
-        <div class="relative">
-          <img src="/zh-lion.svg" alt="" aria-hidden="true" class="absolute -top-6 -right-6 w-24 h-24 opacity-[0.05] hidden lg:block" />
-          <div class="bg-white border border-zurich-border rounded-2xl shadow-xl overflow-hidden">
+      <!-- Right: Chat replay -->
+      <div>
+        <div class="bg-white border border-zurich-border rounded-2xl shadow-regular overflow-hidden">
 
-            <!-- Chat header -->
-            <div class="flex items-center gap-3 px-5 py-3.5 border-b border-zurich-border bg-zh-black-5/60">
-              <button
-                id="lion-btn"
-                aria-label="Bünzli"
-                class="w-8 h-8 rounded-full bg-zurich-blue/10 flex items-center justify-center hover:bg-zurich-blue/20 transition-colors cursor-pointer"
-              >
-                <img src="/zh-lion.svg" alt="" aria-hidden="true" class="w-4 h-4" />
-              </button>
-              <div>
-                <p class="text-sm font-semibold text-zurich-dark">Bünzli AI</p>
-                <p class="text-[10px] text-tram-green font-mono">{t.chatOnline}</p>
-              </div>
+          <!-- Chat header -->
+          <div class="flex items-center gap-3 px-5 py-3.5 border-b border-zurich-border bg-zh-black-5/60">
+            <div class="w-8 h-8 rounded-full bg-zurich-blue/10 flex items-center justify-center">
+              <img src="/zh-lion.svg" alt="" aria-hidden="true" class="w-4 h-4" />
             </div>
+            <div class="flex-1">
+              <p class="text-sm font-semibold text-zurich-dark">Bünzli AI</p>
+              <p class="text-[10px] text-tram-green font-mono flex items-center gap-1">
+                <span class="w-1 h-1 rounded-full bg-tram-green animate-pulse"></span>
+                {t.heroStatusDot}
+              </p>
+            </div>
+            <button
+              id="chat-reset"
+              class="text-[11px] font-mono text-zurich-gray hover:text-zurich-blue transition-colors"
+              aria-label="Reset chat"
+            >
+              {t.heroReset}
+            </button>
+          </div>
 
-            <!-- Chat messages -->
-            <div class="p-5 space-y-4 min-h-[200px] lg:min-h-[280px]">
-              <div id="msg-1" class="flex justify-end opacity-0">
-                <div class="bg-zurich-blue text-white rounded-2xl rounded-tr-sm px-4 py-2.5 max-w-[80%]">
-                  <p class="text-sm">{t.chatUser1}</p>
-                </div>
-              </div>
+          <!-- Messages -->
+          <div
+            id="chat-messages"
+            class="px-5 py-5 space-y-4 min-h-[320px] max-h-[320px] overflow-y-auto"
+            aria-live="polite"
+          ></div>
 
-              <div id="msg-2" class="flex justify-start opacity-0">
-                <div class="bg-gray-100 rounded-2xl rounded-tl-sm px-4 py-2.5 max-w-[85%]">
-                  <p class="text-sm text-zurich-dark leading-relaxed" set:html={t.chatBot1} />
-                  <p class="text-[10px] text-zurich-gray mt-1.5 font-mono">{t.chatBot1Source}</p>
-                </div>
-              </div>
-
-              <div id="msg-3" class="hidden lg:flex justify-end opacity-0">
-                <div class="bg-zurich-blue text-white rounded-2xl rounded-tr-sm px-4 py-2.5 max-w-[80%]">
-                  <p class="text-sm">{t.chatUser2}</p>
-                </div>
-              </div>
-
-              <div id="msg-4" class="hidden lg:flex justify-start opacity-0">
-                <div class="bg-gray-100 rounded-2xl rounded-tl-sm px-4 py-2.5 max-w-[85%]">
-                  <p class="text-sm text-zurich-dark leading-relaxed" set:html={t.chatBot2} />
-                  <p class="text-[10px] text-zurich-gray mt-1.5 font-mono">{t.chatBot2Source}</p>
-                </div>
-              </div>
-
-              <!-- Typing indicator -->
-              <div id="typing-indicator" class="hidden flex justify-start">
-                <div class="bg-gray-100 rounded-2xl rounded-tl-sm px-4 py-3">
-                  <div class="flex items-center gap-1">
-                    <span class="w-1.5 h-1.5 rounded-full bg-zurich-gray/40 animate-bounce" style="animation-delay:0ms"></span>
-                    <span class="w-1.5 h-1.5 rounded-full bg-zurich-gray/40 animate-bounce" style="animation-delay:150ms"></span>
-                    <span class="w-1.5 h-1.5 rounded-full bg-zurich-gray/40 animate-bounce" style="animation-delay:300ms"></span>
-                  </div>
-                </div>
-              </div>
+          <!-- Prompt chips -->
+          <div class="border-t border-zurich-border bg-zh-black-5/40 px-4 py-3">
+            <p class="text-[10px] font-mono text-zurich-gray/70 mb-2 uppercase tracking-wider">
+              {t.heroReplayHint}
+            </p>
+            <div class="flex gap-2 overflow-x-auto scrollbar-none -mx-1 px-1 pb-1">
+              {prompts.map((p, i) => (
+                <button
+                  class="chat-chip shrink-0 text-xs text-zurich-dark bg-white border border-zurich-border rounded-full px-3 py-1.5 hover:border-zurich-blue hover:text-zurich-blue hover:shadow-short transition-all whitespace-nowrap"
+                  data-idx={i}
+                >
+                  {p.q}
+                </button>
+              ))}
             </div>
           </div>
         </div>
@@ -139,79 +128,112 @@ const trust = [
   </div>
 </section>
 
-<!-- Trust bar -->
-<div class="border-y border-zurich-border bg-zh-black-5/60 py-4">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6">
-    <div class="flex flex-wrap items-center justify-center gap-x-8 gap-y-2">
-      {trust.map(({ icon, label }) => (
-        <span class="flex items-center gap-2 text-sm text-zurich-gray">
-          <span aria-hidden="true">{icon}</span>
-          {label}
-        </span>
-      ))}
-    </div>
-  </div>
-</div>
+<script define:vars={{ prompts }}>
+  const messagesEl = document.getElementById('chat-messages');
+  const chipsEl = document.querySelectorAll('.chat-chip');
+  const resetBtn = document.getElementById('chat-reset');
+  if (!messagesEl) throw new Error('chat messages not found');
 
-<!-- Easter egg overlay -->
-<div
-  id="easter-egg"
-  class="hidden fixed inset-0 z-50 flex flex-col items-center justify-center cursor-pointer"
-  style="background:rgba(0,0,0,0.75);backdrop-filter:blur(4px)"
->
-  <div class="relative text-center">
-    <img src="/zh-lion.svg" alt="" aria-hidden="true"
-      class="absolute top-1/2 left-1/2 w-48 h-48 opacity-10"
-      style="filter:brightness(0) invert(1);transform:translate(-50%,-50%) rotate(-8deg)" />
-    <h2 class="relative text-6xl sm:text-8xl font-extrabold text-white" style="text-shadow:0 4px 30px rgba(0,0,0,0.5)">
-      {t.easterEggMessage}
-    </h2>
-    <p class="mt-4 text-white/50 text-sm font-mono">— Bünzli AI, 2026</p>
-  </div>
-</div>
+  let currentRun = 0;
 
-<script>
-  // Chat animation
-  const showMsg = (id: string, delay: number) => {
-    setTimeout(() => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-      el.style.transform = 'translateY(8px)';
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          el.style.opacity = '1';
-          el.style.transform = 'translateY(0)';
-        });
-      });
-    }, delay);
-  };
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
-  const typing = document.getElementById('typing-indicator');
-  const showTyping = (at: number, hide: number) => {
-    setTimeout(() => typing?.classList.remove('hidden'), at);
-    setTimeout(() => typing?.classList.add('hidden'), hide);
-  };
+  function addUser(text) {
+    const el = document.createElement('div');
+    el.className = 'flex justify-end opacity-0 transition-opacity duration-300';
+    el.innerHTML = `<div class="bg-zurich-blue text-white rounded-2xl rounded-tr-sm px-4 py-2.5 max-w-[85%]"><p class="text-sm">${text}</p></div>`;
+    messagesEl.appendChild(el);
+    requestAnimationFrame(() => { el.style.opacity = '1'; });
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    return el;
+  }
 
-  showMsg('msg-1', 400);
-  showTyping(1200, 2200);
-  showMsg('msg-2', 2200);
-  showMsg('msg-3', 3200);
-  showTyping(3800, 4800);
-  showMsg('msg-4', 4800);
+  function addTyping() {
+    const el = document.createElement('div');
+    el.className = 'flex justify-start typing-indicator';
+    el.innerHTML = `<div class="bg-gray-100 rounded-2xl rounded-tl-sm px-4 py-3"><div class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-zurich-gray/40 animate-bounce" style="animation-delay:0ms"></span><span class="w-1.5 h-1.5 rounded-full bg-zurich-gray/40 animate-bounce" style="animation-delay:150ms"></span><span class="w-1.5 h-1.5 rounded-full bg-zurich-gray/40 animate-bounce" style="animation-delay:300ms"></span></div></div>`;
+    messagesEl.appendChild(el);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    return el;
+  }
 
-  // Easter egg (3 clicks on lion)
-  let lionClicks = 0;
-  const lionBtn = document.getElementById('lion-btn');
-  const easterEgg = document.getElementById('easter-egg');
+  function addBot(sourceText) {
+    const el = document.createElement('div');
+    el.className = 'flex justify-start opacity-0 transition-opacity duration-300';
+    el.innerHTML = `<div class="bg-gray-100 rounded-2xl rounded-tl-sm px-4 py-2.5 max-w-[85%]"><p class="text-sm text-zurich-dark leading-relaxed bot-body"></p><p class="text-[10px] text-zurich-gray/70 mt-1.5 font-mono">${sourceText}</p></div>`;
+    messagesEl.appendChild(el);
+    requestAnimationFrame(() => { el.style.opacity = '1'; });
+    return el.querySelector('.bot-body');
+  }
 
-  lionBtn?.addEventListener('click', () => {
-    lionClicks++;
-    if (lionClicks >= 3 && easterEgg) {
-      easterEgg.classList.remove('hidden');
-      lionClicks = 0;
-      setTimeout(() => easterEgg?.classList.add('hidden'), 3000);
+  async function streamInto(target, html, runId) {
+    // Word-by-word reveal, preserving HTML tags (<b> etc.)
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    const nodes = Array.from(tmp.childNodes);
+    target.innerHTML = '';
+
+    for (const node of nodes) {
+      if (runId !== currentRun) return;
+      if (node.nodeType === Node.TEXT_NODE) {
+        const words = node.textContent.split(/(\s+)/);
+        for (const w of words) {
+          if (runId !== currentRun) return;
+          target.appendChild(document.createTextNode(w));
+          messagesEl.scrollTop = messagesEl.scrollHeight;
+          await sleep(30);
+        }
+      } else {
+        const clone = node.cloneNode(true);
+        target.appendChild(clone);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+        await sleep(60);
+      }
     }
+  }
+
+  async function play(idx) {
+    currentRun++;
+    const runId = currentRun;
+    messagesEl.innerHTML = '';
+    const p = prompts[idx];
+    if (!p) return;
+
+    addUser(p.q);
+    await sleep(550);
+    if (runId !== currentRun) return;
+
+    const typing = addTyping();
+    await sleep(900);
+    if (runId !== currentRun) { typing.remove(); return; }
+    typing.remove();
+
+    const target = addBot(p.src);
+    await streamInto(target, p.a, runId);
+  }
+
+  chipsEl.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = parseInt(btn.getAttribute('data-idx') || '0', 10);
+      play(i);
+    });
   });
-  easterEgg?.addEventListener('click', () => easterEgg.classList.add('hidden'));
+
+  resetBtn?.addEventListener('click', () => play(0));
+
+  // Auto-play the first prompt once the hero is in view
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        play(0);
+        io.disconnect();
+      }
+    });
+  }, { threshold: 0.2 });
+  io.observe(messagesEl);
 </script>
+
+<style>
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+  .scrollbar-none { scrollbar-width: none; }
+</style>
