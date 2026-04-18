@@ -17,6 +17,8 @@ import { usePrefs, type Prefs } from "./prefs";
 import { makeThreadHistory } from "./history";
 import { localThreadListAdapter } from "./threads";
 import { ThreadSidebar } from "./ThreadSidebar";
+import { AuthProvider, useAuth } from "../../auth/AuthProvider";
+import { setAuthTokenGetter } from "./authToken";
 
 // ── helpers ─────────────────────────────────────────────────────────────
 
@@ -299,15 +301,50 @@ function ChatPane() {
   );
 }
 
-export default function BunzliChat() {
+function LoginScreen() {
+  const { login } = useAuth();
+  return (
+    <div className="min-h-[100dvh] flex items-center justify-center bg-zh-black-5 px-6">
+      <div className="w-full max-w-sm rounded-2xl border border-zurich-border bg-white shadow-short p-8 text-center">
+        <h1 className="text-[22px] font-semibold tracking-tight text-zurich-dark">
+          Grüezi, ich bin <span className="text-gradient">Bünzli</span>
+        </h1>
+        <p className="mt-2 text-[14px] text-zurich-gray">
+          Zum Schwätzä musch dich zerst aamäldä.
+        </p>
+        <button
+          onClick={() => login()}
+          className="mt-5 w-full h-10 rounded-full bg-zurich-blue text-white text-[14px] font-medium hover:bg-zurich-blue-dark transition"
+        >
+          Aamäldä
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function AuthedChat() {
+  const { state, getAccessToken } = useAuth();
   const [prefs, setPrefs] = usePrefs();
   const prefsRef = useRef(prefs);
   prefsRef.current = prefs;
+
+  useEffect(() => {
+    setAuthTokenGetter(getAccessToken);
+    return () => setAuthTokenGetter(null);
+  }, [getAccessToken]);
 
   const runtime = useRemoteThreadListRuntime({
     adapter: localThreadListAdapter,
     runtimeHook: () => useBunzliThreadRuntime(() => prefsRef.current),
   });
+
+  if (state.status === "loading") {
+    return <div className="min-h-[100dvh] flex items-center justify-center bg-zh-black-5 text-[14px] text-zurich-gray">Lade…</div>;
+  }
+  if (state.status === "anonymous") {
+    return <LoginScreen />;
+  }
 
   return (
     <AssistantRuntimeProvider runtime={runtime}>
@@ -327,5 +364,13 @@ export default function BunzliChat() {
         <ChatPane />
       </div>
     </AssistantRuntimeProvider>
+  );
+}
+
+export default function BunzliChat() {
+  return (
+    <AuthProvider>
+      <AuthedChat />
+    </AuthProvider>
   );
 }

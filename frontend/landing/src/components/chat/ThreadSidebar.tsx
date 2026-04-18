@@ -4,6 +4,7 @@ import {
   ThreadListItemPrimitive,
 } from "@assistant-ui/react";
 import type { Prefs } from "./prefs";
+import { useAuth } from "../../auth/AuthProvider";
 
 const COLLAPSE_KEY = "bunzli.sidebar.collapsed";
 
@@ -64,6 +65,14 @@ function MapPinIcon({ className = "" }: { className?: string }) {
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className={className}>
       <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z" />
       <circle cx="12" cy="10" r="3" />
+    </svg>
+  );
+}
+
+function LogoutIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
     </svg>
   );
 }
@@ -224,6 +233,44 @@ function LocationItem({
   );
 }
 
+// ── user badge ─────────────────────────────────────────────────────────
+
+function UserBadge() {
+  const { state, logout } = useAuth();
+  if (state.status !== "authenticated") return null;
+  const profile: any = state.user.profile ?? {};
+  const name: string =
+    profile.name ||
+    profile.preferred_username ||
+    profile.email ||
+    (profile.sub as string) ||
+    "Benutzer";
+  const email: string | undefined = profile.email;
+  const initial = name.trim().charAt(0).toUpperCase();
+
+  return (
+    <div className="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-zh-black-5 transition">
+      <span className="flex-none w-7 h-7 inline-flex items-center justify-center rounded-full bg-zurich-blue text-white text-[12px] font-semibold">
+        {initial}
+      </span>
+      <div className="flex-1 min-w-0">
+        <div className="text-[13px] font-medium text-zurich-dark truncate">{name}</div>
+        {email && email !== name && (
+          <div className="text-[11px] text-zurich-gray truncate">{email}</div>
+        )}
+      </div>
+      <button
+        onClick={() => logout()}
+        title="Abmäldä"
+        aria-label="Abmäldä"
+        className="flex-none p-1.5 rounded-md text-zurich-gray hover:text-zurich-dark hover:bg-white transition"
+      >
+        <LogoutIcon />
+      </button>
+    </div>
+  );
+}
+
 // ── settings section ───────────────────────────────────────────────────
 
 function SidebarSettings({
@@ -250,6 +297,9 @@ function SidebarSettings({
       >
         <LockIcon className="text-zurich-blue" />
         <span>Chat-History · AES-256, nur lokal</span>
+      </div>
+      <div className="mt-1 pt-1 border-t border-zurich-border">
+        <UserBadge />
       </div>
     </div>
   );

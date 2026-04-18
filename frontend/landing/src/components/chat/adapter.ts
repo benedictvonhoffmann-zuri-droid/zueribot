@@ -1,6 +1,7 @@
 import type { ChatModelAdapter } from "@assistant-ui/react";
 import type { Prefs } from "./prefs";
 import { buildContextBlock } from "./prefs";
+import { getAccessToken } from "./authToken";
 
 const ENDPOINT = import.meta.env.DEV
   ? "http://localhost/zuribot/v1/chat/completions"
@@ -27,9 +28,13 @@ export function makeAdapter(getPrefs: () => Prefs): ChatModelAdapter {
         ? [{ role: "system", content: ctx }, ...openai]
         : openai;
 
+      const token = getAccessToken();
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
       const r = await fetch(ENDPOINT, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           model: "zuribot",
           messages: withContext,

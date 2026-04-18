@@ -8,7 +8,7 @@ import logging
 import time
 from typing import Optional, List
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
@@ -17,6 +17,7 @@ import uvicorn
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 
 from backend.agent import graph, SYSTEM_PROMPT
+from backend.auth import require_user
 
 logger = logging.getLogger("zuribot.api")
 
@@ -106,7 +107,7 @@ async def _stream_generator(langchain_messages: list, model: str, chat_id: str):
 
 
 @app.post("/v1/chat/completions")
-async def chat_completions(request: ChatRequest):
+async def chat_completions(request: ChatRequest, user: dict = Depends(require_user)):
     try:
         langchain_messages = [SystemMessage(content=SYSTEM_PROMPT)]
 

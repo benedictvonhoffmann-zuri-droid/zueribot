@@ -9,6 +9,7 @@ import {
   txOf,
 } from "./db";
 import { deleteThreadMessages } from "./history";
+import { getAccessToken } from "./authToken";
 
 // On-disk row: id in clear (IDB key), rest encrypted.
 type ThreadRow = {
@@ -94,9 +95,12 @@ async function llmTitle(
   try {
     const ctrl = new AbortController();
     const timeout = setTimeout(() => ctrl.abort(), 8000);
+    const token = getAccessToken();
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
     const r = await fetch(TITLE_ENDPOINT, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({
         model: "zuribot",
         stream: false,
