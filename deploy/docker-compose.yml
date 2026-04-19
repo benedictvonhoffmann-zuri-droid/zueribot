@@ -1,9 +1,7 @@
 services:
 
   traefik:
-    image: traefik:v3.3
-    environment:
-      - DOCKER_API_VERSION=1.44
+    image: traefik:v3.5
     command:
       # Dashboard (internal only — not exposed)
       - "--api.dashboard=true"
