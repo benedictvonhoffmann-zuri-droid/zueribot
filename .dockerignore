@@ -28,6 +28,9 @@ frontend/landing/node_modules/
 frontend/landing/dist/
 frontend/landing/.astro/
 
+# Caddy runtime data (root-owned, not needed in build)
+deploy/caddy/
+
 # Secrets / local config
 .env.local
 .env.*.local
