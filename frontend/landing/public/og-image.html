@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Bünzli OG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    background: #ffffff;
+    color: #0a0a0a;
+    display: flex;
+    padding: 80px;
+    gap: 64px;
+    align-items: stretch;
+  }
+  .left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 48px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-weight: 700;
+    font-size: 30px;
+    letter-spacing: -0.01em;
+  }
+  .brand .lion {
+    width: 56px; height: 56px;
+    background: #0070B4;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .brand .lion img {
+    width: 26px;
+    height: auto;
+    display: block;
+  }
+  .brand .space-suffix { color: #0070B4; }
+  .headline {
+    font-weight: 800;
+    font-size: 96px;
+    line-height: 0.98;
+    letter-spacing: -0.03em;
+  }
+  .headline .accent { color: #0070B4; }
+  .sub {
+    font-size: 28px;
+    line-height: 1.35;
+    color: #525252;
+    max-width: 620px;
+    font-weight: 400;
+    margin-top: -24px;
+  }
+  .right {
+    width: 420px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 20px;
+  }
+  .bubble-user {
+    align-self: flex-end;
+    background: #0070B4;
+    color: white;
+    padding: 18px 26px;
+    border-radius: 22px;
+    border-bottom-right-radius: 6px;
+    font-size: 22px;
+    font-weight: 600;
+    max-width: 360px;
+    box-shadow: 0 10px 30px rgba(0,100,180,0.18);
+  }
+  .bubble-bot {
+    align-self: flex-start;
+    background: #f5f5f5;
+    color: #171717;
+    padding: 18px 24px;
+    border-radius: 22px;
+    border-bottom-left-radius: 6px;
+    font-size: 20px;
+    line-height: 1.4;
+    max-width: 380px;
+  }
+  .bubble-bot b { color: #0a0a0a; }
+</style>
+</head>
+<body>
+  <div class="left">
+    <div class="brand">
+      <span class="lion">
+        <img src="./zh-lion.svg" alt="" />
+      </span>
+      <span>Bünzli<span class="space-suffix">.Space</span></span>
+    </div>
+
+    <div class="headline">De Bünzli het<br/><span class="accent">meinige.</span></div>
+
+    <div class="sub">A proper Bünzli actually knows Zürich — trams, badis, mieti-tipps, rent law. And shares it, gerne.</div>
+  </div>
+
+  <div class="right">
+    <div class="bubble-user">Was lauft das wuchenänd z Züri?</div>
+    <div class="bubble-bot">
+      3 tipps: <b>Bürkliplatz Flohmarkt</b> sa 06:00–15:30 · live-musig i de <b>Rote Fabrik</b> fr & sa ab 20:00 · <b>Kunsthus</b> sunntig bis 20:00 offe.
+    </div>
+  </div>
+</body>
+</html>
