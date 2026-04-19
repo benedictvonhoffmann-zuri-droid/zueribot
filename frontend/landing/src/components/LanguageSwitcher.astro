@@ -8,45 +8,80 @@ interface Props {
 const { currentLang } = Astro.props;
 ---
 
-<nav aria-label="Language selection" class="lang-switcher flex items-center gap-0.5">
-  {LOCALES.map(locale => (
-    <a
-      href={`/${locale}/`}
-      hreflang={LOCALE_META[locale].htmlLang}
-      aria-current={locale === currentLang ? 'page' : undefined}
-      title={LOCALE_META[locale].label}
-      class:list={[
-        'lang-link px-2 py-1 rounded-md text-xs font-semibold transition-all duration-150',
-        locale === currentLang ? 'lang-active' : 'lang-inactive',
-      ]}
-    >
-      {locale.toUpperCase()}
-    </a>
-  ))}
-</nav>
+<div class="lang-switcher relative">
+  <button
+    type="button"
+    id="lang-toggle"
+    aria-haspopup="menu"
+    aria-expanded="false"
+    class="lang-trigger inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold transition-colors"
+  >
+    {currentLang.toUpperCase()}
+    <svg class="lang-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+      <path d="M2.5 4l2.5 2.5L7.5 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+
+  <div
+    id="lang-menu"
+    role="menu"
+    aria-labelledby="lang-toggle"
+    class="lang-menu hidden absolute right-0 top-full mt-1 min-w-[140px] rounded-md border border-zurich-border bg-white shadow-[0_12px_32px_rgba(0,0,0,0.08)] py-1 z-50"
+  >
+    {LOCALES.map(locale => (
+      <a
+        href={`/${locale}/`}
+        hreflang={LOCALE_META[locale].htmlLang}
+        aria-current={locale === currentLang ? 'page' : undefined}
+        role="menuitem"
+        class:list={[
+          'flex items-center justify-between px-3 py-1.5 text-xs font-medium text-zurich-dark hover:bg-zh-black-5 transition-colors',
+          locale === currentLang && 'bg-zh-black-5',
+        ]}
+      >
+        <span>{LOCALE_META[locale].label}</span>
+        <span class="font-mono text-zurich-gray/60">{locale.toUpperCase()}</span>
+      </a>
+    ))}
+  </div>
+</div>
 
 <style>
-  .lang-active {
-    background: rgba(255,255,255,0.15);
-    color: white;
-  }
-  .lang-inactive {
-    color: rgba(255,255,255,0.5);
-  }
-  .lang-inactive:hover {
-    background: rgba(255,255,255,0.08);
-    color: rgba(255,255,255,0.85);
-  }
-
-  :global(.nav-solid) .lang-active {
-    background: var(--color-zurich-blue);
-    color: white;
-  }
-  :global(.nav-solid) .lang-inactive {
-    color: var(--color-zurich-gray);
-  }
-  :global(.nav-solid) .lang-inactive:hover {
+  .lang-trigger { color: rgba(255,255,255,0.7); }
+  .lang-trigger:hover { color: white; background: rgba(255,255,255,0.08); }
+  :global(.nav-solid) .lang-trigger { color: var(--color-zurich-gray); }
+  :global(.nav-solid) .lang-trigger:hover {
+    color: var(--color-zurich-dark);
     background: var(--color-zurich-blue-light);
-    color: var(--color-zurich-blue);
   }
+  .lang-chevron { transition: transform 150ms ease; }
+  .lang-switcher[data-open="true"] .lang-chevron { transform: rotate(180deg); }
 </style>
+
+<script>
+  const root = document.querySelector<HTMLElement>('.lang-switcher');
+  const trigger = document.getElementById('lang-toggle') as HTMLButtonElement | null;
+  const menu = document.getElementById('lang-menu') as HTMLElement | null;
+  if (root && trigger && menu) {
+    const close = () => {
+      menu.classList.add('hidden');
+      trigger.setAttribute('aria-expanded', 'false');
+      root.removeAttribute('data-open');
+    };
+    const open = () => {
+      menu.classList.remove('hidden');
+      trigger.setAttribute('aria-expanded', 'true');
+      root.setAttribute('data-open', 'true');
+    };
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menu.classList.contains('hidden') ? open() : close();
+    });
+    document.addEventListener('click', (e) => {
+      if (!root.contains(e.target as Node)) close();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') close();
+    });
+  }
+</script>

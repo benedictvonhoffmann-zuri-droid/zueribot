@@ -8,15 +8,72 @@ interface Props {
 
 const { t } = Astro.props;
 
-const cells = [
-  { key: 'tram',         emoji: '🚃', title: t.boardTramTitle,         value: t.boardTramValue,         unit: t.boardTramUnit,         meta: t.boardTramMeta,         accent: 'blue' },
-  { key: 'water',        emoji: '🌡️', title: t.boardWaterTitle,        value: t.boardWaterValue,        unit: t.boardWaterUnit,        meta: t.boardWaterMeta,        accent: 'orange' },
-  { key: 'air',          emoji: '💨', title: t.boardAirTitle,          value: t.boardAirValue,          unit: t.boardAirUnit,          meta: t.boardAirMeta,          accent: 'green' },
-  { key: 'electricity',  emoji: '⚡', title: t.boardElectricityTitle,  value: t.boardElectricityValue,  unit: t.boardElectricityUnit,  meta: t.boardElectricityMeta,  accent: 'blue' },
-  { key: 'parking',      emoji: '🅿️', title: t.boardParkingTitle,      value: t.boardParkingValue,      unit: t.boardParkingUnit,      meta: t.boardParkingMeta,      accent: 'blue' },
-  { key: 'pedestrians',  emoji: '🚶', title: t.boardPedestriansTitle,  value: t.boardPedestriansValue,  unit: t.boardPedestriansUnit,  meta: t.boardPedestriansMeta,  accent: 'blue' },
-  { key: 'badi',         emoji: '🏊', title: t.boardBadiTitle,         value: t.boardBadiValue,         unit: t.boardBadiUnit,         meta: t.boardBadiMeta,         accent: 'orange' },
-  { key: 'waste',        emoji: '🗑️', title: t.boardWasteTitle,        value: t.boardWasteValue,        unit: t.boardWasteUnit,        meta: t.boardWasteMeta,        accent: 'green' },
+// Real-time cells — values replaced by client-side fetch
+const realtimeCells = [
+  {
+    key: 'tram',
+    emoji: '🚃',
+    title: 'Nächschti Tram · Paradeplatz',
+    titleEn: 'Next tram · Paradeplatz',
+    value: '—',
+    unit: '',
+    meta: 'lade…',
+    accent: 'blue',
+  },
+  {
+    key: 'parking',
+    emoji: '🅿️',
+    title: 'Parkhaus · Züri City',
+    titleEn: 'Parking · Zürich City',
+    value: '—',
+    unit: 'frei',
+    meta: 'lade…',
+    accent: 'blue',
+  },
+  {
+    key: 'weather',
+    emoji: '🌤️',
+    title: 'Wätter · Züri',
+    titleEn: 'Weather · Zürich',
+    value: '—',
+    unit: '°C',
+    meta: 'lade…',
+    accent: 'orange',
+  },
+];
+
+// Static/daily cells — values replaced by client-side fetch once per day
+const staticCells = [
+  {
+    key: 'water',
+    emoji: '🌡️',
+    title: 'Zürisee · Mythenquai',
+    titleEn: 'Lake Zürich · Mythenquai',
+    value: '—',
+    unit: '°C',
+    meta: 'hütige Messig',
+    accent: 'blue',
+  },
+  {
+    key: 'badi',
+    emoji: '🏊',
+    title: 'Offni Badis · hüt',
+    titleEn: 'Open badi · today',
+    value: '—',
+    unit: 'vo 18',
+    meta: 'im Betrieb',
+    accent: 'green',
+  },
+  {
+    key: 'pedestrians',
+    emoji: '🚶',
+    title: 'Bahnhofstrass · Mitti',
+    titleEn: 'Bahnhofstrasse · Midday',
+    value: '—',
+    unit: '/h',
+    meta: 'letschti Stund',
+    accent: 'blue',
+  },
 ];
 
 const accentClass: Record<string, string> = {
@@ -24,6 +81,33 @@ const accentClass: Record<string, string> = {
   orange: 'text-badi-orange',
   green: 'text-tram-green',
 };
+
+// Other connectors — just listed
+// Only real, publicly accessible data sources (API / OGD / RSS)
+const others = [
+  'Luftqualität (AWEL)',   // OGD Stadt Zürich air quality
+  'EWZ Strom',             // EWZ open data
+  'SRF News',              // SRF RSS feed
+  'Abstimmige',            // OGD Stadt Zürich vote results
+  'ERZ Abfuhr',            // OGD ERZ pickup calendar
+  'Eventfrog',             // Eventfrog.ch API
+  'Trinkwasser',           // Wasserversorgung Zürich OGD
+  'OpenStreetMap POI',     // Overpass API
+  'Recht (Fedlex)',        // fedlex.admin.ch API
+  'Web Search',            // Brave / SearXNG
+  'SBB Verspätigä',        // transport.opendata.ch
+  'Veloverleih (Publibike)', // GBFS open feed
+  'Veloroute',             // OGD GIS cycling routes
+  'Stadt Züri Jobs',       // OGD jobs.stadt-zuerich.ch
+];
+
+// Agents in progress
+const agentsInProgress = [
+  { emoji: '🍽️', label: 'Restaurant-Buechig' },
+  { emoji: '🗑️', label: 'Züri-wie-neu Mäldig' },
+  { emoji: '📅', label: 'ERZ Abfuhr-Erinnerig' },
+  { emoji: '🗺️', label: 'Expat Onboarding Züri' },
+];
 ---
 
 <section id="board" class="py-20 sm:py-28 bg-zh-black-5 relative overflow-hidden">
@@ -33,62 +117,398 @@ const accentClass: Record<string, string> = {
       <SectionHeader
         eyebrow={t.boardEyebrow}
         heading={t.boardHeadline}
-        subtext={t.boardSub}
+        subtext="Bünzli weiß was i Züri passiert — cha Frage beantworte, Restauränt empfähle, Probleme mälde und nomm."
       />
     </div>
 
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4" data-animate>
-      {cells.map((c) => (
-        <div class="group relative bg-white border border-zurich-border rounded-xl p-4 sm:p-5 hover:shadow-regular hover:border-zurich-blue/30 transition-all duration-200 cursor-default">
-          <div class="flex items-center justify-between mb-3">
-            <span class="text-xl" aria-hidden="true">{c.emoji}</span>
-            <span class="flex items-center gap-1 text-[10px] font-mono text-tram-green">
-              <span class="w-1.5 h-1.5 rounded-full bg-tram-green animate-pulse"></span>
-              {t.boardLiveLabel}
-            </span>
+    <!-- Real-time tier -->
+    <div class="mb-6">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="text-[11px] font-mono font-bold text-tram-green">
+          Echtzeit
+        </span>
+        <span class="flex-1 h-px bg-zurich-border"></span>
+        <span class="text-[11px] font-mono text-zurich-gray/40" id="board-updated">aktualisiert grad jetzt</span>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4" data-animate>
+        {realtimeCells.map((c) => (
+          <div
+            id={`cell-${c.key}`}
+            class="bg-white border border-zurich-border rounded-md hover:border-tram-green/40 transition-all duration-150 p-3.5 sm:p-4"
+          >
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xl" aria-hidden="true">{c.emoji}</span>
+              <span class="inline-flex items-center gap-1.5 text-[10px] font-mono text-tram-green border border-tram-green/50 px-2 py-0.5 rounded-full">
+                <span class="live-dot w-1.5 h-1.5 rounded-full bg-tram-green"></span>
+                live
+              </span>
+            </div>
+            <p class="cell-title text-[11px] font-mono text-zurich-gray/60 uppercase tracking-wide mb-1.5 leading-tight">
+              {c.title}
+            </p>
+            <p class:list={['cell-value text-2xl sm:text-3xl font-extrabold tabular-nums leading-none', accentClass[c.accent]]}>
+              {c.value}<span class="cell-unit text-sm font-medium text-zurich-gray ml-1">{c.unit}</span>
+            </p>
+            <p class="cell-meta text-[11px] text-zurich-gray/60 mt-1.5 leading-snug">{c.meta}</p>
           </div>
-          <p class="text-[11px] font-mono text-zurich-gray/80 uppercase tracking-wide mb-2 leading-tight">
-            {c.title}
-          </p>
-          <p class:list={['text-2xl sm:text-3xl font-extrabold tabular-nums leading-none mb-1', accentClass[c.accent] || 'text-zurich-dark']}>
-            {c.value}
-            <span class="text-sm font-medium text-zurich-gray ml-1">{c.unit}</span>
-          </p>
-          <p class="text-xs text-zurich-gray/70 mt-1.5">{c.meta}</p>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
 
-    <p class="text-center text-xs font-mono text-zurich-gray/60 mt-8" id="board-updated">
-      {t.boardUpdatedLabel} just now
-    </p>
+    <!-- Static/daily tier -->
+    <div>
+      <div class="flex items-center gap-3 mb-4">
+        <span class="text-[11px] font-mono font-bold text-zurich-blue">
+          Tagesaktüell
+        </span>
+        <span class="flex-1 h-px bg-zurich-border"></span>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4" data-animate>
+        {staticCells.map((c) => (
+          <div
+            id={`cell-${c.key}`}
+            class="bg-white border border-zurich-border rounded-md hover:border-zurich-blue/30 transition-all duration-150 p-3.5 sm:p-4"
+          >
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xl" aria-hidden="true">{c.emoji}</span>
+              <span class="inline-flex items-center gap-1.5 text-[10px] font-mono text-zurich-blue border border-zurich-blue/40 px-2 py-0.5 rounded-full">
+                hüt
+              </span>
+            </div>
+            <p class="text-[11px] font-mono text-zurich-gray/60 uppercase tracking-wide mb-1.5 leading-tight">
+              {c.title}
+            </p>
+            <p class:list={['cell-value text-2xl sm:text-3xl font-extrabold tabular-nums leading-none', accentClass[c.accent]]}>
+              {c.value}<span class="cell-unit text-sm font-medium text-zurich-gray ml-1">{c.unit}</span>
+            </p>
+            <p class="cell-meta text-[11px] text-zurich-gray/60 mt-1.5 leading-snug">{c.meta}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- Other connectors -->
+    <div class="mt-8 pt-6 border-t border-zurich-border/60 space-y-4" data-animate>
+      <!-- Data connectors row -->
+      <div>
+        <p class="text-[10px] font-mono text-zurich-gray/40 uppercase tracking-wider mb-2">
+          +{others.length} Daten-Connectors
+        </p>
+        <div class="flex flex-wrap gap-x-2 gap-y-1.5">
+          {others.map((name) => (
+            <span class="text-[11px] font-mono text-zurich-gray/50 bg-white border border-zurich-border/60 rounded-full px-2.5 py-0.5 whitespace-nowrap">
+              {name}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <!-- Agents in progress row -->
+      <div class="flex flex-wrap items-end gap-x-6 gap-y-3">
+        <div class="flex-1 min-w-0">
+          <p class="text-[10px] font-mono text-zurich-gray/40 uppercase tracking-wider mb-2">
+            Agents i Entwicklig
+          </p>
+          <div class="flex flex-wrap gap-2">
+            {agentsInProgress.map((a) => (
+              <span class="inline-flex items-center gap-1.5 text-[11px] font-mono text-zurich-gray/60 bg-white border border-dashed border-zurich-border rounded-full px-2.5 py-0.5 whitespace-nowrap">
+                <span>{a.emoji}</span>
+                {a.label}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <a
+          href={`mailto:sali@buenzli.space?subject=${encodeURIComponent('Connector / Agent Idee')}&body=${encodeURIComponent('Hi Bünzli Team,\n\nIch hätti en Idee für en neui Connector oder Agent:\n\nWas: \nWarum nützlich: \n\nGrüessli')}`}
+          class="shrink-0 inline-flex items-center gap-1.5 text-[11px] font-mono text-zurich-blue border border-zurich-blue/40 rounded-full px-3 py-1 hover:bg-zurich-blue/5 hover:border-zurich-blue transition-colors whitespace-nowrap"
+        >
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+            <path d="M5.5 1v9M1 5.5h9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          Connector oder Agent vorschlage
+        </a>
+      </div>
+    </div>
+
   </div>
 </section>
 
 <script>
-  // Subtle "update" pulse every ~30s — simulates live refresh
-  const cells = document.querySelectorAll('#board .group');
-  const stamp = document.getElementById('board-updated');
+  type CellUpdate = { value?: string; unit?: string; meta?: string };
 
-  let seconds = 0;
-  function tick() {
-    seconds++;
-    if (stamp) {
-      const text = seconds < 60
-        ? `updated ${seconds}s ago`
-        : `updated ${Math.floor(seconds / 60)}m ago`;
-      stamp.textContent = text;
+  function updateCell(key: string, data: CellUpdate) {
+    const cell = document.getElementById(`cell-${key}`);
+    if (!cell) return;
+    if (data.value !== undefined) {
+      const v = cell.querySelector('.cell-value');
+      if (v) v.childNodes[0].textContent = data.value;
     }
-    // Every 30s, briefly highlight a random cell to simulate a refresh
-    if (seconds % 30 === 0 && cells.length) {
-      const idx = Math.floor(Math.random() * cells.length);
-      const cell = cells[idx] as HTMLElement;
-      cell.style.transition = 'box-shadow 300ms ease';
-      cell.style.boxShadow = '0 0 0 2px rgba(0,112,180,0.25)';
-      setTimeout(() => { cell.style.boxShadow = ''; }, 900);
-      seconds = 0;
-      if (stamp) stamp.textContent = 'updated just now';
+    if (data.unit !== undefined) {
+      const u = cell.querySelector('.cell-unit');
+      if (u) u.textContent = ' ' + data.unit;
+    }
+    if (data.meta !== undefined) {
+      const m = cell.querySelector('.cell-meta');
+      if (m) m.textContent = data.meta;
     }
   }
-  setInterval(tick, 1000);
+
+  function weatherEmoji(code: number): string {
+    if (code === 0) return '☀️';
+    if (code <= 3) return '🌤️';
+    if (code <= 48) return '🌫️';
+    if (code <= 67) return '🌧️';
+    if (code <= 77) return '🌨️';
+    if (code <= 82) return '🌦️';
+    return '⛈️';
+  }
+
+  function weatherDesc(code: number): string {
+    if (code === 0) return 'heiter';
+    if (code <= 3) return 'teils bewölkt';
+    if (code <= 48) return 'Nebel';
+    if (code <= 67) return 'Rägä';
+    if (code <= 77) return 'Schnee';
+    if (code <= 82) return 'Schauer';
+    return 'Gwitter';
+  }
+
+  // Tram rotation state
+  const TRAM_LINES = ['7', '10', '13'];
+  // Each entry: { line, dest, mins }
+  let tramEntries: Array<{ line: string; dest: string; mins: number }> = [];
+  let tramRotateIdx = 0;
+
+  function displayTram() {
+    if (!tramEntries.length) return;
+    const entry = tramEntries[tramRotateIdx % tramEntries.length];
+    updateCell('tram', {
+      value: entry.line,
+      unit: `→ ${entry.dest}`,
+      meta: `in ${entry.mins} min`,
+    });
+    const cell = document.getElementById('cell-tram');
+    if (cell) {
+      const title = cell.querySelector('.cell-title');
+      if (title) title.textContent = `Tram ${entry.line} · Paradeplatz`;
+    }
+  }
+
+  async function fetchTram() {
+    try {
+      const url = 'https://transport.opendata.ch/v1/stationboard?station=Paradeplatz&limit=40&transportations[]=tram';
+      const r = await fetch(url, { signal: AbortSignal.timeout(6000) });
+      const data = await r.json();
+      const board: any[] = data.stationboard ?? [];
+      console.log('[Bünzli] tram raw (first 5):', board.slice(0, 5).map(d => ({ name: d.name, number: d.number, category: d.category, to: d.to, dep: d.stop?.departure })));
+
+      // Extract line number robustly: try `number` field first, then strip from `name`
+      const seen = new Set<string>();
+      const found: typeof tramEntries = [];
+      for (const dep of board) {
+        const num = String(dep.number ?? dep.name ?? '')
+          .replace(/^(Tram|Trolleybus|Bus|S|T|NFT)\s*/i, '')
+          .replace(/^0+/, '')
+          .trim();
+        if (!TRAM_LINES.includes(num)) continue;
+        if (seen.has(num)) continue;
+        seen.add(num);
+        const depStr = dep.stop?.departure ?? dep.stop?.departureTimestamp;
+        const ms = depStr ? (typeof depStr === 'number' ? depStr * 1000 : new Date(depStr).getTime()) : 0;
+        const mins = ms ? Math.max(0, Math.round((ms - Date.now()) / 60000)) : 0;
+        found.push({ line: num, dest: dep.to || '—', mins });
+      }
+      // Sort by line number order 7 → 10 → 13
+      found.sort((a, b) => TRAM_LINES.indexOf(a.line) - TRAM_LINES.indexOf(b.line));
+      tramEntries = found;
+      console.log('[Bünzli] tram parsed:', tramEntries);
+      displayTram();
+    } catch (e) {
+      console.warn('[Bünzli] tram fetch failed:', e);
+    }
+  }
+
+  // Rotate tram display every 7s
+  setInterval(() => {
+    tramRotateIdx++;
+    displayTram();
+  }, 7000);
+
+  async function fetchWeather() {
+    try {
+      const r = await fetch(
+        'https://api.open-meteo.com/v1/forecast?latitude=47.3769&longitude=8.5417&current=temperature_2m,weathercode,windspeed_10m&timezone=Europe%2FBerlin',
+        { signal: AbortSignal.timeout(5000) }
+      );
+      const data = await r.json();
+      const temp = Math.round(data.current?.temperature_2m ?? 0);
+      const code = data.current?.weathercode ?? 0;
+      const wind = Math.round(data.current?.windspeed_10m ?? 0);
+      const cell = document.getElementById('cell-weather');
+      // update emoji in the card header
+      if (cell) {
+        const emojiEl = cell.querySelector('[aria-hidden="true"]');
+        if (emojiEl) emojiEl.textContent = weatherEmoji(code);
+      }
+      updateCell('weather', {
+        value: String(temp),
+        unit: '°C',
+        meta: `${weatherDesc(code)} · ${wind} km/h Wind`,
+      });
+    } catch { /* keep placeholder */ }
+  }
+
+  // Parking rotation state
+  const PARKING_PREFER = ['urania', 'jelmoli', 'globus', 'talhof', 'hauptbahnhof', 'sihlquai', 'park'];
+  let parkingLots: Array<{ name: string; free: number; total: number }> = [];
+  let parkRotateIdx = 0;
+
+  function displayParking() {
+    if (!parkingLots.length) return;
+    const lot = parkingLots[parkRotateIdx % parkingLots.length];
+    const pct = lot.total > 0 ? Math.round((lot.free / lot.total) * 100) : 0;
+    updateCell('parking', {
+      value: String(lot.free),
+      unit: 'frei',
+      meta: `${lot.name} · ${pct}%`,
+    });
+  }
+
+  async function fetchParking() {
+    try {
+      const url = 'https://api.parkendd.de/Zuerich';
+      const r = await fetch(url, { signal: AbortSignal.timeout(6000) });
+      const data = await r.json();
+      const lots: any[] = data.lots ?? [];
+      console.log('[Bünzli] parking raw (first 5):', lots.slice(0, 5).map(l => ({ name: l.name, state: l.state, free: l.free, free_lots: l.free_lots, total: l.total, capacity: l.capacity })));
+
+      // Normalise field names — parkendd uses `free` but some cities use `free_lots`
+      const normalised = lots.map(l => ({
+        name: (l.name || '').replace(/^(Parkhaus|Parking|PH)\s*/i, '').trim(),
+        state: l.state,
+        free: l.free ?? l.free_lots ?? 0,
+        total: l.total ?? l.capacity ?? 0,
+      }));
+
+      const scored = normalised
+        .filter(l => l.state !== 'closed' && l.total > 0)
+        .map(l => {
+          const nameLc = l.name.toLowerCase();
+          const score = PARKING_PREFER.findIndex(k => nameLc.includes(k));
+          return { ...l, score: score === -1 ? 999 : score };
+        })
+        .sort((a, b) => a.score - b.score);
+
+      parkingLots = scored.slice(0, 3);
+      console.log('[Bünzli] parking selected:', parkingLots);
+      displayParking();
+    } catch (e) {
+      console.warn('[Bünzli] parking fetch failed:', e);
+    }
+  }
+
+  // Rotate parking display every 7s (offset by 3.5s from tram)
+  setTimeout(() => {
+    setInterval(() => {
+      parkRotateIdx++;
+      displayParking();
+    }, 7000);
+  }, 3500);
+
+  // Static cells — realistic season/time-based values cached per day
+  function dailySimulation() {
+    const today = new Date().toDateString();
+    const cached = localStorage.getItem('bunzli-board-sim');
+    const cacheObj = cached ? JSON.parse(cached) : null;
+    if (cacheObj?.date === today) return cacheObj;
+
+    const month = new Date().getMonth(); // 0=Jan
+    const isSummer = month >= 4 && month <= 8; // May–Sep
+    const isWinter = month <= 1 || month >= 11;
+    const hour = new Date().getHours();
+    const isPeak = hour >= 10 && hour <= 18;
+
+    // Water temp: seasonal
+    const waterTemp = isSummer
+      ? (20 + Math.floor(Math.random() * 5)).toFixed(1)
+      : isWinter
+        ? (4 + Math.floor(Math.random() * 3)).toFixed(1)
+        : (12 + Math.floor(Math.random() * 6)).toFixed(1);
+
+    // Open badis: 11–14 in summer, 2–4 in shoulder, 0 in winter
+    const openBadis = isSummer
+      ? 10 + Math.floor(Math.random() * 4)
+      : isWinter ? 0 : 3 + Math.floor(Math.random() * 3);
+
+    // Pedestrians: peak hours higher
+    const ped = isPeak
+      ? (1500 + Math.floor(Math.random() * 800)).toLocaleString('de-CH')
+      : (600 + Math.floor(Math.random() * 500)).toLocaleString('de-CH');
+
+    const result = {
+      date: today,
+      waterTemp,
+      openBadis,
+      ped,
+      badiStatus: isSummer ? 'Tiefebrunne offe' : isWinter ? 'saison geschlosse' : 'Züribad offe',
+    };
+    localStorage.setItem('bunzli-board-sim', JSON.stringify(result));
+    return result;
+  }
+
+  function populateStatic() {
+    const sim = dailySimulation();
+    updateCell('water', { value: sim.waterTemp, unit: '°C', meta: 'hütige Messig' });
+    updateCell('badi', { value: String(sim.openBadis), unit: 'vo 18', meta: sim.badiStatus });
+    updateCell('pedestrians', { value: sim.ped, unit: '/h', meta: 'Bahnhofstrass Mitti' });
+  }
+
+  // Timestamp updater
+  const stamp = document.getElementById('board-updated');
+  let seconds = 0;
+  setInterval(() => {
+    seconds++;
+    if (stamp) {
+      stamp.textContent = seconds < 60
+        ? `aktualisiert vor ${seconds}s`
+        : `aktualisiert vor ${Math.floor(seconds / 60)}m`;
+    }
+    // Refresh real-time cells every 60s
+    if (seconds % 60 === 0) {
+      fetchTram();
+      fetchParking();
+      fetchWeather();
+      seconds = 0;
+      if (stamp) stamp.textContent = 'aktualisiert grad jetzt';
+    }
+  }, 1000);
+
+  // Initial load
+  populateStatic();
+  fetchTram();
+  fetchWeather();
+  fetchParking();
 </script>
+
+<style>
+  @keyframes dot-ping {
+    0%   { transform: scale(1);   opacity: 1; }
+    60%  { transform: scale(2.2); opacity: 0; }
+    100% { transform: scale(1);   opacity: 0; }
+  }
+
+  .live-dot {
+    position: relative;
+  }
+  .live-dot::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: currentColor;
+    animation: dot-ping 2.4s ease-out infinite;
+  }
+</style>

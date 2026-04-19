@@ -13,8 +13,8 @@ const { lang, t } = Astro.props;
 const htmlLang = LOCALE_META[lang].htmlLang;
 const canonicalUrl = `https://buenzli.space/${lang}/`;
 
-const betaHref = `mailto:hello@buenzli.space?subject=${encodeURIComponent('Beta Test Request - buenzli.space')}&body=${encodeURIComponent('Hi Buenzli Team,\n\nI would like to beta test buenzli.space!\n\nLinkedIn profile: \nWhy I want to test: \nWhat I would use Bünzli AI for: \n\nBest regards')}`;
-const collabHref = `mailto:hello@buenzli.space?subject=${encodeURIComponent('Collaboration Inquiry - buenzli.space')}&body=${encodeURIComponent('Hi Buenzli Team,\n\nI would like to collaborate on buenzli.space!\n\nLinkedIn profile: \nWhy I want to collaborate: \nSkills I bring: \n\nBest regards')}`;
+const betaHref = `mailto:sali@buenzli.space?subject=${encodeURIComponent('Beta Test Request - buenzli.space')}&body=${encodeURIComponent('Hi Buenzli Team,\n\nI would like to beta test buenzli.space!\n\nLinkedIn profile: \nWhy I want to test: \nWhat I would use Bünzli AI for: \n\nBest regards')}`;
+const collabHref = `mailto:sali@buenzli.space?subject=${encodeURIComponent('Collaboration Inquiry - buenzli.space')}&body=${encodeURIComponent('Hi Buenzli Team,\n\nI would like to collaborate on buenzli.space!\n\nLinkedIn profile: \nWhy I want to collaborate: \nSkills I bring: \n\nBest regards')}`;
 
 const navLinks = [
   { label: t.navBoard,   href: '#board' },
@@ -53,9 +53,9 @@ const navLinks = [
 
         <!-- Logo -->
         <a href={`/${lang}/`} class="flex items-center gap-2">
-          <img src="/zh-lion.svg" alt="" aria-hidden="true" class="w-5 h-5 opacity-90 nav-lion" />
+          <img src="/zh-lion.svg" alt="" aria-hidden="true" class="w-5 h-5 nav-lion" style="filter: brightness(0) saturate(100%)" />
           <span class="font-bold text-lg tracking-tight nav-wordmark">
-            bünzli<span class="nav-dot">.</span>
+            Bünzli<span class="nav-dot font-medium" style="color: var(--color-zurich-blue)">.Space</span>
           </span>
         </a>
 
@@ -69,15 +69,16 @@ const navLinks = [
         </nav>
 
         <!-- Right controls -->
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-3">
           <LanguageSwitcher currentLang={lang} />
+          <span class="hidden sm:inline-block h-5 w-px bg-zurich-border" aria-hidden="true"></span>
           <a
             href={betaHref}
-            class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-zurich-blue text-white hover:bg-zurich-blue-dark transition-colors duration-150 shadow-short"
+            class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-semibold bg-zurich-blue text-white hover:bg-zurich-blue-dark transition-colors duration-150 shadow-short"
           >
             {t.navBetaCta}
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-              <path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+              <path d="M2.5 6.5h8M7 3.5l3 3-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </a>
           <!-- Mobile hamburger -->
@@ -101,7 +102,7 @@ const navLinks = [
         ))}
         <a
           href={betaHref}
-          class="mt-3 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold bg-zurich-blue text-white"
+          class="mt-3 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md text-sm font-semibold bg-zurich-blue text-white"
         >
           {t.navBetaCta}
         </a>
@@ -143,7 +144,7 @@ const navLinks = [
             <ul class="space-y-2">
               <li><a href={betaHref}    class="text-sm text-white/70 hover:text-white transition-colors">{t.footerBeta}</a></li>
               <li><a href={collabHref}  class="text-sm text-white/70 hover:text-white transition-colors">{t.footerCollaborate}</a></li>
-              <li><a href="https://github.com" target="_blank" rel="noopener noreferrer" class="text-sm text-white/70 hover:text-white transition-colors">{t.footerGitHub}</a></li>
+              <li><a href="https://github.com/benedictvonhoffmann-zuri-droid/zueribot" target="_blank" rel="noopener noreferrer" class="text-sm text-white/70 hover:text-white transition-colors">{t.footerGitHub}</a></li>
             </ul>
           </div>
 
@@ -151,8 +152,8 @@ const navLinks = [
           <div>
             <h4 class="text-xs font-semibold text-white/50 uppercase tracking-wider mb-3">{t.footerLegal}</h4>
             <ul class="space-y-2">
-              <li><a href="#" class="text-sm text-white/70 hover:text-white transition-colors">{t.footerImpressum}</a></li>
-              <li><a href="#" class="text-sm text-white/70 hover:text-white transition-colors">{t.footerDatenschutz}</a></li>
+              <li><button type="button" data-open-legal="imprint" class="text-sm text-white/70 hover:text-white transition-colors text-left">{t.footerImpressum}</button></li>
+              <li><button type="button" data-open-legal="privacy" class="text-sm text-white/70 hover:text-white transition-colors text-left">{t.footerDatenschutz}</button></li>
             </ul>
           </div>
         </div>
@@ -163,6 +164,31 @@ const navLinks = [
         </div>
       </div>
     </footer>
+
+    <!-- Legal dialogs (single-page friendly) -->
+    <dialog id="legal-imprint" class="legal-dialog">
+      <div class="legal-dialog-inner">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-bold text-zurich-dark">{t.imprintTitle}</h2>
+          <button type="button" data-close-legal aria-label={t.legalClose} class="w-8 h-8 rounded-full hover:bg-zh-black-5 flex items-center justify-center text-zurich-gray">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <div class="legal-prose" set:html={t.imprintBody}></div>
+      </div>
+    </dialog>
+
+    <dialog id="legal-privacy" class="legal-dialog">
+      <div class="legal-dialog-inner">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-bold text-zurich-dark">{t.privacyTitle}</h2>
+          <button type="button" data-close-legal aria-label={t.legalClose} class="w-8 h-8 rounded-full hover:bg-zh-black-5 flex items-center justify-center text-zurich-gray">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <div class="legal-prose" set:html={t.privacyBody}></div>
+      </div>
+    </dialog>
 
     <script>
       const header = document.getElementById('site-header') as HTMLElement;
@@ -211,7 +237,68 @@ const navLinks = [
         { threshold: 0.1, rootMargin: '0px 0px -60px 0px' }
       );
       document.querySelectorAll('[data-animate], [data-animate-stagger]').forEach(el => observer.observe(el));
+
+      // Legal dialogs
+      document.querySelectorAll<HTMLButtonElement>('[data-open-legal]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const key = btn.dataset.openLegal;
+          const dlg = document.getElementById(`legal-${key}`) as HTMLDialogElement | null;
+          dlg?.showModal();
+        });
+      });
+      document.querySelectorAll<HTMLButtonElement>('[data-close-legal]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const dlg = btn.closest('dialog') as HTMLDialogElement | null;
+          dlg?.close();
+        });
+      });
+      // Backdrop click closes dialog
+      document.querySelectorAll<HTMLDialogElement>('dialog.legal-dialog').forEach(dlg => {
+        dlg.addEventListener('click', (e) => {
+          if (e.target === dlg) dlg.close();
+        });
+      });
     </script>
+
+    <style is:global>
+      /* Legal dialogs — global so set:html content gets styled */
+      dialog.legal-dialog {
+        max-width: 640px;
+        width: calc(100% - 2rem);
+        max-height: 85vh;
+        border: 1px solid var(--color-zurich-border);
+        border-radius: 6px;
+        padding: 0;
+        background: white;
+        box-shadow: 0 24px 64px -16px rgba(0, 0, 0, 0.3);
+        margin: auto;
+        position: fixed;
+        inset: 0;
+      }
+      dialog.legal-dialog::backdrop {
+        background: rgba(0, 64, 124, 0.4);
+        backdrop-filter: blur(4px);
+      }
+      .legal-dialog-inner {
+        padding: 1.75rem 1.75rem 2rem;
+        max-height: 85vh;
+        overflow-y: auto;
+      }
+      .legal-prose p {
+        font-size: 0.875rem;
+        line-height: 1.65;
+        color: var(--color-zurich-gray);
+        margin: 0 0 0.9rem 0;
+      }
+      .legal-prose p:last-child { margin-bottom: 0; }
+      .legal-prose a {
+        color: var(--color-zurich-blue);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+      .legal-prose a:hover { color: var(--color-zurich-blue-dark); }
+      .legal-prose strong { color: var(--color-zurich-dark); font-weight: 600; }
+    </style>
 
     <style>
       #site-header {

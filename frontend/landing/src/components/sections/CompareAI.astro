@@ -8,35 +8,45 @@ interface Props {
 
 const { t } = Astro.props;
 
+// Pure-black and zurich-blue CSS filters for tinting monochrome SVGs.
+// Generated via https://codepen.io/sosuke/pen/Pjoqqp
+const LOGO_FILTER_BLACK = 'brightness(0) saturate(100%)';
+const LOGO_FILTER_BLUE = 'brightness(0) saturate(100%) invert(15%) sepia(88%) saturate(3878%) hue-rotate(210deg) brightness(92%) contrast(101%)';
+
 const columns = [
   {
     key: 'chatgpt',
     label: t.compareChatGPTLabel,
-    icon: 'CG',
-    iconBg: 'bg-zh-black-5 text-zurich-gray',
+    logo: '/brands/openai.svg',
+    logoFilter: LOGO_FILTER_BLACK,
+    logoBg: 'bg-zh-black-5',
     answer: t.compareChatGPTAnswer,
     verdict: t.compareChatGPTVerdict,
-    verdictColor: 'text-red-500/80',
+    verdictColor: 'text-amber-700',
+    badge: { label: 'Danger', icon: '⚠️', class: 'text-amber-700 border-amber-500/40 bg-amber-50' },
   },
   {
     key: 'gemini',
     label: t.compareGeminiLabel,
-    icon: 'G',
-    iconBg: 'bg-zh-black-5 text-zurich-gray',
+    logo: '/brands/gemini.svg',
+    logoFilter: LOGO_FILTER_BLACK,
+    logoBg: 'bg-zh-black-5',
     answer: t.compareGeminiAnswer,
     verdict: t.compareGeminiVerdict,
-    verdictColor: 'text-amber-600/90',
+    verdictColor: 'text-amber-700',
+    badge: { label: 'Danger', icon: '⚠️', class: 'text-amber-700 border-amber-500/40 bg-amber-50' },
   },
   {
     key: 'bunzli',
     label: t.compareBunzliLabel,
-    icon: '🦁',
-    iconBg: 'bg-zurich-blue/10',
+    logo: '/zh-lion.svg',
+    logoFilter: LOGO_FILTER_BLACK,
+    logoBg: 'bg-zurich-blue/10',
     answer: t.compareBunzliAnswer,
-    source: t.compareBunzliSource,
     verdict: t.compareBunzliVerdict,
     verdictColor: 'text-tram-green',
     highlight: true,
+    badge: { label: 'Safe', icon: '✓', class: 'text-tram-green border-tram-green/40 bg-tram-green/5' },
   },
 ];
 ---
@@ -52,13 +62,21 @@ const columns = [
       />
     </div>
 
-    <!-- Question banner -->
+    <!-- Question banner (chat-input styled) -->
     <div class="max-w-3xl mx-auto mb-8" data-animate>
-      <div class="bg-white border border-zurich-border rounded-xl px-6 py-4 flex items-center gap-4">
-        <span class="text-xs font-mono text-zurich-gray/60 uppercase tracking-wider shrink-0">Q</span>
-        <p class="text-base sm:text-lg text-zurich-dark font-medium italic">
-          "{t.compareQuestion}"
+      <div class="bg-white border border-zurich-border rounded-full shadow-regular pl-5 pr-2 py-2 flex items-center gap-3">
+        <svg class="w-4 h-4 text-zurich-gray/50 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <p class="flex-1 text-base sm:text-lg text-zurich-dark font-medium">
+          {t.compareQuestion}
         </p>
+        <button type="button" disabled aria-hidden="true" class="shrink-0 w-9 h-9 rounded-full bg-zurich-blue text-white flex items-center justify-center">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="19" x2="12" y2="5"/>
+            <polyline points="5 12 12 5 19 12"/>
+          </svg>
+        </button>
       </div>
     </div>
 
@@ -66,26 +84,32 @@ const columns = [
     <div class="grid md:grid-cols-3 gap-4" data-animate>
       {columns.map((c) => (
         <div class:list={[
-          'rounded-xl border p-5 flex flex-col',
+          'rounded-md border p-5 flex flex-col',
           c.highlight
             ? 'bg-white border-zurich-blue/40 shadow-regular ring-1 ring-zurich-blue/10'
             : 'bg-white border-zurich-border opacity-90',
         ]}>
           <div class="flex items-center gap-2 mb-4">
-            <div class:list={['w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold', c.iconBg]}>
-              {c.icon}
+            <div class:list={['w-8 h-8 rounded-full flex items-center justify-center', c.logoBg]}>
+              <img
+                src={c.logo}
+                alt=""
+                aria-hidden="true"
+                class="w-4 h-4"
+                style={`filter: ${c.logoFilter}`}
+              />
             </div>
             <span class="text-sm font-semibold text-zurich-dark">{c.label}</span>
+            <span class:list={['ml-auto inline-flex items-center gap-1 text-[10px] font-mono font-semibold border rounded-full px-2 py-0.5', c.badge.class]}>
+              <span aria-hidden="true">{c.badge.icon}</span>
+              {c.badge.label}
+            </span>
           </div>
 
-          <p class:list={[
+          <div class:list={[
             'text-sm leading-relaxed mb-4 flex-1',
             c.highlight ? 'text-zurich-dark' : 'text-zurich-gray',
           ]} set:html={c.answer} />
-
-          {c.source && (
-            <p class="text-[10px] font-mono text-zurich-gray/70 mb-3">{c.source}</p>
-          )}
 
           <div class:list={['text-xs font-mono pt-3 border-t', c.highlight ? 'border-zurich-blue/20' : 'border-zurich-border']}>
             <span class:list={[c.verdictColor, 'font-semibold']}>{c.verdict}</span>
@@ -94,8 +118,14 @@ const columns = [
       ))}
     </div>
 
-    <p class="text-center text-sm text-zurich-gray mt-10 max-w-2xl mx-auto" data-animate>
-      {t.compareFooter}
-    </p>
+    <!-- Claude shoutout (hierarchy-down footnote) -->
+    <div class="mt-8 pt-6 border-t border-zurich-border/50" data-animate>
+      <div class="flex items-start gap-2.5">
+        <span class="text-xs shrink-0 mt-0.5 text-zurich-gray/50" aria-hidden="true">💬</span>
+        <p class="text-xs sm:text-[13px] text-zurich-gray/70 leading-relaxed">
+          {t.compareFooter}
+        </p>
+      </div>
+    </div>
   </div>
 </section>

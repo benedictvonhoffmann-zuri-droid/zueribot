@@ -9,7 +9,8 @@ interface Props {
 const { t } = Astro.props;
 
 const repoHref = 'https://github.com/benedictvonhoffmann-zuri-droid/zueribot';
-const suggestHref = `mailto:hello@buenzli.space?subject=${encodeURIComponent('Connector suggestion')}&body=${encodeURIComponent("Hi Bünzli,\n\nA connector I'd love to see:\n\nData source:\nWhat it would do:\nWhy it matters:\n\nCheers")}`;
+const repoSlug = 'benedictvonhoffmann-zuri-droid/zueribot';
+const suggestHref = `mailto:sali@buenzli.space?subject=${encodeURIComponent('Connector suggestion')}&body=${encodeURIComponent("Hi Bünzli,\n\nA connector I'd love to see:\n\nData source:\nWhat it would do:\nWhy it matters:\n\nCheers")}`;
 
 const commits = [
   { msg: t.openCommit1Msg, meta: t.openCommit1Meta },
@@ -34,7 +35,7 @@ const stackParts = (t.openStackList as string).split(' · ');
     <div class="grid md:grid-cols-2 gap-6 mb-10" data-animate>
 
       <!-- Stack -->
-      <div class="bg-white border border-zurich-border rounded-2xl p-6 sm:p-8">
+      <div class="bg-white border border-zurich-border rounded-md p-6 sm:p-8">
         <div class="flex items-center justify-between mb-4">
           <span class="text-[11px] font-mono text-zurich-gray/70 uppercase tracking-wider">{t.openStackLabel}</span>
           <span class="text-xl" aria-hidden="true">⚙️</span>
@@ -49,13 +50,13 @@ const stackParts = (t.openStackList as string).split(' · ');
         <p class="text-sm text-zurich-gray leading-relaxed">{t.openStackNote}</p>
       </div>
 
-      <!-- Latest commits -->
-      <div class="bg-white border border-zurich-border rounded-2xl p-6 sm:p-8">
+      <!-- Latest commits (live from GitHub) -->
+      <div class="bg-white border border-zurich-border rounded-md p-6 sm:p-8">
         <div class="flex items-center justify-between mb-4">
           <span class="text-[11px] font-mono text-zurich-gray/70 uppercase tracking-wider">{t.openCommitsLabel}</span>
           <span class="text-xl" aria-hidden="true">📝</span>
         </div>
-        <ul class="space-y-3">
+        <ul class="space-y-3" data-commits data-repo={repoSlug}>
           {commits.map(c => (
             <li class="flex items-start gap-3 text-sm">
               <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-tram-green shrink-0"></span>
@@ -76,7 +77,7 @@ const stackParts = (t.openStackList as string).split(' · ');
         href={repoHref}
         target="_blank"
         rel="noopener noreferrer"
-        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-zurich-dark text-white hover:bg-zurich-dark/90 transition-colors shadow-short w-full sm:w-auto justify-center"
+        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-md text-sm font-semibold bg-zurich-dark text-white hover:bg-zurich-dark/90 transition-colors shadow-short w-full sm:w-auto justify-center"
       >
         <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
           <path d="M8 0a8 8 0 00-2.53 15.59c.4.07.55-.17.55-.39v-1.35c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.8.06 1.23.82 1.23.82.72 1.22 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.01.08-2.11 0 0 .67-.21 2.2.82a7.6 7.6 0 014 0c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.91.08 2.11.51.56.82 1.28.82 2.15 0 3.07-1.87 3.74-3.65 3.95.29.25.54.73.54 1.48v2.19c0 .22.15.46.55.39A8 8 0 008 0z"/>
@@ -85,7 +86,7 @@ const stackParts = (t.openStackList as string).split(' · ');
       </a>
       <a
         href={suggestHref}
-        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold border border-zurich-blue text-zurich-blue hover:bg-zurich-blue/5 transition-colors w-full sm:w-auto justify-center"
+        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-md text-sm font-semibold border border-zurich-blue text-zurich-blue hover:bg-zurich-blue/5 transition-colors w-full sm:w-auto justify-center"
       >
         {t.openContributeCta}
       </a>
@@ -93,3 +94,56 @@ const stackParts = (t.openStackList as string).split(' · ');
 
   </div>
 </section>
+
+<script>
+  type Commit = {
+    sha: string;
+    html_url: string;
+    commit: { message: string; author: { date: string } };
+  };
+
+  function relativeTime(iso: string): string {
+    const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+    if (diff < 60) return 'just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
+    return `${Math.floor(diff / 604800)}w ago`;
+  }
+
+  function escapeHtml(s: string): string {
+    return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
+  }
+
+  async function loadCommits() {
+    const root = document.querySelector<HTMLElement>('[data-commits]');
+    if (!root) return;
+    const repo = root.dataset.repo;
+    if (!repo) return;
+    try {
+      const res = await fetch(`https://api.github.com/repos/${repo}/commits?per_page=3`, {
+        headers: { Accept: 'application/vnd.github+json' },
+      });
+      if (!res.ok) return;
+      const data: Commit[] = await res.json();
+      if (!Array.isArray(data) || data.length === 0) return;
+      root.innerHTML = data.slice(0, 3).map((c) => {
+        const msg = escapeHtml(c.commit.message.split('\n')[0]);
+        const when = relativeTime(c.commit.author.date);
+        const sha = c.sha.slice(0, 7);
+        return `
+          <li class="flex items-start gap-3 text-sm">
+            <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-tram-green shrink-0"></span>
+            <div class="flex-1 min-w-0">
+              <a href="${c.html_url}" target="_blank" rel="noopener noreferrer" class="text-zurich-dark hover:text-zurich-blue truncate block">${msg}</a>
+              <p class="text-[11px] font-mono text-zurich-gray/60 mt-0.5">${when} · ${sha}</p>
+            </div>
+          </li>`;
+      }).join('');
+    } catch {
+      // Keep fallback list on network error.
+    }
+  }
+
+  loadCommits();
+</script>

@@ -7,12 +7,10 @@ interface Props {
 
 const { t } = Astro.props;
 
-const betaHref = `mailto:hello@buenzli.space?subject=${encodeURIComponent('Beta access request — buenzli.space')}&body=${encodeURIComponent('Hi Bünzli team,\n\nI\'d like early access.\n\nWho I am:\nHow I\'d use Bünzli:\n\nCheers')}`;
+const betaHref = `mailto:sali@buenzli.space?subject=${encodeURIComponent('Beta access request — buenzli.space')}&body=${encodeURIComponent('Hi Bünzli team,\n\nI\'d like early access.\n\nWho I am:\nZürich neighbourhood:\nHow I\'d use Bünzli:\nHow I\'d like to contribute (feedback, bug reports, code, connector ideas):\n\nCheers')}`;
 
-// Static beta counter — wire to real signup list once it exists
-const taken = 47;
-const total = 500;
-const pct = Math.round((taken / total) * 100);
+// Beta launch target: 2026-06-01 00:00 CEST (Zürich)
+const launchTarget = '2026-06-01T00:00:00+02:00';
 ---
 
 <section id="join" class="py-20 sm:py-28 bg-zh-black-5 border-t border-zurich-border">
@@ -31,39 +29,42 @@ const pct = Math.round((taken / total) * 100);
       {t.joinSub}
     </p>
 
-    <form
-      action={betaHref}
-      method="get"
-      class="flex flex-col sm:flex-row gap-2 max-w-md mx-auto mb-6"
-      data-animate
-    >
-      <label class="sr-only" for="join-email">{t.joinEmailLabel}</label>
-      <input
-        id="join-email"
-        type="email"
-        required
-        placeholder={t.joinEmailPlaceholder}
-        class="flex-1 px-4 py-3 rounded-lg border border-zurich-border bg-white text-zurich-dark placeholder:text-zurich-gray/60 focus:outline-none focus:border-zurich-blue focus:ring-2 focus:ring-zurich-blue/10 text-sm"
-      />
+    <div class="mb-8" data-animate>
       <a
         href={betaHref}
-        class="inline-flex items-center justify-center gap-1.5 px-5 py-3 rounded-lg text-sm font-semibold bg-zurich-blue text-white hover:bg-zurich-blue-dark transition-colors shadow-short whitespace-nowrap"
+        class="inline-flex items-center justify-center gap-1.5 px-6 py-3 rounded-md text-sm font-semibold bg-zurich-blue text-white hover:bg-zurich-blue-dark transition-colors shadow-short"
       >
         {t.joinCta}
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
           <path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </a>
-    </form>
+    </div>
 
-    <!-- Live counter -->
-    <div class="max-w-sm mx-auto mb-4" data-animate>
-      <div class="flex items-center justify-between text-[11px] font-mono text-zurich-gray mb-1.5">
-        <span>{t.joinCounter}</span>
-        <span>{pct}%</span>
-      </div>
-      <div class="h-1.5 bg-zurich-border rounded-full overflow-hidden">
-        <div class="h-full bg-zurich-blue rounded-full" style={`width: ${pct}%`}></div>
+    <!-- Countdown to beta launch -->
+    <div class="mb-6" data-animate>
+      <p class="text-[11px] font-mono text-zurich-gray/70 uppercase tracking-wider mb-3">{t.joinCounter}</p>
+      <div
+        class="inline-flex items-stretch gap-2 sm:gap-3"
+        data-countdown
+        data-target={launchTarget}
+      >
+        <div class="flex flex-col items-center bg-white border border-zurich-border rounded-md px-3 sm:px-4 py-2 min-w-[60px] sm:min-w-[72px]">
+          <span class="text-2xl sm:text-3xl font-bold text-zurich-dark font-mono tabular-nums" data-days>--</span>
+          <span class="text-[10px] font-mono text-zurich-gray/70 uppercase tracking-wider mt-0.5">{t.joinCountdownDays}</span>
+        </div>
+        <div class="flex flex-col items-center bg-white border border-zurich-border rounded-md px-3 sm:px-4 py-2 min-w-[60px] sm:min-w-[72px]">
+          <span class="text-2xl sm:text-3xl font-bold text-zurich-dark font-mono tabular-nums" data-hours>--</span>
+          <span class="text-[10px] font-mono text-zurich-gray/70 uppercase tracking-wider mt-0.5">{t.joinCountdownHours}</span>
+        </div>
+        <div class="flex flex-col items-center bg-white border border-zurich-border rounded-md px-3 sm:px-4 py-2 min-w-[60px] sm:min-w-[72px]">
+          <span class="text-2xl sm:text-3xl font-bold text-zurich-dark font-mono tabular-nums" data-minutes>--</span>
+          <span class="text-[10px] font-mono text-zurich-gray/70 uppercase tracking-wider mt-0.5">{t.joinCountdownMinutes}</span>
+        </div>
+        <div class="flex flex-col items-center bg-white border border-zurich-border rounded-md px-3 sm:px-4 py-2 min-w-[60px] sm:min-w-[72px]">
+          <span class="text-2xl sm:text-3xl font-bold text-zurich-blue font-mono tabular-nums" data-seconds>--</span>
+          <span class="text-[10px] font-mono text-zurich-gray/70 uppercase tracking-wider mt-0.5">{t.joinCountdownSeconds}</span>
+        </div>
       </div>
     </div>
 
@@ -71,3 +72,29 @@ const pct = Math.round((taken / total) * 100);
 
   </div>
 </section>
+
+<script>
+  function pad(n: number): string {
+    return n < 10 ? `0${n}` : String(n);
+  }
+
+  function tick() {
+    const root = document.querySelector<HTMLElement>('[data-countdown]');
+    if (!root) return;
+    const target = root.dataset.target;
+    if (!target) return;
+    const diff = new Date(target).getTime() - Date.now();
+    const clamped = Math.max(diff, 0);
+    const days = Math.floor(clamped / 86400000);
+    const hours = Math.floor((clamped % 86400000) / 3600000);
+    const minutes = Math.floor((clamped % 3600000) / 60000);
+    const seconds = Math.floor((clamped % 60000) / 1000);
+    root.querySelector<HTMLElement>('[data-days]')!.textContent = String(days);
+    root.querySelector<HTMLElement>('[data-hours]')!.textContent = pad(hours);
+    root.querySelector<HTMLElement>('[data-minutes]')!.textContent = pad(minutes);
+    root.querySelector<HTMLElement>('[data-seconds]')!.textContent = pad(seconds);
+  }
+
+  tick();
+  setInterval(tick, 1000);
+</script>

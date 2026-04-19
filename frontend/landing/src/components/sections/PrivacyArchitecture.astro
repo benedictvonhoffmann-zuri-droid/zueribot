@@ -9,7 +9,7 @@ interface Props {
 const { t } = Astro.props;
 
 const hops = [
-  { label: t.privDiagramYou,   icon: '👤' },
+  { label: t.privDiagramYou,   icon: '🧑' },
   { label: t.privDiagramISP,   icon: '🌐' },
   { label: t.privDiagramHost,  icon: '🏢' },
   { label: t.privDiagramModel, icon: '🧠' },
@@ -33,18 +33,26 @@ const pillars = [
   <div class="relative max-w-6xl mx-auto px-4 sm:px-6">
 
     <!-- Header -->
-    <div class="mb-14" data-animate>
-      <SectionHeader eyebrow={t.privEyebrow} heading={t.privHeadline} subtext={t.privSub} theme="dark" />
+    <div class="mb-14 text-center max-w-3xl mx-auto" data-animate>
+      <p class="mb-4">
+        <span class="inline-block bg-white px-2.5 py-1 font-mono text-xs tracking-widest uppercase text-tram-green -rotate-1">
+          {t.privEyebrow}
+        </span>
+      </p>
+      <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-white">
+        {t.privHeadline}
+      </h2>
+      <p class="text-lg text-white/70">{t.privSub}</p>
     </div>
 
     <!-- Request path diagram -->
     <div class="max-w-4xl mx-auto mb-12" data-animate>
-      <div class="bg-white/5 border border-white/15 rounded-2xl p-6 sm:p-8 backdrop-blur-sm">
+      <div class="bg-white/5 border border-white/80 rounded-md p-6 sm:p-8">
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-0">
           {hops.map((h, i) => (
             <>
               <div class="flex-1 flex flex-col items-center text-center">
-                <div class="w-12 h-12 rounded-full bg-white/15 border border-white/25 flex items-center justify-center text-xl mb-2" aria-hidden="true">
+                <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center text-xl mb-2 shadow-sm" aria-hidden="true">
                   {h.icon}
                 </div>
                 <span class="text-xs font-mono text-white/90 uppercase tracking-wider">{h.label}</span>
@@ -68,11 +76,11 @@ const pillars = [
     <!-- Pillars -->
     <div class="grid md:grid-cols-3 gap-4 mb-12" data-animate>
       {pillars.map((p, i) => (
-        <div class="bg-white/10 border border-white/15 rounded-xl p-5 backdrop-blur-sm hover:bg-white/15 transition-colors">
-          <div class="text-[11px] font-mono text-white/50 mb-2">0{i + 1}</div>
-          <h3 class="font-bold text-white mb-2 text-base">{p.title}</h3>
-          <p class="text-sm text-white/75 leading-relaxed mb-3">{p.body}</p>
-          <a href={p.href} target="_blank" rel="noopener noreferrer" class="text-xs font-mono text-white/80 hover:text-white underline underline-offset-2">
+        <div class="rounded-md p-6 bg-white/5 border border-white/80 hover:bg-white/10 transition-colors">
+          <div class="text-[11px] font-mono text-white/60 mb-3 tracking-wider">0{i + 1}</div>
+          <h3 class="font-bold text-white mb-2 text-lg">{p.title}</h3>
+          <p class="text-sm text-white/80 leading-relaxed mb-4">{p.body}</p>
+          <a href={p.href} target="_blank" rel="noopener noreferrer" class="text-xs font-mono text-white/70 hover:text-white underline underline-offset-2">
             {p.link} →
           </a>
         </div>
