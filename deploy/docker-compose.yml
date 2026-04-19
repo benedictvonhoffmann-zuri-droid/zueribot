@@ -1,41 +1,16 @@
 services:
 
-  traefik:
-    image: traefik:v3.5
-    command:
-      # Dashboard (internal only — not exposed)
-      - "--api.dashboard=true"
-      - "--api.insecure=false"
-
-      # Providers
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--providers.docker.network=zuribot-net"
-
-      # Entrypoints
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-
-      # Global HTTP → HTTPS redirect
-      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
-      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
-      - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
-
-      # Let's Encrypt ACME (HTTP-01 challenge)
-      - "--certificatesresolvers.le.acme.email=${ACME_EMAIL}"
-      - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
-      - "--certificatesresolvers.le.acme.httpchallenge=true"
-      - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
-
-      # Logs
-      - "--log.level=INFO"
-      - "--accesslog=false"
+  caddy:
+    image: caddy:2
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - "./traefik/letsencrypt:/letsencrypt"
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./Caddyfile:/etc/caddy/Caddyfile:ro"
+      - "./caddy/data:/data"
+      - "./caddy/config:/config"
+    environment:
+      - ACME_EMAIL=${ACME_EMAIL}
     restart: unless-stopped
     networks:
       - zuribot-net
@@ -71,22 +46,9 @@ services:
       - "80"
     depends_on:
       - zuribot
-      - traefik
     restart: unless-stopped
     networks:
       - zuribot-net
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.web.rule=Host(`buenzli.space`) || Host(`www.buenzli.space`)"
-      - "traefik.http.routers.web.entrypoints=websecure"
-      - "traefik.http.routers.web.tls=true"
-      - "traefik.http.routers.web.tls.certresolver=le"
-      - "traefik.http.services.web.loadbalancer.server.port=80"
-      # Redirect www → apex
-      - "traefik.http.middlewares.www-to-apex.redirectregex.regex=^https://www\\.buenzli\\.space/(.*)"
-      - "traefik.http.middlewares.www-to-apex.redirectregex.replacement=https://buenzli.space/$${1}"
-      - "traefik.http.middlewares.www-to-apex.redirectregex.permanent=true"
-      - "traefik.http.routers.web.middlewares=www-to-apex"
 
 networks:
   zuribot-net:

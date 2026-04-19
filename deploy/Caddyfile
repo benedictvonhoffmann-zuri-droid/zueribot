@@ -1,0 +1,12 @@
+{
+    email {$ACME_EMAIL}
+}
+
+www.buenzli.space {
+    redir https://buenzli.space{uri} permanent
+}
+
+buenzli.space {
+    encode gzip
+    reverse_proxy web:80
+}
