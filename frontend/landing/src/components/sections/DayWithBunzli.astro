@@ -22,9 +22,11 @@ const scenes = [
     <div class="mb-16" data-animate>
       <SectionHeader
         eyebrow={t.dayEyebrow}
-        heading={t.dayHeadline}
+        heading=""
         subtext={t.daySub}
-      />
+      >
+        <Fragment slot="heading" set:html={t.dayHeadline} />
+      </SectionHeader>
     </div>
 
     <div class="relative">

@@ -37,21 +37,19 @@ const prompts = [
     <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
       <!-- Left: copy -->
-      <div>
+      <div class="min-w-0">
         <div class="inline-flex items-center gap-2 border border-zurich-border rounded-full px-3 py-1 text-[11px] font-mono text-zurich-gray mb-6 bg-white">
           <span class="w-1.5 h-1.5 rounded-full bg-tram-green animate-pulse"></span>
           {t.heroEyebrow}
         </div>
 
-        <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.02] mb-6 text-zurich-dark">
+        <h1 class="text-[2.25rem] sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.05] sm:leading-[1.02] mb-6 text-zurich-dark break-words hyphens-auto" lang="de">
           {t.heroHeadline1}
           <br />
           <span class="text-gradient">{t.heroHeadline2}</span>
         </h1>
 
-        <p class="text-lg text-zurich-gray leading-relaxed mb-8 max-w-md">
-          {t.heroSub}
-        </p>
+        <p class="text-lg text-zurich-gray leading-relaxed mb-8 max-w-md" set:html={t.heroSub} />
 
         <div class="flex flex-col sm:flex-row gap-3 mb-10">
           <Button href={betaHref} variant="primary" size="lg" class="w-full sm:w-auto">
@@ -65,15 +63,15 @@ const prompts = [
           </Button>
         </div>
 
-        <div class="flex items-center gap-5 text-xs text-zurich-gray/70 font-mono">
-          <span class="flex items-center gap-1.5">🛡️ no tracking, no logs</span>
-          <span class="flex items-center gap-1.5">🇨🇭 swiss hosted</span>
-          <span class="hidden sm:flex items-center gap-1.5">💻 open source</span>
+        <div class="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-2 text-xs text-zurich-gray/70 font-mono">
+          <span class="flex items-center gap-1.5">🛡️ {t.heroTrustNoTracking}</span>
+          <span class="flex items-center gap-1.5">🇨🇭 {t.heroTrustSwissHosted}</span>
+          <span class="flex items-center gap-1.5">💻 {t.heroTrustOpenSource}</span>
         </div>
       </div>
 
       <!-- Right: Chat replay -->
-      <div>
+      <div class="min-w-0">
         <div class="bg-white border border-zurich-border rounded-md shadow-regular overflow-hidden">
 
           <!-- Chat header -->
@@ -248,7 +246,7 @@ const prompts = [
     id="zh-overlay-close"
     class="mt-12 text-white/50 hover:text-white/90 text-sm font-mono transition-colors"
   >
-    [ schliessä ]
+    [ schlüsse ]
   </button>
 </div>
 

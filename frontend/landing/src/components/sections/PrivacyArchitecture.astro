@@ -1,5 +1,4 @@
 ---
-import SectionHeader from '../ui/SectionHeader.astro';
 import type { TranslationSchema } from '../../i18n/translations/de';
 
 interface Props {
@@ -45,10 +44,10 @@ const pillars = [
       <p class="text-lg text-white/70">{t.privSub}</p>
     </div>
 
-    <!-- Request path diagram -->
-    <div class="max-w-4xl mx-auto mb-12" data-animate>
+    <!-- Request path diagram — desktop only -->
+    <div class="hidden sm:block max-w-4xl mx-auto mb-12" data-animate>
       <div class="bg-white/5 border border-white/80 rounded-md p-6 sm:p-8">
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-0">
+        <div class="flex items-center">
           {hops.map((h, i) => (
             <>
               <div class="flex-1 flex flex-col items-center text-center">
@@ -58,7 +57,7 @@ const pillars = [
                 <span class="text-xs font-mono text-white/90 uppercase tracking-wider">{h.label}</span>
               </div>
               {i < hops.length - 1 && (
-                <div class="flex items-center justify-center text-white/30 sm:px-2 rotate-90 sm:rotate-0">
+                <div class="flex items-center justify-center text-white/30 px-2">
                   <svg width="28" height="12" viewBox="0 0 28 12" fill="none" aria-hidden="true">
                     <path d="M1 6h24M21 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
@@ -92,8 +91,8 @@ const pillars = [
       {t.privZeros}
     </p>
 
-    <!-- Verify -->
-    <div class="text-center" data-animate>
+    <!-- Verify — desktop only (F12 is irrelevant on mobile) -->
+    <div class="hidden sm:block text-center" data-animate>
       <div class="inline-flex items-center gap-3 bg-white/10 border border-white/20 rounded-full px-5 py-2.5 text-sm">
         <span class="text-[10px] font-mono text-white/60 uppercase tracking-wider">{t.privVerifyLabel}</span>
         <span class="text-white/90">{t.privVerify}</span>

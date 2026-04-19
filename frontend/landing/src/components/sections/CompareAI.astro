@@ -23,7 +23,7 @@ const columns = [
     answer: t.compareChatGPTAnswer,
     verdict: t.compareChatGPTVerdict,
     verdictColor: 'text-amber-700',
-    badge: { label: 'Danger', icon: '⚠️', class: 'text-amber-700 border-amber-500/40 bg-amber-50' },
+    badge: { label: t.compareBadgeDanger, icon: '⚠️', class: 'text-amber-700 border-amber-500/40 bg-amber-50' },
   },
   {
     key: 'gemini',
@@ -34,7 +34,7 @@ const columns = [
     answer: t.compareGeminiAnswer,
     verdict: t.compareGeminiVerdict,
     verdictColor: 'text-amber-700',
-    badge: { label: 'Danger', icon: '⚠️', class: 'text-amber-700 border-amber-500/40 bg-amber-50' },
+    badge: { label: t.compareBadgeDanger, icon: '⚠️', class: 'text-amber-700 border-amber-500/40 bg-amber-50' },
   },
   {
     key: 'bunzli',
@@ -46,7 +46,7 @@ const columns = [
     verdict: t.compareBunzliVerdict,
     verdictColor: 'text-tram-green',
     highlight: true,
-    badge: { label: 'Safe', icon: '✓', class: 'text-tram-green border-tram-green/40 bg-tram-green/5' },
+    badge: { label: t.compareBadgeSafe, icon: '✓', class: 'text-tram-green border-tram-green/40 bg-tram-green/5' },
   },
 ];
 ---
@@ -68,7 +68,7 @@ const columns = [
         <svg class="w-4 h-4 text-zurich-gray/50 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
         </svg>
-        <p class="flex-1 text-base sm:text-lg text-zurich-dark font-medium">
+        <p class="flex-1 min-w-0 text-xs sm:text-lg text-zurich-dark font-medium whitespace-nowrap overflow-hidden text-ellipsis">
           {t.compareQuestion}
         </p>
         <button type="button" disabled aria-hidden="true" class="shrink-0 w-9 h-9 rounded-full bg-zurich-blue text-white flex items-center justify-center">

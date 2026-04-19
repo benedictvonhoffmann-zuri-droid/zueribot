@@ -32,10 +32,10 @@ const stackParts = (t.openStackList as string).split(' · ');
       />
     </div>
 
-    <div class="grid md:grid-cols-2 gap-6 mb-10" data-animate>
+    <div class="grid md:grid-cols-2 gap-6 mb-10 min-w-0" data-animate>
 
       <!-- Stack -->
-      <div class="bg-white border border-zurich-border rounded-md p-6 sm:p-8">
+      <div class="min-w-0 bg-white border border-zurich-border rounded-md p-5 sm:p-8">
         <div class="flex items-center justify-between mb-4">
           <span class="text-[11px] font-mono text-zurich-gray/70 uppercase tracking-wider">{t.openStackLabel}</span>
           <span class="text-xl" aria-hidden="true">⚙️</span>
@@ -51,7 +51,7 @@ const stackParts = (t.openStackList as string).split(' · ');
       </div>
 
       <!-- Latest commits (live from GitHub) -->
-      <div class="bg-white border border-zurich-border rounded-md p-6 sm:p-8">
+      <div class="min-w-0 bg-white border border-zurich-border rounded-md p-5 sm:p-8">
         <div class="flex items-center justify-between mb-4">
           <span class="text-[11px] font-mono text-zurich-gray/70 uppercase tracking-wider">{t.openCommitsLabel}</span>
           <span class="text-xl" aria-hidden="true">📝</span>

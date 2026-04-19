@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0064B4"/>
+      <stop offset="100%" stop-color="#003D6E"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Lion watermark (right side, subtle) -->
+  <g transform="translate(820 120) scale(3.0)" opacity="0.12">
+    <path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF"
+      d="M37.2069 133.205L20.6553 133.138C20.1877 133.138 19.7201 133.071 19.2525 133.004C15.5117 132.269 11.9045 130.132 9.0993 126.994C5.69271 123.122 3.82204 117.848 3.88881 112.307V73.5202H0.882812V70.1155H3.88881V39.1393H10.8354V32.9307H15.1774V27.523H19.5194V22.1153H19.5862V8.76383H40.9478V22.1153H49.7654V27.523H54.1074V32.9307H58.5162V39.1393H65.4628V70.1155H68.4688V73.5202H65.4628V85.8036H67.9343V89.6757H71.7419V99.6909H75.2153V102.962H78.4215V106.234H81.2268V108.904H87.8394V114.111H83.4974V116.515H81.5598V119.652H75.7497V125.86H73.8121V128.798H71.1405V131.869H67.9343V134.006H53.7066V130.935H47.1609V134.006H40.5484V130.935H37.2753L37.2069 133.205Z"/>
+  </g>
+
+  <!-- Content -->
+  <g transform="translate(80 170)">
+    <!-- Small lion + wordmark -->
+    <g transform="translate(0 0)">
+      <rect x="0" y="0" width="64" height="64" rx="12" fill="#FFFFFF"/>
+      <g transform="translate(13 8) scale(0.28)">
+        <path fill-rule="evenodd" clip-rule="evenodd" fill="#0064B4"
+          d="M37.2069 133.205L20.6553 133.138C20.1877 133.138 19.7201 133.071 19.2525 133.004C15.5117 132.269 11.9045 130.132 9.0993 126.994C5.69271 123.122 3.82204 117.848 3.88881 112.307V73.5202H0.882812V70.1155H3.88881V39.1393H10.8354V32.9307H15.1774V27.523H19.5194V22.1153H19.5862V8.76383H40.9478V22.1153H49.7654V27.523H54.1074V32.9307H58.5162V39.1393H65.4628V70.1155H68.4688V73.5202H65.4628V85.8036H67.9343V89.6757H71.7419V99.6909H75.2153V102.962H78.4215V106.234H81.2268V108.904H87.8394V114.111H83.4974V116.515H81.5598V119.652H75.7497V125.86H73.8121V128.798H71.1405V131.869H67.9343V134.006H53.7066V130.935H47.1609V134.006H40.5484V130.935H37.2753L37.2069 133.205Z"/>
+      </g>
+    </g>
+    <text x="86" y="45" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="40" font-weight="700" fill="#FFFFFF">bünzli<tspan fill="#FFFFFF" opacity="0.6">.space</tspan></text>
+
+    <!-- Headline -->
+    <text y="170" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="78" font-weight="700" fill="#FFFFFF" letter-spacing="-2">
+      <tspan x="0" dy="0">D AI, wo Züri</tspan>
+      <tspan x="0" dy="92">würkli kennt.</tspan>
+    </text>
+
+    <!-- Sub -->
+    <text y="378" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="30" font-weight="400" fill="#FFFFFF" opacity="0.85">
+      <tspan x="0">Tramziite, mieti-tipps, badis, restaurants —</tspan>
+      <tspan x="0" dy="40">uf Züridütsch, Dütsch oder Englisch.</tspan>
+    </text>
+  </g>
+
+  <!-- Footer row -->
+  <g transform="translate(80 560)" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="20" fill="#FFFFFF" opacity="0.7">
+    <text x="0" y="0">kei tracking</text>
+    <text x="180" y="0">·</text>
+    <text x="200" y="0">schwizer gehostet</text>
+    <text x="460" y="0">·</text>
+    <text x="480" y="0">open source</text>
+  </g>
+</svg>

@@ -44,10 +44,12 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
+    overflow-x: clip;
   }
 
   body {
     background-color: white;
+    overflow-x: clip;
   }
 
   h1, h2, h3, h4 {

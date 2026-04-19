@@ -213,7 +213,7 @@ SOURCES = {
 # ── HTTP Session ───────────────────────────────────────────────────────────
 _session = requests.Session()
 _session.headers.update({
-    "User-Agent": "Mozilla/5.0 (compatible; ZuriBot/1.0; +https://github.com/zuribot)",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
     "Accept-Language": "de,en;q=0.9",
     "Accept": "text/html,application/xhtml+xml",
 })

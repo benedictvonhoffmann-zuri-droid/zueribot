@@ -33,3 +33,12 @@ models/
 
 # Knowledge base (large binary files, rebuilt locally)
 data/knowledge_base/
+data/law_knowledge_base/
+data/law_pdfs/
+data/manual_content/
+
+# Claude Code worktrees
+.claude/
+
+# Env backup (never commit)
+.env.save
