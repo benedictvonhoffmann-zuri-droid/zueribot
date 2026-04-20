@@ -42,3 +42,4 @@ data/manual_content/
 
 # Env backup (never commit)
 .env.save
+DEPLOY_NOTES.md
