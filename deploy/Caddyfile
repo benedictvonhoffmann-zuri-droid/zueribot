@@ -8,5 +8,13 @@ www.buenzli.space {
 
 buenzli.space {
     encode gzip
-    reverse_proxy web:80
+
+    # Landing-page contact form → FastAPI backend.
+    handle_path /zuribot/* {
+        reverse_proxy zuribot:8000
+    }
+
+    handle {
+        reverse_proxy web:80
+    }
 }
