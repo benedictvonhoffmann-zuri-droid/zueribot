@@ -137,6 +137,14 @@ Update memory when something changes — don't accumulate stale entries.
 
 ---
 
+## End of session: refresh this file
+
+Before wrapping a session, re-read this CLAUDE.md and update it if anything during the session changed the workflow, deploy process, tooling, or anti-patterns. The goal is to keep this file as the single source of truth — the next session should not have to rediscover things we already learned together. Small edits are fine; commit them alongside the session's work.
+
+Same applies to `DEPLOY_NOTES.md` (gitignored) when operational details change: new container, new env var, new subdomain.
+
+---
+
 ## Anti-patterns to avoid (learned the hard way)
 
 - **Editing files in the main repo when you're supposed to be in a worktree.** Always check `pwd` before the first edit. If you've edited the wrong path, `cp` to the right one and `git checkout --` to revert main.
