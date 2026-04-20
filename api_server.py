@@ -8,7 +8,7 @@ import logging
 import time
 from typing import Optional, List
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
@@ -163,6 +163,112 @@ async def chat_completions(request: ChatRequest, user: dict = Depends(require_us
 @app.get("/health")
 async def health():
     return {"status": "healthy"}
+
+
+# --- Contact form (landing page) ---------------------------------------------
+
+import asyncio
+import os
+import re
+import smtplib
+import ssl
+from collections import deque
+from email.message import EmailMessage
+
+_EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]{2,}$")
+_CONTACT_RATE: dict[str, deque] = {}
+_CONTACT_WINDOW_SEC = 3600
+_CONTACT_MAX_PER_WINDOW = 5
+
+_SMTP_HOST = os.getenv("SMTP_HOST", "").strip()
+_SMTP_PORT = int(os.getenv("SMTP_PORT", "465"))
+_SMTP_USER = os.getenv("SMTP_USER", "").strip()
+_SMTP_PASS = os.getenv("SMTP_PASS", "")
+_SMTP_FROM = os.getenv("SMTP_FROM", _SMTP_USER).strip()
+_SMTP_TO = os.getenv("SMTP_TO", _SMTP_USER).strip()
+
+
+def _send_contact_email(intent: str, email: str, connector: Optional[str], note: Optional[str], ip: str) -> None:
+    """Blocking SMTP send. Run via asyncio.to_thread from the async handler."""
+    subject_map = {
+        "beta": "Bünzli — beta signup",
+        "connector": "Bünzli — connector suggestion",
+        "collab": "Bünzli — collaboration request",
+    }
+    msg = EmailMessage()
+    msg["Subject"] = subject_map.get(intent, f"Bünzli — {intent}")
+    msg["From"] = _SMTP_FROM
+    msg["To"] = _SMTP_TO
+    msg["Reply-To"] = email
+    body_lines = [
+        f"Intent: {intent}",
+        f"From:   {email}",
+        f"IP:     {ip}",
+    ]
+    if connector:
+        body_lines.append(f"Connector: {connector}")
+    if note:
+        body_lines.append("")
+        body_lines.append("Note:")
+        body_lines.append(note)
+    msg.set_content("\n".join(body_lines))
+
+    ctx = ssl.create_default_context()
+    if _SMTP_PORT == 465:
+        with smtplib.SMTP_SSL(_SMTP_HOST, _SMTP_PORT, context=ctx, timeout=10) as s:
+            s.login(_SMTP_USER, _SMTP_PASS)
+            s.send_message(msg)
+    else:
+        with smtplib.SMTP(_SMTP_HOST, _SMTP_PORT, timeout=10) as s:
+            s.starttls(context=ctx)
+            s.login(_SMTP_USER, _SMTP_PASS)
+            s.send_message(msg)
+
+
+class ContactRequest(BaseModel):
+    intent: str = Field(pattern=r"^(beta|connector|collab)$")
+    email: str = Field(max_length=254)
+    connector: Optional[str] = Field(default=None, max_length=200)
+    note: Optional[str] = Field(default=None, max_length=2000)
+
+
+def _rate_limit(ip: str) -> bool:
+    now = time.time()
+    bucket = _CONTACT_RATE.setdefault(ip, deque())
+    while bucket and now - bucket[0] > _CONTACT_WINDOW_SEC:
+        bucket.popleft()
+    if len(bucket) >= _CONTACT_MAX_PER_WINDOW:
+        return False
+    bucket.append(now)
+    return True
+
+
+@app.post("/contact")
+async def contact(req: ContactRequest, request: Request):
+    email = req.email.strip()
+    if not _EMAIL_RE.match(email):
+        raise HTTPException(status_code=400, detail="invalid_email")
+
+    ip = request.client.host if request.client else "unknown"
+    if not _rate_limit(ip):
+        raise HTTPException(status_code=429, detail="rate_limited")
+
+    logger.info(
+        "contact_submission intent=%s email=%s connector=%r note=%r ip=%s",
+        req.intent, email, req.connector, req.note, ip,
+    )
+
+    if _SMTP_HOST and _SMTP_PASS:
+        try:
+            await asyncio.to_thread(
+                _send_contact_email, req.intent, email, req.connector, req.note, ip,
+            )
+        except Exception as e:
+            # Log but still report success — submission is in the journal,
+            # we don't want a flaky mail server to swallow signups.
+            logger.error("contact_email_failed: %s", e, exc_info=True)
+
+    return {"ok": True}
 
 
 if __name__ == "__main__":

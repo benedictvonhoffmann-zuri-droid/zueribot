@@ -7,8 +7,6 @@ interface Props {
 
 const { t } = Astro.props;
 
-const betaHref = `mailto:sali@buenzli.space?subject=${encodeURIComponent('Beta access request — buenzli.space')}&body=${encodeURIComponent('Hi Bünzli team,\n\nI\'d like early access.\n\nWho I am:\nZürich neighbourhood:\nHow I\'d use Bünzli:\nHow I\'d like to contribute (feedback, bug reports, code, connector ideas):\n\nCheers')}`;
-
 // Beta launch target: 2026-06-01 00:00 CEST (Zürich)
 const launchTarget = '2026-06-01T00:00:00+02:00';
 ---
@@ -30,15 +28,16 @@ const launchTarget = '2026-06-01T00:00:00+02:00';
     </p>
 
     <div class="mb-8" data-animate>
-      <a
-        href={betaHref}
+      <button
+        type="button"
+        data-open-contact="beta"
         class="inline-flex items-center justify-center gap-1.5 px-6 py-3 rounded-md text-sm font-semibold bg-zurich-blue text-white hover:bg-zurich-blue-dark transition-colors shadow-short"
       >
         {t.joinCta}
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
           <path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-      </a>
+      </button>
     </div>
 
     <!-- Countdown to beta launch -->

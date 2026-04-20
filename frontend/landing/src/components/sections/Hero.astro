@@ -10,7 +10,6 @@ interface Props {
 
 const { t } = Astro.props;
 
-const betaHref = `mailto:sali@buenzli.space?subject=${encodeURIComponent('Beta access request — buenzli.space')}&body=${encodeURIComponent('Hi Bünzli team,\n\nI\'d like early access.\n\nWho I am:\nHow I\'d use Bünzli:\n\nCheers')}`;
 const repoHref = 'https://github.com/benedictvonhoffmann-zuri-droid/zueribot';
 
 const prompts = [
@@ -43,16 +42,16 @@ const prompts = [
           {t.heroEyebrow}
         </div>
 
-        <h1 class="text-[2.25rem] sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.05] sm:leading-[1.02] mb-6 text-zurich-dark break-words hyphens-auto" lang="de">
+        <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.05] sm:leading-[1.02] mb-6 text-zurich-dark break-words hyphens-auto" lang="de">
           {t.heroHeadline1}
           <br />
           <span class="text-gradient">{t.heroHeadline2}</span>
         </h1>
 
-        <p class="text-lg text-zurich-gray leading-relaxed mb-8 max-w-md" set:html={t.heroSub} />
+        <p class="text-base sm:text-lg text-zurich-gray leading-relaxed mb-8 max-w-md" set:html={t.heroSub} />
 
         <div class="flex flex-col sm:flex-row gap-3 mb-10">
-          <Button href={betaHref} variant="primary" size="lg" class="w-full sm:w-auto">
+          <Button variant="primary" size="lg" class="w-full sm:w-auto" data-open-contact="beta">
             {t.heroCtaPrimary}
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
               <path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>

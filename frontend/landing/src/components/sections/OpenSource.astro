@@ -10,7 +10,6 @@ const { t } = Astro.props;
 
 const repoHref = 'https://github.com/benedictvonhoffmann-zuri-droid/zueribot';
 const repoSlug = 'benedictvonhoffmann-zuri-droid/zueribot';
-const suggestHref = `mailto:sali@buenzli.space?subject=${encodeURIComponent('Connector suggestion')}&body=${encodeURIComponent("Hi Bünzli,\n\nA connector I'd love to see:\n\nData source:\nWhat it would do:\nWhy it matters:\n\nCheers")}`;
 
 const commits = [
   { msg: t.openCommit1Msg, meta: t.openCommit1Meta },
@@ -84,12 +83,13 @@ const stackParts = (t.openStackList as string).split(' · ');
         </svg>
         {t.openRepoCta}
       </a>
-      <a
-        href={suggestHref}
+      <button
+        type="button"
+        data-open-contact="connector"
         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-md text-sm font-semibold border border-zurich-blue text-zurich-blue hover:bg-zurich-blue/5 transition-colors w-full sm:w-auto justify-center"
       >
         {t.openContributeCta}
-      </a>
+      </button>
     </div>
 
   </div>
