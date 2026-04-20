@@ -139,7 +139,6 @@ Missing a source? Open an issue or PR.
 ```
 zuribot/
 ├── api_server.py           # FastAPI entry point (OpenAI-compatible)
-├── main.py                 # CLI chat loop (dev / debug)
 ├── requirements.txt
 ├── requirements-heavy.txt  # torch, sentence-transformers, chromadb
 ├── backend/
