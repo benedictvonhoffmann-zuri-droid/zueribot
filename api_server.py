@@ -8,7 +8,7 @@ import logging
 import time
 from typing import Optional, List
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
@@ -163,6 +163,54 @@ async def chat_completions(request: ChatRequest, user: dict = Depends(require_us
 @app.get("/health")
 async def health():
     return {"status": "healthy"}
+
+
+# --- Contact form (landing page) ---------------------------------------------
+
+import re
+from collections import deque
+
+_EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]{2,}$")
+_CONTACT_RATE: dict[str, deque] = {}
+_CONTACT_WINDOW_SEC = 3600
+_CONTACT_MAX_PER_WINDOW = 5
+
+
+class ContactRequest(BaseModel):
+    intent: str = Field(pattern=r"^(beta|connector|collab)$")
+    email: str = Field(max_length=254)
+    connector: Optional[str] = Field(default=None, max_length=200)
+    note: Optional[str] = Field(default=None, max_length=2000)
+
+
+def _rate_limit(ip: str) -> bool:
+    now = time.time()
+    bucket = _CONTACT_RATE.setdefault(ip, deque())
+    while bucket and now - bucket[0] > _CONTACT_WINDOW_SEC:
+        bucket.popleft()
+    if len(bucket) >= _CONTACT_MAX_PER_WINDOW:
+        return False
+    bucket.append(now)
+    return True
+
+
+@app.post("/contact")
+async def contact(req: ContactRequest, request: Request):
+    email = req.email.strip()
+    if not _EMAIL_RE.match(email):
+        raise HTTPException(status_code=400, detail="invalid_email")
+
+    ip = request.client.host if request.client else "unknown"
+    if not _rate_limit(ip):
+        raise HTTPException(status_code=429, detail="rate_limited")
+
+    # TODO: wire SMTP via Infomaniak once creds are in env.
+    # For now log so we can read submissions from journalctl.
+    logger.info(
+        "contact_submission intent=%s email=%s connector=%r note=%r ip=%s",
+        req.intent, email, req.connector, req.note, ip,
+    )
+    return {"ok": True}
 
 
 if __name__ == "__main__":

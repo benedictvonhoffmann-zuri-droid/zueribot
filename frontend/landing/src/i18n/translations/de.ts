@@ -250,6 +250,28 @@ export const de = {
   footerBeta: 'Beta beaträge',
   footerCollaborate: 'Mitbaue',
   footerMade: 'Z Züri gmacht',
+
+  // Contact modal (beta / connector / collab)
+  contactTitleBeta: 'A de beta teilnäh',
+  contactTitleConnector: 'En connector Vorschlah',
+  contactTitleCollab: 'Mitmache',
+  contactIntroBeta: 'Lahn dini email da und mir schicked dir en Iiladig, sobald en Platz frei wird.',
+  contactIntroConnector: 'Was fehlt dir? Teils ois mit und mir werdets für dich baue.',
+  contactIntroCollab: 'Willsch bim ufbau vom Bünzli hälfe? Schriib ois e churzi nachricht über dini skills oder dini idee.',
+  contactEmailLabel: 'Dini email',
+  contactEmailPlaceholder: 'du@bispiel.zh',
+  contactEmailInvalid: 'Bitte gib e gültigi email adresse ah.',
+  contactConnectorLabel: 'Was für en connector?',
+  contactConnectorPlaceholder: 'Schrieb da was suechsch',
+  contactCollabLabel: 'Churzi notiz (optional)',
+  contactCollabPlaceholder: 'A was wotsch schaffe?',
+  contactSubmit: 'Abschike',
+  contactSubmitting: 'verarbeitig…',
+  contactSuccessTitle: 'Danke – mir melded eus',
+  contactSuccessBody: 'Mir hend dis interesse notiert und melded eus, sobalds news git.',
+  contactErrorGeneric: 'Es isch chli schiefgloffe. Versuechs bitte namal oder schicke es email direkt a sali@buenzli.space.',
+  contactClose: 'Schlüsse',
+  contactMailFallback: 'Du bevorzugsch email? Schrieb a sali@buenzli.space.',
 };
 
 export type TranslationSchema = typeof de;

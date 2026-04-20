@@ -1,0 +1,207 @@
+---
+import type { TranslationSchema } from '../i18n/translations/de';
+
+interface Props {
+  t: TranslationSchema;
+}
+
+const { t } = Astro.props;
+const fallbackEmail = 'sali@buenzli.space';
+---
+
+<dialog id="contact-dialog" class="legal-dialog">
+  <div class="legal-dialog-inner">
+    <div class="flex items-center justify-between mb-4">
+      <h2 id="contact-title" class="text-xl font-bold text-zurich-dark">{t.contactTitleBeta}</h2>
+      <button type="button" data-close-legal aria-label={t.contactClose} class="w-8 h-8 rounded-full hover:bg-zh-black-5 flex items-center justify-center text-zurich-gray">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <p id="contact-intro" class="text-sm text-zurich-gray leading-relaxed mb-5">{t.contactIntroBeta}</p>
+
+    <form id="contact-form" novalidate>
+      <!-- Email (always shown) -->
+      <div class="mb-4">
+        <label for="contact-email" class="block text-[11px] font-mono text-zurich-gray/70 uppercase tracking-wider mb-1.5">
+          {t.contactEmailLabel}
+        </label>
+        <input
+          id="contact-email"
+          name="email"
+          type="email"
+          autocomplete="email"
+          required
+          placeholder={t.contactEmailPlaceholder}
+          class="w-full border border-zurich-border rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-zurich-blue focus:ring-1 focus:ring-zurich-blue data-[invalid=true]:border-red-500 data-[invalid=true]:ring-red-500"
+        />
+        <p id="contact-email-error" class="hidden text-xs text-red-600 mt-1.5">{t.contactEmailInvalid}</p>
+      </div>
+
+      <!-- Connector name (connector intent only) -->
+      <div id="contact-connector-field" class="hidden mb-4">
+        <label for="contact-connector-input" class="block text-[11px] font-mono text-zurich-gray/70 uppercase tracking-wider mb-1.5">
+          {t.contactConnectorLabel}
+        </label>
+        <input
+          id="contact-connector-input"
+          name="connector"
+          type="text"
+          placeholder={t.contactConnectorPlaceholder}
+          class="w-full border border-zurich-border rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-zurich-blue focus:ring-1 focus:ring-zurich-blue"
+        />
+      </div>
+
+      <!-- Collab note (collab intent only) -->
+      <div id="contact-collab-field" class="hidden mb-4">
+        <label for="contact-collab-input" class="block text-[11px] font-mono text-zurich-gray/70 uppercase tracking-wider mb-1.5">
+          {t.contactCollabLabel}
+        </label>
+        <textarea
+          id="contact-collab-input"
+          name="note"
+          rows="3"
+          placeholder={t.contactCollabPlaceholder}
+          class="w-full border border-zurich-border rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-zurich-blue focus:ring-1 focus:ring-zurich-blue resize-none"
+        ></textarea>
+      </div>
+
+      <button
+        id="contact-submit"
+        type="submit"
+        class="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md text-sm font-semibold bg-zurich-blue text-white hover:bg-zurich-blue-dark transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+      >
+        <span class="submit-label">{t.contactSubmit}</span>
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+          <path d="M2.5 6.5h8M7 3.5l3 3-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      <p id="contact-error" class="hidden text-xs text-red-600 mt-3 text-center">{t.contactErrorGeneric}</p>
+      <p class="text-[11px] text-zurich-gray/70 mt-3 text-center">{t.contactMailFallback}</p>
+    </form>
+
+    <!-- Success state -->
+    <div id="contact-success" class="hidden text-center py-6">
+      <div class="w-12 h-12 rounded-full bg-tram-green/10 flex items-center justify-center mx-auto mb-4">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+          <path d="M5 11.5l4 4 8-8" stroke="#2a9d4a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <p class="text-base font-bold text-zurich-dark mb-1.5">{t.contactSuccessTitle}</p>
+      <p class="text-sm text-zurich-gray leading-relaxed">{t.contactSuccessBody}</p>
+      <button
+        type="button"
+        data-close-legal
+        class="mt-5 inline-flex items-center px-4 py-2 rounded-md text-sm font-semibold border border-zurich-border hover:bg-zh-black-5 transition-colors"
+      >
+        {t.contactClose}
+      </button>
+    </div>
+  </div>
+</dialog>
+
+<script define:vars={{ t, fallbackEmail }}>
+  const dlg = document.getElementById('contact-dialog');
+  const titleEl = document.getElementById('contact-title');
+  const introEl = document.getElementById('contact-intro');
+  const form = document.getElementById('contact-form');
+  const successEl = document.getElementById('contact-success');
+  const emailInput = document.getElementById('contact-email');
+  const emailError = document.getElementById('contact-email-error');
+  const connectorField = document.getElementById('contact-connector-field');
+  const connectorInput = document.getElementById('contact-connector-input');
+  const collabField = document.getElementById('contact-collab-field');
+  const collabInput = document.getElementById('contact-collab-input');
+  const submitBtn = document.getElementById('contact-submit');
+  const submitLabel = submitBtn?.querySelector('.submit-label');
+  const genericError = document.getElementById('contact-error');
+
+  const titles = { beta: t.contactTitleBeta, connector: t.contactTitleConnector, collab: t.contactTitleCollab };
+  const intros = { beta: t.contactIntroBeta, connector: t.contactIntroConnector, collab: t.contactIntroCollab };
+
+  let currentIntent = 'beta';
+
+  // RFC-5322 lite: good enough to catch mistypes, avoids false negatives
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  const isValidEmail = (v) => EMAIL_RE.test(v.trim());
+
+  function resetForm() {
+    form?.reset();
+    form?.classList.remove('hidden');
+    successEl?.classList.add('hidden');
+    genericError?.classList.add('hidden');
+    emailError?.classList.add('hidden');
+    emailInput?.removeAttribute('data-invalid');
+    if (submitBtn) submitBtn.disabled = false;
+    if (submitLabel) submitLabel.textContent = t.contactSubmit;
+  }
+
+  function render() {
+    if (titleEl) titleEl.textContent = titles[currentIntent];
+    if (introEl) introEl.textContent = intros[currentIntent];
+    connectorField?.classList.toggle('hidden', currentIntent !== 'connector');
+    collabField?.classList.toggle('hidden', currentIntent !== 'collab');
+  }
+
+  // Inline validation: validate on blur, clear error on input
+  emailInput?.addEventListener('blur', () => {
+    const v = emailInput.value.trim();
+    if (v && !isValidEmail(v)) {
+      emailInput.setAttribute('data-invalid', 'true');
+      emailError?.classList.remove('hidden');
+    }
+  });
+  emailInput?.addEventListener('input', () => {
+    emailInput.removeAttribute('data-invalid');
+    emailError?.classList.add('hidden');
+  });
+
+  document.querySelectorAll('[data-open-contact]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      currentIntent = btn.dataset.openContact || 'beta';
+      resetForm();
+      render();
+      dlg?.showModal();
+      setTimeout(() => emailInput?.focus(), 50);
+    });
+  });
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = emailInput?.value.trim() || '';
+    if (!isValidEmail(email)) {
+      emailInput?.setAttribute('data-invalid', 'true');
+      emailError?.classList.remove('hidden');
+      emailInput?.focus();
+      return;
+    }
+
+    const payload = {
+      intent: currentIntent,
+      email,
+      connector: currentIntent === 'connector' ? (connectorInput?.value.trim() || '') : undefined,
+      note: currentIntent === 'collab' ? (collabInput?.value.trim() || '') : undefined,
+    };
+
+    if (submitBtn) submitBtn.disabled = true;
+    if (submitLabel) submitLabel.textContent = t.contactSubmitting;
+    genericError?.classList.add('hidden');
+
+    try {
+      const res = await fetch('/zuribot/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error('bad response');
+      form?.classList.add('hidden');
+      successEl?.classList.remove('hidden');
+    } catch {
+      genericError?.classList.remove('hidden');
+      if (submitBtn) submitBtn.disabled = false;
+      if (submitLabel) submitLabel.textContent = t.contactSubmit;
+    }
+  });
+</script>

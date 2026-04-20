@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import LanguageSwitcher from '../components/LanguageSwitcher.astro';
+import ContactModal from '../components/ContactModal.astro';
 import { LOCALE_META, type Locale } from '../i18n/locales';
 import type { TranslationSchema } from '../i18n/translations/de';
 
@@ -12,9 +13,6 @@ interface Props {
 const { lang, t } = Astro.props;
 const htmlLang = LOCALE_META[lang].htmlLang;
 const canonicalUrl = `https://buenzli.space/${lang}/`;
-
-const betaHref = `mailto:sali@buenzli.space?subject=${encodeURIComponent('Beta Test Request - buenzli.space')}&body=${encodeURIComponent('Hi Buenzli Team,\n\nI would like to beta test buenzli.space!\n\nLinkedIn profile: \nWhy I want to test: \nWhat I would use Bünzli AI for: \n\nBest regards')}`;
-const collabHref = `mailto:sali@buenzli.space?subject=${encodeURIComponent('Collaboration Inquiry - buenzli.space')}&body=${encodeURIComponent('Hi Buenzli Team,\n\nI would like to collaborate on buenzli.space!\n\nLinkedIn profile: \nWhy I want to collaborate: \nSkills I bring: \n\nBest regards')}`;
 
 const navLinks = [
   { label: t.navBoard,   href: '#board' },
@@ -82,15 +80,16 @@ const navLinks = [
         <div class="flex items-center gap-3">
           <LanguageSwitcher currentLang={lang} />
           <span class="hidden sm:inline-block h-5 w-px bg-zurich-border" aria-hidden="true"></span>
-          <a
-            href={betaHref}
+          <button
+            type="button"
+            data-open-contact="beta"
             class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-semibold bg-zurich-blue text-white hover:bg-zurich-blue-dark transition-colors duration-150 shadow-short"
           >
             {t.navBetaCta}
             <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
               <path d="M2.5 6.5h8M7 3.5l3 3-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-          </a>
+          </button>
           <!-- Mobile hamburger -->
           <button id="mobile-menu-btn" aria-label="Menu" class="md:hidden w-8 h-8 flex items-center justify-center nav-hamburger">
             <svg id="menu-icon-open" width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -126,15 +125,16 @@ const navLinks = [
             {label}
           </a>
         ))}
-        <a
-          href={betaHref}
-          class="mt-8 flex items-center justify-center gap-1.5 px-4 py-3.5 rounded-md text-base font-semibold bg-zurich-blue text-white hover:bg-zurich-blue-dark transition-colors"
+        <button
+          type="button"
+          data-open-contact="beta"
+          class="mt-8 flex items-center justify-center gap-1.5 px-4 py-3.5 rounded-md text-base font-semibold bg-zurich-blue text-white hover:bg-zurich-blue-dark transition-colors w-full"
         >
           {t.navBetaCta}
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
             <path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-        </a>
+        </button>
       </nav>
     </div>
 
@@ -171,8 +171,8 @@ const navLinks = [
           <div>
             <h4 class="text-xs font-semibold text-white/50 uppercase tracking-wider mb-3">{t.footerCommunity}</h4>
             <ul class="space-y-2">
-              <li><a href={betaHref}    class="text-sm text-white/70 hover:text-white transition-colors">{t.footerBeta}</a></li>
-              <li><a href={collabHref}  class="text-sm text-white/70 hover:text-white transition-colors">{t.footerCollaborate}</a></li>
+              <li><button type="button" data-open-contact="beta"   class="text-sm text-white/70 hover:text-white transition-colors text-left">{t.footerBeta}</button></li>
+              <li><button type="button" data-open-contact="collab" class="text-sm text-white/70 hover:text-white transition-colors text-left">{t.footerCollaborate}</button></li>
               <li><a href="https://github.com/benedictvonhoffmann-zuri-droid/zueribot" target="_blank" rel="noopener noreferrer" class="text-sm text-white/70 hover:text-white transition-colors">{t.footerGitHub}</a></li>
             </ul>
           </div>
@@ -193,6 +193,8 @@ const navLinks = [
         </div>
       </div>
     </footer>
+
+    <ContactModal t={t} />
 
     <!-- Legal dialogs (single-page friendly) -->
     <dialog id="legal-imprint" class="legal-dialog">
