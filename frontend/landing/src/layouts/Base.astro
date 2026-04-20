@@ -103,21 +103,40 @@ const navLinks = [
         </div>
       </div>
 
-      <!-- Mobile menu -->
-      <div id="mobile-menu" class="hidden md:hidden border-b px-4 pb-4 mobile-menu-bg">
+    </header>
+
+    <!-- Mobile menu (full-screen overlay) -->
+    <div id="mobile-menu" class="hidden md:hidden fixed inset-0 z-[60] mobile-menu-bg flex-col">
+      <div class="flex items-center justify-between h-14 px-4 sm:px-6 border-b border-zurich-border/60">
+        <a href={`/${lang}/`} class="flex items-center gap-2">
+          <img src="/zh-lion.svg" alt="" aria-hidden="true" class="w-5 h-5" style="filter: brightness(0) saturate(100%)" />
+          <span class="font-bold text-lg tracking-tight text-zurich-dark">
+            Bünzli<span class="font-medium" style="color: var(--color-zurich-blue)">.Space</span>
+          </span>
+        </a>
+        <button id="mobile-menu-close" aria-label="Close menu" class="w-8 h-8 flex items-center justify-center text-zurich-dark">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M3 3l12 12M15 3L3 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <nav class="flex-1 overflow-y-auto px-4 sm:px-6 py-6" aria-label="Mobile navigation">
         {navLinks.map(({ label, href }) => (
-          <a href={href} class="block py-2.5 text-sm nav-link transition-colors border-b border-white/10 last:border-0">
+          <a href={href} class="block py-4 text-lg font-medium nav-link transition-colors border-b border-zurich-border/40">
             {label}
           </a>
         ))}
         <a
           href={betaHref}
-          class="mt-3 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md text-sm font-semibold bg-zurich-blue text-white"
+          class="mt-8 flex items-center justify-center gap-1.5 px-4 py-3.5 rounded-md text-base font-semibold bg-zurich-blue text-white hover:bg-zurich-blue-dark transition-colors"
         >
           {t.navBetaCta}
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </a>
-      </div>
-    </header>
+      </nav>
+    </div>
 
     <main id="main-content">
       <slot />
@@ -217,21 +236,33 @@ const navLinks = [
       updateNav();
       window.addEventListener('scroll', updateNav, { passive: true });
 
-      // Mobile menu toggle
+      // Mobile menu toggle (full-screen overlay)
+      const mobileMenuCloseBtn = document.getElementById('mobile-menu-close') as HTMLButtonElement | null;
+
+      function openMobileMenu() {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        iconOpen.classList.add('hidden');
+        iconClose.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+      }
+      function closeMobileMenu() {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        iconOpen.classList.remove('hidden');
+        iconClose.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+      }
+
       mobileMenuBtn?.addEventListener('click', () => {
-        const isOpen = !mobileMenu.classList.contains('hidden');
-        mobileMenu.classList.toggle('hidden', isOpen);
-        iconOpen.classList.toggle('hidden', !isOpen);
-        iconClose.classList.toggle('hidden', isOpen);
+        if (mobileMenu.classList.contains('hidden')) openMobileMenu();
+        else closeMobileMenu();
       });
+      mobileMenuCloseBtn?.addEventListener('click', closeMobileMenu);
 
       // Close mobile menu on nav link click
-      mobileMenu?.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => {
-          mobileMenu.classList.add('hidden');
-          iconOpen.classList.remove('hidden');
-          iconClose.classList.add('hidden');
-        });
+      mobileMenu?.querySelectorAll('nav a').forEach(link => {
+        link.addEventListener('click', closeMobileMenu);
       });
 
       // Scroll animations
