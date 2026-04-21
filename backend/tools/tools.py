@@ -3,6 +3,7 @@ Tool definitions and dispatch logic for ZuriBot.
 Maps LLM tool calls to connector functions.
 """
 
+from backend.connectors import registry as connector_registry
 from backend.connectors import (
     weather_connector,
     transit_connector,
@@ -597,6 +598,12 @@ def dispatch_tool(name, arguments):
     Returns:
         Dict with success, data, source, error
     """
+    # New per-folder registry takes precedence. Tools that have been migrated
+    # resolve here; anything not yet migrated falls through to the legacy
+    # if/elif block below.
+    if name in connector_registry._registry:
+        return connector_registry.dispatch(name, arguments)
+
     try:
         if name == "get_weather":
             return weather_connector.get_weather(
