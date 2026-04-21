@@ -82,48 +82,43 @@ class POIConnector(BaseConnector):
                 time.sleep(3)
         return []
 
+    def _geocode_ch(self, q: str) -> tuple[float, float] | None:
+        """Geocode via geo.admin.ch (Swiss federal address index)."""
+        try:
+            r = requests.get(
+                "https://api3.geo.admin.ch/rest/services/api/SearchServer",
+                params={"type": "locations", "searchText": q, "limit": 1},
+                timeout=5,
+            )
+            if r.status_code != 200:
+                return None
+            hits = r.json().get("results", [])
+            if not hits:
+                return None
+            return float(hits[0]["attrs"]["lat"]), float(hits[0]["attrs"]["lon"])
+        except Exception:
+            return None
+
     def _resolve_location(self, query: str, lat=None, lon=None):
         if lat and lon:
             return query, lat, lon
 
         kreis_match = re.search(r'kreis\s*(\d{1,2})', query, re.IGNORECASE)
         if kreis_match:
-            try:
-                time.sleep(0.5)
-                resp = requests.get(
-                    "https://nominatim.openstreetmap.org/search",
-                    params={"q": f"Kreis {kreis_match.group(1)}, Zürich", "format": "json", "limit": 1},
-                    headers={"User-Agent": "ZuriBot/1.0"},
-                    timeout=5,
-                )
-                if resp.status_code == 200 and resp.json():
-                    lat = float(resp.json()[0]["lat"])
-                    lon = float(resp.json()[0]["lon"])
-                    poi_query = re.sub(r'(?i)\s*kreis\s*\d{1,2}\s*', ' ', query).strip()
-                    return poi_query, lat, lon
-            except Exception:
-                pass
+            hit = self._geocode_ch(f"Kreis {kreis_match.group(1)}, Zürich")
+            if hit:
+                poi_query = re.sub(r'(?i)\s*kreis\s*\d{1,2}\s*', ' ', query).strip()
+                return poi_query, hit[0], hit[1]
 
         loc_match = re.search(r'(?:nähe|naehe|near|bei|beim|in)\s+(.+?)(?:\s+(?:supermarket|pharmacy|restaurant|cafe|bar|bakery|hospital|doctor|dentist|bank|atm|post|fuel|parking|school|library|cinema|theatre|museum|hotel|playground|park|fitness|gym|police|toilets|hairdresser|apotheke|spital))', query, re.IGNORECASE)
         if not loc_match:
             loc_match = re.search(r'(?:nähe|naehe|near|bei|beim|in)\s+(.+)', query, re.IGNORECASE)
 
         if loc_match:
-            try:
-                time.sleep(0.5)
-                resp = requests.get(
-                    "https://nominatim.openstreetmap.org/search",
-                    params={"q": f"{loc_match.group(1)}, Zürich", "format": "json", "limit": 1},
-                    headers={"User-Agent": "ZuriBot/1.0"},
-                    timeout=5,
-                )
-                if resp.status_code == 200 and resp.json():
-                    lat = float(resp.json()[0]["lat"])
-                    lon = float(resp.json()[0]["lon"])
-                    poi_query = re.sub(r'(?i)\s*(?:nähe|naehe|near|bei|beim|in)\s+.+', '', query).strip()
-                    return poi_query, lat, lon
-            except Exception:
-                pass
+            hit = self._geocode_ch(f"{loc_match.group(1)}, Zürich")
+            if hit:
+                poi_query = re.sub(r'(?i)\s*(?:nähe|naehe|near|bei|beim|in)\s+.+', '', query).strip()
+                return poi_query, hit[0], hit[1]
 
         return query, ZURICH_CENTER[0], ZURICH_CENTER[1]
 
@@ -143,21 +138,10 @@ class POIConnector(BaseConnector):
         lat = user_latitude
         lon = user_longitude
 
-        # Geocode user_address → lat/lon if coordinates not provided directly
         if user_address and not (lat and lon):
-            try:
-                # geo.admin.ch — official Swiss federal address index, knows every Swiss street
-                r = requests.get(
-                    "https://api3.geo.admin.ch/rest/services/api/SearchServer",
-                    params={"type": "locations", "searchText": user_address, "limit": 1},
-                    timeout=5,
-                )
-                hits = r.json().get("results", []) if r.status_code == 200 else []
-                if hits:
-                    lat = hits[0]["attrs"]["lat"]
-                    lon = hits[0]["attrs"]["lon"]
-            except Exception:
-                pass
+            hit = self._geocode_ch(user_address)
+            if hit:
+                lat, lon = hit
 
         try:
             poi_q, search_lat, search_lon = self._resolve_location(poi_query, lat, lon)

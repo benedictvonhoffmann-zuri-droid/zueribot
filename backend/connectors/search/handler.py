@@ -55,6 +55,6 @@ class SearchConnector(BaseConnector):
                 "total_results": data.get("number_of_results", 0),
             })
         except requests.exceptions.ConnectionError:
-            return self.err("SearXNG is not running. Start it with: docker start searxng")
+            return self.err("Search backend unavailable.")
         except Exception as e:
             return self.err(e)

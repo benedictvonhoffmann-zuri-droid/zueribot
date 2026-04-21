@@ -12,40 +12,26 @@ from .manifest import manifest
 ZUERICH_API = "https://www.zuerich.com/api/v2/data"
 
 CATEGORIES = {
+    # Gastronomy umbrella + sub-cuisines (zuerich.com IDs 166 + 193–205)
     "gastronomy": "166",
-    "american": "193",
-    "asian": "194",
-    "swiss": "195",
-    "italian": "196",
-    "french": "197",
-    "mediterranean": "198",
-    "steakhouse": "199",
-    "seafood": "200",
-    "dinner": "201",
-    "lunch": "202",
+    "american": "193", "asian": "194", "swiss": "195", "italian": "196",
+    "french": "197", "mediterranean": "198", "steakhouse": "199", "seafood": "200",
+    "dinner": "201", "lunch": "202", "cafe": "204", "breakfast": "205",
+    # "bar" is the gastronomy sub-category; "bars" is the top-level nightlife list (different IDs)
     "bar": "203",
-    "cafe": "204",
-    "breakfast": "205",
     "bars": "103",
     "nightlife": "162",
-    "accommodation": "71",
-    "hotel": "72",
-    "hostel": "73",
-    "b&b": "74",
-    "attractions": "99",
-    "museums": "96",
-    "art": "136",
-    "churches": "137",
-    "nature": "159",
-    "parks": "160",
-    "viewpoints": "161",
-    "water": "159",
-    "activities": "95",
-    "tours": "97",
-    "events": "98",
-    "shopping": "100",
-    "fashion": "101",
-    "souvenirs": "102",
+    # Accommodation
+    "accommodation": "71", "hotel": "72", "hostel": "73", "b&b": "74",
+    # Attractions + culture
+    "attractions": "99", "museums": "96", "art": "136", "churches": "137",
+    # Nature (zuerich.com has no separate water category — 159 covers both)
+    "nature": "159", "water": "159",
+    "parks": "160", "viewpoints": "161",
+    # Activities
+    "activities": "95", "tours": "97", "events": "98",
+    # Shopping
+    "shopping": "100", "fashion": "101", "souvenirs": "102",
 }
 
 TYPE_MAP = {

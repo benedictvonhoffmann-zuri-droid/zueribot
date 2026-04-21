@@ -19,12 +19,12 @@ CSV_URL = (
     "bau_whg_mpe_mietpreis_raum_zizahl_gn_jahr_od5161/download/BAU516OD5161.csv"
 )
 
+# Dataset only breaks rents down by these bins (MPE publishes coarse categories).
 ROOMS_MAP = {
-    "1": "1 Zimmer", "1.5": "1,5 Zimmer",
-    "2": "2 Zimmer", "2.5": "2,5 Zimmer",
-    "3": "3 Zimmer", "3.5": "3,5 Zimmer",
-    "4": "4 Zimmer", "4.5": "4,5 Zimmer",
-    "5": "5 Zimmer", "5+": "5 und mehr Zimmer",
+    "2": "2 Zimmer",
+    "3": "3 Zimmer",
+    "4": "4 Zimmer",
+    "all": "2 , 3  und 4 Zimmer",
 }
 
 
@@ -73,8 +73,13 @@ class RentConnector(BaseConnector):
                 return self.err(f"Keine Mietpreisdaten für '{quartier}' gefunden.")
 
         if rooms:
-            room_label = ROOMS_MAP.get(rooms.replace(",", "."), rooms)
-            df = df[df["ZimmerLang"].str.contains(room_label.split()[0], case=False, na=False)]
+            room_key = rooms.replace(",", ".").strip()
+            room_label = ROOMS_MAP.get(room_key)
+            if room_label is None:
+                return self.err(
+                    f"Unbekannte Zimmerzahl '{rooms}'. Gültig: {', '.join(ROOMS_MAP.keys())}."
+                )
+            df = df[df["ZimmerLang"] == room_label]
 
         if df.empty:
             return self.err("Keine Daten für diese Filterkomibination.")

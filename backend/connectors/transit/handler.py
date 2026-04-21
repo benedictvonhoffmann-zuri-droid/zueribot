@@ -99,11 +99,13 @@ class TransitConnector(BaseConnector):
                             "arrival_time": sec_arr.get("arrival", ""),
                         })
                     elif walk:
+                        walk_dur = walk.get("duration")
+                        duration_min = walk_dur // 60 if isinstance(walk_dur, int) else 0
                         sections.append({
                             "type": "walk",
                             "from": sec_dep.get("station", {}).get("name", ""),
                             "to": sec_arr.get("station", {}).get("name", ""),
-                            "duration_min": walk.get("duration", 0) // 60 if isinstance(walk.get("duration", 0), int) else walk.get("duration", 0),
+                            "duration_min": duration_min,
                         })
 
                 result.append({

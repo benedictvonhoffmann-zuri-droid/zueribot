@@ -101,14 +101,12 @@ class WaterConnector(BaseConnector):
                 if matches:
                     return self.ok(matches)
 
-                # Not found: surface helpful metadata via err (legacy included data on error)
-                envelope = self.err(f"No badi found for '{badi_name}'")
-                envelope["data"] = {
-                    "current_badis": all_names,
-                    "seasonal_badis": FREIBAEDER,
-                    "note": "Freibäder (outdoor pools) are seasonal (May–September). Currently only Hallenbäder (indoor pools) are available.",
-                }
-                return envelope
+                return self.err(
+                    f"No badi found for '{badi_name}'. "
+                    f"Freibäder are seasonal (May–September). "
+                    f"Currently available: {', '.join(all_names) or '(none)'}. "
+                    f"Known seasonal: {', '.join(FREIBAEDER)}."
+                )
 
             return self.ok(all_badis)
         except Exception as e:

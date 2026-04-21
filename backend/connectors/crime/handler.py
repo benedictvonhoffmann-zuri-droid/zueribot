@@ -19,13 +19,8 @@ STRAFTATEN_URL = (
 )
 
 STADTKREIS_MAP = {
-    "1": "Kreis 01", "2": "Kreis 02", "3": "Kreis 03", "4": "Kreis 04",
-    "5": "Kreis 05", "6": "Kreis 06", "7": "Kreis 07", "8": "Kreis 08",
-    "9": "Kreis 09", "10": "Kreis 10", "11": "Kreis 11", "12": "Kreis 12",
-    "kreis 1": "Kreis 01", "kreis 2": "Kreis 02", "kreis 3": "Kreis 03",
-    "kreis 4": "Kreis 04", "kreis 5": "Kreis 05", "kreis 6": "Kreis 06",
-    "kreis 7": "Kreis 07", "kreis 8": "Kreis 08", "kreis 9": "Kreis 09",
-    "kreis 10": "Kreis 10", "kreis 11": "Kreis 11", "kreis 12": "Kreis 12",
+    **{str(n): f"Kreis {n}" for n in range(1, 13)},
+    **{f"kreis {n}": f"Kreis {n}" for n in range(1, 13)},
 }
 
 
@@ -59,11 +54,12 @@ class CrimeConnector(BaseConnector):
 
         if stadtkreis:
             kreis_key = stadtkreis.lower().strip()
-            kreis_label = STADTKREIS_MAP.get(kreis_key, stadtkreis)
-            mask = df_zurich["Stadtkreis_Name"].str.contains(
-                kreis_label.split()[-1].lstrip("0"), case=False, na=False
-            )
-            df_zurich = df_zurich[mask]
+            kreis_label = STADTKREIS_MAP.get(kreis_key)
+            if kreis_label is None:
+                return self.err(
+                    f"Unbekannter Stadtkreis '{stadtkreis}'. Gültig: 1–12 oder 'kreis N'."
+                )
+            df_zurich = df_zurich[df_zurich["Stadtkreis_Name"] == kreis_label]
             if df_zurich.empty:
                 return self.err(f"Keine Daten für Stadtkreis '{stadtkreis}' gefunden.")
 
