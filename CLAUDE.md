@@ -111,6 +111,15 @@ Full operational reference (paths, container names, troubleshooting) is in `DEPL
 
 **Confirm with Benedict before any deploy.** Even small ones — "this would touch the live site, OK to push and deploy?" Production isn't reversible without effort.
 
+### 6. Release notes
+
+Every session that deploys ends with a short business-focused summary Benedict can reuse in changelogs, LinkedIn updates, or stakeholder emails.
+
+- Non-technical language. Frame from the user's perspective, not the code's.
+- Two short sections: "What changed for users" (or "nothing visible yet" if foundational) and "Under the hood" (a handful of bullets on *why it matters*, not *what file changed*).
+- No file paths, no commit SHAs, no framework names unless they're load-bearing for the reader.
+- Ship as part of the close-out message — don't write it to a file unless Benedict asks.
+
 ---
 
 ## Secrets & .env
