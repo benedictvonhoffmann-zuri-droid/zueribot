@@ -3,7 +3,6 @@
 import io
 import logging
 from datetime import datetime
-from functools import lru_cache
 
 import pandas as pd
 import requests
@@ -28,43 +27,40 @@ KEY_PARAMS = {
 }
 
 
-@lru_cache(maxsize=4)
-def _load_data_for_year(year: int) -> pd.DataFrame | None:
-    try:
-        url = f"{BASE_URL}/{year}_Trinkwasserqualitaet.csv"
-        resp = requests.get(url, timeout=30)
-        resp.raise_for_status()
-        df = pd.read_csv(io.BytesIO(resp.content), encoding="utf-8-sig")
-        df.columns = [
-            c.encode("latin-1", errors="replace").decode("utf-8", errors="replace")
-             .strip().strip("\ufeff").strip()
-            for c in df.columns
-        ]
-        date_col = next((c for c in df.columns if "atum" in c), None)
-        if date_col:
-            df = df.rename(columns={date_col: "Datum"})
-        df["Datum"] = pd.to_datetime(df["Datum"], errors="coerce")
-        return df
-    except Exception as e:
-        logger.warning(f"Failed to load water quality data for {year}: {e}")
-        return None
-
-
-def _load_data() -> tuple[pd.DataFrame | None, int | None]:
-    """Try current year, fall back to previous years (dataset published annually)."""
-    current = datetime.now().year
-    for year in (current, current - 1, current - 2):
-        df = _load_data_for_year(year)
-        if df is not None:
-            return df, year
-    return None, None
-
-
 class WaterQualityConnector(BaseConnector):
     manifest = manifest
 
+    def _fetch_year(self, year: int) -> pd.DataFrame | None:
+        try:
+            url = f"{BASE_URL}/{year}_Trinkwasserqualitaet.csv"
+            resp = requests.get(url, timeout=self.manifest.runtime.timeout_s)
+            resp.raise_for_status()
+            df = pd.read_csv(io.BytesIO(resp.content), encoding="utf-8-sig")
+            df.columns = [
+                c.encode("latin-1", errors="replace").decode("utf-8", errors="replace")
+                 .strip().strip("\ufeff").strip()
+                for c in df.columns
+            ]
+            date_col = next((c for c in df.columns if "atum" in c), None)
+            if date_col:
+                df = df.rename(columns={date_col: "Datum"})
+            df["Datum"] = pd.to_datetime(df["Datum"], errors="coerce")
+            return df
+        except Exception as e:
+            logger.warning(f"Failed to load water quality data for {year}: {e}")
+            return None
+
+    def _load(self) -> tuple[pd.DataFrame | None, int | None]:
+        """Try current year, fall back to previous years (dataset published annually)."""
+        current = datetime.now().year
+        for year in (current, current - 1, current - 2):
+            df = self._cached(f"wq:{year}", lambda y=year: self._fetch_year(y))
+            if df is not None:
+                return df, year
+        return None, None
+
     def get_water_quality(self, standort: str = "") -> dict:
-        df, year = _load_data()
+        df, year = self._load()
         if df is None:
             return self.err("Trinkwasserdaten konnten nicht geladen werden.")
 

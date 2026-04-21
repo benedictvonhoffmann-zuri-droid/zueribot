@@ -62,7 +62,7 @@ manifest = Manifest(
                     },
                     "rooms": {
                         "type": "string",
-                        "description": "Number of rooms (e.g. '2', '3', '3.5', '4'). Leave empty for all room sizes.",
+                        "description": "Number of rooms. Valid: '2', '3', '4', or 'all' for the 2–4 aggregate. Leave empty for all sizes broken out.",
                         "default": "",
                     },
                     "gemeinnuetzig": {

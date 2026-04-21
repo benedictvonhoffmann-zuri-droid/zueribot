@@ -30,7 +30,7 @@ CSV_URL = "https://ckan-prod.zurich.datopian.com/dataset/ugz_luftschadstoffmessu
 class AirQualityConnector(BaseConnector):
     manifest = manifest
 
-    def get_air_quality(self, station: str = "") -> dict:
+    def get_air_quality(self) -> dict:
         try:
             year = datetime.now().year
             url = CSV_URL.format(year)

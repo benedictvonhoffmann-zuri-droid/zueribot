@@ -20,7 +20,7 @@ WMO_CODES = {
 class WeatherConnector(BaseConnector):
     manifest = manifest
 
-    def get_weather(self, location: str = "Zürich") -> dict:
+    def get_weather(self) -> dict:
         try:
             resp = requests.get(
                 "https://api.open-meteo.com/v1/forecast",

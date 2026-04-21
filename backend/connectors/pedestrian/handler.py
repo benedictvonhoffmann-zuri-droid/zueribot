@@ -19,21 +19,10 @@ CSV_URL = (
     "/download/hystreet_fussgaengerfrequenzen_seit2021.csv"
 )
 
-_cache_time: datetime | None = None
-_cache_df: pd.DataFrame | None = None
-CACHE_TTL_MINUTES = 60
-
-
 class PedestrianConnector(BaseConnector):
     manifest = manifest
 
-    def _load_recent(self) -> pd.DataFrame | None:
-        global _cache_time, _cache_df
-
-        now = datetime.now(timezone.utc)
-        if _cache_df is not None and _cache_time and (now - _cache_time).seconds < CACHE_TTL_MINUTES * 60:
-            return _cache_df
-
+    def _fetch(self) -> pd.DataFrame | None:
         try:
             resp = requests.get(CSV_URL, timeout=self.manifest.runtime.timeout_s, stream=True)
             resp.raise_for_status()
@@ -55,19 +44,15 @@ class PedestrianConnector(BaseConnector):
             df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce", utc=True)
             df = df[df["timestamp"].notna()]
 
-            cutoff = now - timedelta(hours=24)
-            df = df[df["timestamp"] >= cutoff]
-
-            _cache_df = df
-            _cache_time = now
-            return df
+            cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
+            return df[df["timestamp"] >= cutoff]
 
         except Exception as e:
             logger.error(f"Failed to load pedestrian data: {e}")
             return None
 
     def get_pedestrian_counts(self, hours: int = 6) -> dict:
-        df = self._load_recent()
+        df = self._cached("hystreet", self._fetch)
         if df is None or df.empty:
             return self.err("Passantenfrequenzen konnten nicht geladen werden.")
 

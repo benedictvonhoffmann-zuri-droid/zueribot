@@ -14,7 +14,8 @@ each manifest, instantiates the handler, and exposes a uniform dispatch.
 
 from __future__ import annotations
 
-from typing import Any, Literal
+import time
+from typing import Any, Callable, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -113,6 +114,27 @@ class BaseConnector:
             raise TypeError(
                 f"{cls.__name__} must set a class-level `manifest = Manifest(...)`"
             )
+
+    def __init__(self) -> None:
+        self._cache: dict[str, tuple[float, Any]] = {}
+
+    # --- TTL cache ---
+
+    def _cached(self, key: str, fetcher: Callable[[], Any]) -> Any:
+        """Cache the result of `fetcher()` under `key` for manifest.runtime.cache_ttl_s.
+
+        Returns None values are not cached (so a failed fetch can be retried).
+        """
+        ttl = self.manifest.runtime.cache_ttl_s
+        now = time.time()
+        if ttl > 0:
+            hit = self._cache.get(key)
+            if hit and (now - hit[0]) < ttl:
+                return hit[1]
+        val = fetcher()
+        if ttl > 0 and val is not None:
+            self._cache[key] = (now, val)
+        return val
 
     # --- response envelope helpers ---
 

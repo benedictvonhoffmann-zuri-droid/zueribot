@@ -2,7 +2,6 @@
 
 import io
 import logging
-from functools import lru_cache
 from typing import Optional
 
 import pandas as pd
@@ -28,28 +27,26 @@ ROOMS_MAP = {
 }
 
 
-@lru_cache(maxsize=1)
-def _load_data() -> Optional[pd.DataFrame]:
-    try:
-        resp = requests.get(CSV_URL, timeout=30)
-        resp.raise_for_status()
-        df = pd.read_csv(io.BytesIO(resp.content), encoding="utf-8-sig")
-        df.columns = [
-            c.encode("latin-1", errors="replace").decode("utf-8", errors="replace")
-             .strip().strip("\ufeff").strip('"').strip()
-            for c in df.columns
-        ]
-        return df
-    except Exception as e:
-        logger.error(f"Failed to load rent data: {e}")
-        return None
-
-
 class RentConnector(BaseConnector):
     manifest = manifest
 
+    def _fetch(self) -> Optional[pd.DataFrame]:
+        try:
+            resp = requests.get(CSV_URL, timeout=self.manifest.runtime.timeout_s)
+            resp.raise_for_status()
+            df = pd.read_csv(io.BytesIO(resp.content), encoding="utf-8-sig")
+            df.columns = [
+                c.encode("latin-1", errors="replace").decode("utf-8", errors="replace")
+                 .strip().strip("\ufeff").strip('"').strip()
+                for c in df.columns
+            ]
+            return df
+        except Exception as e:
+            logger.error(f"Failed to load rent data: {e}")
+            return None
+
     def get_rent_prices(self, quartier: str = "", rooms: str = "", gemeinnuetzig: bool = False) -> dict:
-        df = _load_data()
+        df = self._cached("mpe", self._fetch)
         if df is None:
             return self.err("Mietpreisdaten konnten nicht geladen werden.")
 

@@ -2,7 +2,6 @@
 
 import io
 import logging
-from functools import lru_cache
 
 import pandas as pd
 import requests
@@ -24,24 +23,22 @@ STADTKREIS_MAP = {
 }
 
 
-@lru_cache(maxsize=1)
-def _load_straftaten() -> pd.DataFrame | None:
-    try:
-        resp = requests.get(STRAFTATEN_URL, timeout=30)
-        resp.raise_for_status()
-        df = pd.read_csv(io.StringIO(resp.text), encoding="utf-8-sig")
-        df.columns = [c.strip() for c in df.columns]
-        return df
-    except Exception as e:
-        logger.error(f"Failed to load crime data: {e}")
-        return None
-
-
 class CrimeConnector(BaseConnector):
     manifest = manifest
 
+    def _fetch_straftaten(self) -> pd.DataFrame | None:
+        try:
+            resp = requests.get(STRAFTATEN_URL, timeout=self.manifest.runtime.timeout_s)
+            resp.raise_for_status()
+            df = pd.read_csv(io.StringIO(resp.text), encoding="utf-8-sig")
+            df.columns = [c.strip() for c in df.columns]
+            return df
+        except Exception as e:
+            logger.error(f"Failed to load crime data: {e}")
+            return None
+
     def get_crime_stats(self, stadtkreis: str = "", category: str = "") -> dict:
-        df = _load_straftaten()
+        df = self._cached("straftaten", self._fetch_straftaten)
         if df is None:
             return self.err("Kriminalstatistik konnte nicht geladen werden.")
 

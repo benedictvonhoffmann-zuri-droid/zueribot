@@ -58,13 +58,7 @@ manifest = Manifest(
             ),
             parameters={
                 "type": "object",
-                "properties": {
-                    "location": {
-                        "type": "string",
-                        "description": "Location name (default: Zürich)",
-                        "default": "Zürich",
-                    },
-                },
+                "properties": {},
                 "required": [],
             },
             returns={

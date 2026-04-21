@@ -52,13 +52,7 @@ manifest = Manifest(
             ),
             parameters={
                 "type": "object",
-                "properties": {
-                    "station": {
-                        "type": "string",
-                        "description": "Station name (e.g. 'Zürich Kaserne', 'Zürich Heubeck'). Leave empty for all stations.",
-                        "default": "",
-                    },
-                },
+                "properties": {},
                 "required": [],
             },
         ),

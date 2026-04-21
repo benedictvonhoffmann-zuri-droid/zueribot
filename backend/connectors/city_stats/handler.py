@@ -3,7 +3,6 @@
 import io
 import logging
 from datetime import datetime, timezone
-from functools import lru_cache
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -18,51 +17,39 @@ logger = logging.getLogger("zuribot.connectors.city_stats")
 ERZ_URL = "https://data.stadt-zuerich.ch/dataset/erz_elog_kennzahlen/download/erz_elog_kennzahlen.csv"
 EWZ_URL_TEMPLATE = "https://data.stadt-zuerich.ch/dataset/ewz_bruttolastgang_stadt_zuerich/download/{year}_ewz_bruttolastgang.csv"
 
-_ewz_cache: tuple[pd.DataFrame | None, datetime | None] = (None, None)
-EWZ_CACHE_MINUTES = 30
-
-
-@lru_cache(maxsize=1)
-def _load_erz() -> pd.DataFrame | None:
-    try:
-        resp = requests.get(ERZ_URL, timeout=30)
-        resp.raise_for_status()
-        df = pd.read_csv(io.StringIO(resp.text), encoding="utf-8-sig")
-        df.columns = [c.strip() for c in df.columns]
-        df["Datum"] = pd.to_datetime(df["Datum"], errors="coerce")
-        return df
-    except Exception as e:
-        logger.error(f"Failed to load ERZ data: {e}")
-        return None
-
-
-def _load_ewz() -> pd.DataFrame | None:
-    global _ewz_cache
-    df, ts = _ewz_cache
-    now = datetime.now(timezone.utc)
-    if df is not None and ts and (now - ts).seconds < EWZ_CACHE_MINUTES * 60:
-        return df
-    try:
-        year = now.year
-        url = EWZ_URL_TEMPLATE.format(year=year)
-        resp = requests.get(url, timeout=30)
-        resp.raise_for_status()
-        df = pd.read_csv(io.StringIO(resp.text), encoding="utf-8-sig")
-        df.columns = [c.strip().lstrip("\ufeff").strip('"') for c in df.columns]
-        df.columns = ["zeitpunkt" if i == 0 else c for i, c in enumerate(df.columns)]
-        df["zeitpunkt"] = pd.to_datetime(df["zeitpunkt"], errors="coerce", utc=True)
-        _ewz_cache = (df, now)
-        return df
-    except Exception as e:
-        logger.error(f"Failed to load EWZ data: {e}")
-        return None
-
 
 class CityStatsConnector(BaseConnector):
     manifest = manifest
 
+    def _fetch_erz(self) -> pd.DataFrame | None:
+        try:
+            resp = requests.get(ERZ_URL, timeout=self.manifest.runtime.timeout_s)
+            resp.raise_for_status()
+            df = pd.read_csv(io.StringIO(resp.text), encoding="utf-8-sig")
+            df.columns = [c.strip() for c in df.columns]
+            df["Datum"] = pd.to_datetime(df["Datum"], errors="coerce")
+            return df
+        except Exception as e:
+            logger.error(f"Failed to load ERZ data: {e}")
+            return None
+
+    def _fetch_ewz(self) -> pd.DataFrame | None:
+        try:
+            year = datetime.now(timezone.utc).year
+            url = EWZ_URL_TEMPLATE.format(year=year)
+            resp = requests.get(url, timeout=self.manifest.runtime.timeout_s)
+            resp.raise_for_status()
+            df = pd.read_csv(io.StringIO(resp.text), encoding="utf-8-sig")
+            df.columns = [c.strip().lstrip("\ufeff").strip('"') for c in df.columns]
+            df.columns = ["zeitpunkt" if i == 0 else c for i, c in enumerate(df.columns)]
+            df["zeitpunkt"] = pd.to_datetime(df["zeitpunkt"], errors="coerce", utc=True)
+            return df
+        except Exception as e:
+            logger.error(f"Failed to load EWZ data: {e}")
+            return None
+
     def get_recycling_stats(self) -> dict:
-        df = _load_erz()
+        df = self._cached("erz", self._fetch_erz)
         if df is None:
             return self.err("ERZ-Daten konnten nicht geladen werden.")
 
@@ -95,7 +82,7 @@ class CityStatsConnector(BaseConnector):
         })
 
     def get_electricity_load(self) -> dict:
-        df = _load_ewz()
+        df = self._cached("ewz", self._fetch_ewz)
         if df is None:
             return self.err("Stromlastdaten konnten nicht geladen werden.")
 
