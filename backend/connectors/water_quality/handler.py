@@ -2,6 +2,7 @@
 
 import io
 import logging
+from datetime import datetime
 from functools import lru_cache
 
 import pandas as pd
@@ -14,7 +15,6 @@ from .manifest import manifest
 logger = logging.getLogger("zuribot.connectors.water_quality")
 
 BASE_URL = "https://data.stadt-zuerich.ch/dataset/dib_wvz_trinkwasserqualitaet/download"
-CURRENT_YEAR = 2024
 
 KEY_PARAMS = {
     "E. coli": "E. coli (Keime)",
@@ -28,10 +28,10 @@ KEY_PARAMS = {
 }
 
 
-@lru_cache(maxsize=1)
-def _load_data() -> pd.DataFrame | None:
+@lru_cache(maxsize=4)
+def _load_data_for_year(year: int) -> pd.DataFrame | None:
     try:
-        url = f"{BASE_URL}/{CURRENT_YEAR}_Trinkwasserqualitaet.csv"
+        url = f"{BASE_URL}/{year}_Trinkwasserqualitaet.csv"
         resp = requests.get(url, timeout=30)
         resp.raise_for_status()
         df = pd.read_csv(io.BytesIO(resp.content), encoding="utf-8-sig")
@@ -46,15 +46,25 @@ def _load_data() -> pd.DataFrame | None:
         df["Datum"] = pd.to_datetime(df["Datum"], errors="coerce")
         return df
     except Exception as e:
-        logger.error(f"Failed to load water quality data: {e}")
+        logger.warning(f"Failed to load water quality data for {year}: {e}")
         return None
+
+
+def _load_data() -> tuple[pd.DataFrame | None, int | None]:
+    """Try current year, fall back to previous years (dataset published annually)."""
+    current = datetime.now().year
+    for year in (current, current - 1, current - 2):
+        df = _load_data_for_year(year)
+        if df is not None:
+            return df, year
+    return None, None
 
 
 class WaterQualityConnector(BaseConnector):
     manifest = manifest
 
     def get_water_quality(self, standort: str = "") -> dict:
-        df = _load_data()
+        df, year = _load_data()
         if df is None:
             return self.err("Trinkwasserdaten konnten nicht geladen werden.")
 
@@ -114,5 +124,5 @@ class WaterQualityConnector(BaseConnector):
                      else "Achtung: Einzelne Messwerte über dem Grenzwert — Details prüfen.",
             "alle_werte_ok": overall_ok,
             "standorte": result_list,
-            "jahr": CURRENT_YEAR,
+            "jahr": year,
         })

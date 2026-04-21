@@ -10,7 +10,6 @@ from backend.connectors.base import BaseConnector
 from .manifest import manifest
 
 EVENTFROG_API = "https://api.eventfrog.net/public/v1/events"
-EVENTFROG_KEY = os.environ.get("EVENTFROG_KEY", "51880FF2-6CCF-4B4B-B377-27380B26C290")
 
 RUBRIC_MAP = {
     1: "Single-Party", 2: "Sonstige Veranstaltungen", 3: "Speed-Dating",
@@ -32,7 +31,10 @@ class EventsConnector(BaseConnector):
     manifest = manifest
 
     def _headers(self) -> dict:
-        return {"Authorization": f"Bearer {EVENTFROG_KEY}", "Accept": "application/json"}
+        key = os.environ.get("EVENTFROG_KEY")
+        if not key:
+            raise RuntimeError("EVENTFROG_KEY env var not set")
+        return {"Authorization": f"Bearer {key}", "Accept": "application/json"}
 
     def get_events(self, query: str = "", category: str = "", limit: int = 10) -> dict:
         try:

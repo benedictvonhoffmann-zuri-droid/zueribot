@@ -12,14 +12,20 @@ from .manifest import manifest
 
 BASE_URL = "https://data.stadt-zuerich.ch/dataset"
 
-CSV_URLS = {
-    "kehricht": f"{BASE_URL}/entsorgungskalender_kehricht/download/entsorgungskalender_kehricht_2026.csv",
-    "bioabfall": f"{BASE_URL}/entsorgungskalender_bioabfall/download/entsorgungskalender_bioabfall_2026.csv",
-    "papier": f"{BASE_URL}/entsorgungskalender_papier/download/papier_2026.csv",
-    "karton": f"{BASE_URL}/entsorgungskalender_karton/download/karton_2026.csv",
-    "sammelstellen": f"{BASE_URL}/entsorgungskalender_sammelstellen/download/entsorgungskalender_sammelstellen_2026.csv",
-    "mobiler_recyclinghof": f"{BASE_URL}/entsorgungskalender_mobiler_recyclinghof/download/mobiler_recyclinghof_2026.csv",
-}
+
+def _csv_url(waste_type: str, year: int) -> str:
+    paths = {
+        "kehricht": f"entsorgungskalender_kehricht/download/entsorgungskalender_kehricht_{year}.csv",
+        "bioabfall": f"entsorgungskalender_bioabfall/download/entsorgungskalender_bioabfall_{year}.csv",
+        "papier": f"entsorgungskalender_papier/download/papier_{year}.csv",
+        "karton": f"entsorgungskalender_karton/download/karton_{year}.csv",
+        "sammelstellen": f"entsorgungskalender_sammelstellen/download/entsorgungskalender_sammelstellen_{year}.csv",
+        "mobiler_recyclinghof": f"entsorgungskalender_mobiler_recyclinghof/download/mobiler_recyclinghof_{year}.csv",
+    }
+    return f"{BASE_URL}/{paths[waste_type]}"
+
+
+WASTE_TYPES = {"kehricht", "bioabfall", "papier", "karton", "sammelstellen", "mobiler_recyclinghof"}
 
 
 def _format_date(date_str):
@@ -43,12 +49,28 @@ class RecyclingConnector(BaseConnector):
         text = resp.content.decode("utf-8-sig")
         return list(csv.DictReader(io.StringIO(text)))
 
+    def _fetch_schedule_csv(self, waste_type: str):
+        """Try current year, fall back to previous year (ERZ publishes annually)."""
+        current = datetime.now().year
+        last_err: Exception | None = None
+        for year in (current, current - 1):
+            try:
+                return self._fetch_csv(_csv_url(waste_type, year))
+            except requests.HTTPError as e:
+                last_err = e
+                if e.response is not None and e.response.status_code == 404:
+                    continue
+                raise
+        if last_err:
+            raise last_err
+        return []
+
     def get_waste_schedule(self, zip_code: str = "", waste_type: str = "kehricht", upcoming_days: int = 30) -> dict:
         try:
-            if waste_type not in CSV_URLS:
+            if waste_type not in WASTE_TYPES:
                 return self.err(f"Unknown waste type: {waste_type}")
 
-            rows = self._fetch_csv(CSV_URLS[waste_type])
+            rows = self._fetch_schedule_csv(waste_type)
             if not rows:
                 return self.err("No data available")
 
@@ -107,7 +129,7 @@ class RecyclingConnector(BaseConnector):
 
     def get_collection_points(self, zip_code: str = "", material: str = "") -> dict:
         try:
-            rows = self._fetch_csv(CSV_URLS["sammelstellen"])
+            rows = self._fetch_schedule_csv("sammelstellen")
             if not rows:
                 return self.err("No data available")
 
@@ -158,7 +180,7 @@ class RecyclingConnector(BaseConnector):
 
     def get_mobile_recycling(self, zip_code: str = "", upcoming_days: int = 60) -> dict:
         try:
-            rows = self._fetch_csv(CSV_URLS["mobiler_recyclinghof"])
+            rows = self._fetch_schedule_csv("mobiler_recyclinghof")
             if not rows:
                 return self.err("No data available")
 
