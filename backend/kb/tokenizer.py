@@ -28,7 +28,7 @@ def _tokenizer():
 
     token = os.getenv("HF_TOKEN")
     try:
-        tk = Tokenizer.from_pretrained(_MODEL_ID, auth_token=token) if token else \
+        tk = Tokenizer.from_pretrained(_MODEL_ID, token=token) if token else \
              Tokenizer.from_pretrained(_MODEL_ID)
         logger.info("Loaded EmbeddingGemma tokenizer from %s", _MODEL_ID)
         return tk
