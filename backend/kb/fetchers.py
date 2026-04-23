@@ -51,6 +51,31 @@ class Fetcher:
             "Accept": "text/html,application/xhtml+xml,application/pdf",
             "Accept-Language": "de,en;q=0.9",
         })
+        # Lazily-started persistent Playwright browser. Reused across
+        # fetch_rendered calls because launching Chromium costs ~3-5s.
+        self._pw = None
+        self._browser = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        self.close()
+
+    def close(self) -> None:
+        """Tear down the cached Playwright browser, if any."""
+        if self._browser is not None:
+            try:
+                self._browser.close()
+            except Exception:
+                pass
+            self._browser = None
+        if self._pw is not None:
+            try:
+                self._pw.stop()
+            except Exception:
+                pass
+            self._pw = None
 
     def fetch(self, url: str) -> Optional[FetchResult]:
         """GET ``url`` with per-domain throttling. Returns None on failure."""
@@ -78,10 +103,63 @@ class Fetcher:
             final_url=resp.url,
         )
 
-    def fetch_rendered(self, url: str) -> Optional[FetchResult]:
-        """Playwright-rendered fetch — not yet implemented. See spec §12."""
-        raise NotImplementedError(
-            "Playwright fallback not wired yet. Add playwright to "
-            "requirements and implement when the first stadt-zuerich.ch "
-            "ingester lands."
+    def fetch_rendered(
+        self,
+        url: str,
+        wait_until: str = "networkidle",
+        wait_ms: int = 0,
+    ) -> Optional[FetchResult]:
+        """Fetch ``url`` with headless Chromium. Use for JS-rendered sites.
+
+        Respects the same per-domain rate limit as ``fetch``. Returns the
+        fully-rendered HTML as bytes in ``content`` with
+        ``content_type='text/html; charset=utf-8'``.
+
+        Lazy-imports playwright so ingesters that only need static HTTP
+        don't pull in the heavy dep.
+        """
+        domain = urlparse(url).netloc
+        last = self._last_request.get(domain, 0.0)
+        elapsed = time.time() - last
+        if elapsed < self.rate_limit:
+            time.sleep(self.rate_limit - elapsed)
+
+        if self._browser is None:
+            try:
+                from playwright.sync_api import sync_playwright
+            except ImportError as e:
+                raise RuntimeError(
+                    "playwright not installed — add to requirements-heavy.txt "
+                    "and run `python -m playwright install chromium`"
+                ) from e
+            self._pw = sync_playwright().start()
+            self._browser = self._pw.chromium.launch(headless=True)
+
+        # Use Chromium's default UA — some sites (e.g. ch.ch) serve 404
+        # to identifiably-bot UAs even when rendered via a real browser.
+        page = self._browser.new_page()
+        try:
+            resp = page.goto(url, wait_until=wait_until, timeout=self.timeout * 1000)
+            if wait_ms:
+                page.wait_for_timeout(wait_ms)
+            html = page.content()
+            status = resp.status if resp else 0
+            final_url = page.url
+            page.close()
+        except Exception as e:
+            try:
+                page.close()
+            except Exception:
+                pass
+            logger.warning("rendered fetch failed url=%s err=%s", url, e)
+            self._last_request[domain] = time.time()
+            return None
+
+        self._last_request[domain] = time.time()
+        return FetchResult(
+            url=url,
+            status_code=status,
+            content=html.encode("utf-8"),
+            content_type="text/html; charset=utf-8",
+            final_url=final_url,
         )
