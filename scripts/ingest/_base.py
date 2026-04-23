@@ -64,7 +64,16 @@ def extract_title_and_sections(
 
     def flush():
         if current_paragraphs:
-            text = "\n\n".join(p for p in current_paragraphs if p.strip())
+            # Dedupe: some sites (e.g. ch.ch) render desktop + mobile copies of
+            # the same content in one DOM, which doubles every paragraph.
+            seen: set[str] = set()
+            uniq = []
+            for p in current_paragraphs:
+                s = p.strip()
+                if s and s not in seen:
+                    seen.add(s)
+                    uniq.append(s)
+            text = "\n\n".join(uniq)
             if text.strip():
                 sections.append(Section(
                     heading=current_heading,
