@@ -51,6 +51,31 @@ class Fetcher:
             "Accept": "text/html,application/xhtml+xml,application/pdf",
             "Accept-Language": "de,en;q=0.9",
         })
+        # Lazily-started persistent Playwright browser. Reused across
+        # fetch_rendered calls because launching Chromium costs ~3-5s.
+        self._pw = None
+        self._browser = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        self.close()
+
+    def close(self) -> None:
+        """Tear down the cached Playwright browser, if any."""
+        if self._browser is not None:
+            try:
+                self._browser.close()
+            except Exception:
+                pass
+            self._browser = None
+        if self._pw is not None:
+            try:
+                self._pw.stop()
+            except Exception:
+                pass
+            self._pw = None
 
     def fetch(self, url: str) -> Optional[FetchResult]:
         """GET ``url`` with per-domain throttling. Returns None on failure."""
@@ -99,26 +124,33 @@ class Fetcher:
         if elapsed < self.rate_limit:
             time.sleep(self.rate_limit - elapsed)
 
-        try:
-            from playwright.sync_api import sync_playwright
-        except ImportError as e:
-            raise RuntimeError(
-                "playwright not installed — add to requirements-heavy.txt "
-                "and run `python -m playwright install chromium`"
-            ) from e
+        if self._browser is None:
+            try:
+                from playwright.sync_api import sync_playwright
+            except ImportError as e:
+                raise RuntimeError(
+                    "playwright not installed — add to requirements-heavy.txt "
+                    "and run `python -m playwright install chromium`"
+                ) from e
+            self._pw = sync_playwright().start()
+            self._browser = self._pw.chromium.launch(headless=True)
 
+        # Use Chromium's default UA — some sites (e.g. ch.ch) serve 404
+        # to identifiably-bot UAs even when rendered via a real browser.
+        page = self._browser.new_page()
         try:
-            with sync_playwright() as p:
-                browser = p.chromium.launch(headless=True)
-                page = browser.new_page(user_agent=self._session.headers["User-Agent"])
-                resp = page.goto(url, wait_until=wait_until, timeout=self.timeout * 1000)
-                if wait_ms:
-                    page.wait_for_timeout(wait_ms)
-                html = page.content()
-                status = resp.status if resp else 0
-                final_url = page.url
-                browser.close()
+            resp = page.goto(url, wait_until=wait_until, timeout=self.timeout * 1000)
+            if wait_ms:
+                page.wait_for_timeout(wait_ms)
+            html = page.content()
+            status = resp.status if resp else 0
+            final_url = page.url
+            page.close()
         except Exception as e:
+            try:
+                page.close()
+            except Exception:
+                pass
             logger.warning("rendered fetch failed url=%s err=%s", url, e)
             self._last_request[domain] = time.time()
             return None
