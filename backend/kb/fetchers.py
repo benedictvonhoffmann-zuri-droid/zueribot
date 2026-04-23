@@ -78,10 +78,56 @@ class Fetcher:
             final_url=resp.url,
         )
 
-    def fetch_rendered(self, url: str) -> Optional[FetchResult]:
-        """Playwright-rendered fetch — not yet implemented. See spec §12."""
-        raise NotImplementedError(
-            "Playwright fallback not wired yet. Add playwright to "
-            "requirements and implement when the first stadt-zuerich.ch "
-            "ingester lands."
+    def fetch_rendered(
+        self,
+        url: str,
+        wait_until: str = "networkidle",
+        wait_ms: int = 0,
+    ) -> Optional[FetchResult]:
+        """Fetch ``url`` with headless Chromium. Use for JS-rendered sites.
+
+        Respects the same per-domain rate limit as ``fetch``. Returns the
+        fully-rendered HTML as bytes in ``content`` with
+        ``content_type='text/html; charset=utf-8'``.
+
+        Lazy-imports playwright so ingesters that only need static HTTP
+        don't pull in the heavy dep.
+        """
+        domain = urlparse(url).netloc
+        last = self._last_request.get(domain, 0.0)
+        elapsed = time.time() - last
+        if elapsed < self.rate_limit:
+            time.sleep(self.rate_limit - elapsed)
+
+        try:
+            from playwright.sync_api import sync_playwright
+        except ImportError as e:
+            raise RuntimeError(
+                "playwright not installed — add to requirements-heavy.txt "
+                "and run `python -m playwright install chromium`"
+            ) from e
+
+        try:
+            with sync_playwright() as p:
+                browser = p.chromium.launch(headless=True)
+                page = browser.new_page(user_agent=self._session.headers["User-Agent"])
+                resp = page.goto(url, wait_until=wait_until, timeout=self.timeout * 1000)
+                if wait_ms:
+                    page.wait_for_timeout(wait_ms)
+                html = page.content()
+                status = resp.status if resp else 0
+                final_url = page.url
+                browser.close()
+        except Exception as e:
+            logger.warning("rendered fetch failed url=%s err=%s", url, e)
+            self._last_request[domain] = time.time()
+            return None
+
+        self._last_request[domain] = time.time()
+        return FetchResult(
+            url=url,
+            status_code=status,
+            content=html.encode("utf-8"),
+            content_type="text/html; charset=utf-8",
+            final_url=final_url,
         )

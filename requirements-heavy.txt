@@ -5,3 +5,6 @@ sentence-transformers>=3.0.0
 langchain-huggingface>=0.3.0
 chromadb>=1.0.0
 langchain-chroma>=0.2.0
+# Headless browser for JS-rendered sources (ch.ch, stadt-zuerich.ch, etc.).
+# Bundles a ~120 MB Chromium binary on first `playwright install`.
+playwright>=1.45.0
