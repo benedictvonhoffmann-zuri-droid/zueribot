@@ -44,7 +44,8 @@ class KnowledgeConnector(BaseConnector):
         store_path = Path(_STORE_PATH)
         if not store_path.exists() or not any(store_path.iterdir()):
             raise FileNotFoundError(
-                f"Knowledge base not found at {_STORE_PATH}. Run: python scripts/ingest.py"
+                f"Knowledge base not found at {_STORE_PATH}. (Legacy Chroma store; "
+                f"will be replaced by Phase 2 Qdrant collection — see docs/knowledge_base.md.)"
             )
 
         from langchain_chroma import Chroma
@@ -63,7 +64,8 @@ class KnowledgeConnector(BaseConnector):
         store_path = Path(_LAW_STORE_PATH)
         if not store_path.exists() or not any(store_path.iterdir()):
             raise FileNotFoundError(
-                f"Law knowledge base not found at {_LAW_STORE_PATH}. Run: python scripts/ingest_law_pdfs.py"
+                f"Law knowledge base not found at {_LAW_STORE_PATH}. (Legacy Chroma store; "
+                f"will be replaced by Phase 2 Qdrant collection — see docs/knowledge_base.md.)"
             )
 
         from langchain_chroma import Chroma
