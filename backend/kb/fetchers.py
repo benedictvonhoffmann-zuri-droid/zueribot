@@ -1,9 +1,10 @@
 """HTTP fetcher with per-domain rate limiting.
 
-Playwright fallback for JS-heavy sites (stadt-zuerich.ch and friends)
-is declared in the API but not yet implemented — spec §12. When the
-first ingester that needs it lands, add playwright to requirements and
-fill in ``fetch_rendered``.
+Two fetch modes: plain HTTP (``fetch``) and headless Chromium via
+Playwright (``fetch_rendered``). Use plain HTTP by default; reach for
+``fetch_rendered`` only when a site is genuinely client-rendered (e.g.
+ch.ch's Nuxt SPA), because launching Chromium costs ~3-5s per run.
+The browser is started lazily on first rendered call and reused.
 """
 
 from __future__ import annotations
