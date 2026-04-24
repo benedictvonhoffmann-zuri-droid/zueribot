@@ -1,10 +1,58 @@
 # Bünzli Knowledge Base — Rebuild Spec
 
-**Status:** design locked, ingest not yet implemented.
-**Last updated:** 2026-04-22.
-**Supersedes:** the current Chroma-based KB at `data/knowledge_base/` and `data/law_knowledge_base/`, which will be discarded.
+**Status:** Phase 1 ingest in progress — 9 of ~30 target sources landed.
+**Last updated:** 2026-04-24.
+**Supersedes:** the current Chroma-based KB at `data/knowledge_base/` and `data/law_knowledge_base/`, which will be discarded once Phase 2 (Qdrant + embeddings) is live.
 
 This document is the single source of truth for how Bünzli's knowledge base is structured, chunked, and annotated. Every ingest script must conform to this spec.
+
+---
+
+## 0. Progress tracker
+
+Updated as ingesters land. `scripts/ingest/*.py` is the authoritative list of what exists today.
+
+### Done (Phase 1 ingesters shipped)
+
+| Source | Script | Categories | Authority |
+|---|---|---|---|
+| ch.ch — Bundesportal | `ch_ch.py` | admin, civic, housing, mobility, health | federal |
+| stadt-zuerich.ch | `stadt_zuerich.py` | admin, housing, mobility, emergency, education, leisure, health | city |
+| zh.ch (canton portal) | `zh_ch_canton.py` | admin, mobility, housing, health, emergency, education, civic, leisure | cantonal |
+| Wikipedia (curated DE+EN) | `wikipedia.py` | leisure, neighborhoods, civic | wikipedia |
+| Federal law PDFs (8 codes) | `law_pdfs.py` | law (statute) | federal |
+| ZVV | `zvv.py` | mobility | cantonal |
+| easyvote | `easyvote.py` | civic | community |
+| Zürich cantonal law (LS) | `zh_cantonal_law.py` | law (statute) | cantonal |
+| zuerich.com (Tourism) | `zuerich_com.py` | food_drink, leisure | private |
+
+Chunks go to `data/chunks/{category}/{source}/*.jsonl` (gitignored). Full crawls are deferred to the AI pod; what's in the repo are smoke-test runs.
+
+### Outstanding
+
+Priority sources from §11 that still need ingesters. Grouped by what's genuinely new (not already covered by the portals above).
+
+**High priority — clear gaps:**
+- **bag.admin.ch** — federal health. Needs a curated allow-list (`/krankheiten`, `/gesund-leben`, `/impfungen`) rather than blanket sitemap; ~1,800 URLs otherwise pulls too much press-release noise. `health` category.
+- **Quartierspiegel** (`stadt-zuerich.ch/quartierspiegel`) — per-Kreis profile pages. **Requires Playwright** (§12). `neighborhoods` category, ⭐ priority.
+- **Stadtarchiv Zürich** — historical layer for Bünzli's voice. Playwright-gated. `leisure/history`, ⭐ character source.
+- **HLS (Historisches Lexikon der Schweiz)** — ⭐ prioritised historical source. Attempted 2026-04-24: Cloudflare-blocks non-browser UAs and robots declares `ai-train=no`. Deferred — re-attempt later via Playwright with respectful rate limiting, or skip permanently.
+
+**Medium priority — category fillers:**
+- Mieterverband + HEV Schweiz — `housing` (cap MV crawl to ~15% of category).
+- estv.admin.ch, sem.admin.ch, bsv.admin.ch — federal `admin` procedures.
+- UZH / ETH / ZHAW / PHZH — `education`.
+- swissvotes.ch, parlament.ch — `civic` depth.
+- Tox Info Suisse, apotheken-notfall.ch — `emergency` reference entries.
+- Badi-Info, landesmuseum / kunsthaus / rietberg — `leisure` reference entries.
+- Gault Millau Zürich, Stadt Zürich Märkte — `food_drink`.
+- Quartiervereine (34 sites, quality-checked) — `neighborhoods`.
+- Stadt Zürich AS (municipal law) — Playwright-gated. `law`.
+
+**Explicitly covered by existing portals (do not re-ingest):**
+- SRZ / Stadtpolizei → already in `stadt_zuerich.py` (service pages) and `zh_ch_canton.py` (`sicherheit-justiz`).
+- Kapo Zürich / gd.zh.ch → `zh_ch_canton.py`.
+- Stadt Zürich Velo / Parken / Schulen → `stadt_zuerich.py`.
 
 ---
 
@@ -395,7 +443,7 @@ data/chunks/{category}/{source}/*.jsonl   # Phase 1 output
 data/law_pdfs/*.pdf                       # source PDFs (already present)
 ```
 
-Old `scripts/ingest.py`, `scripts/ingest_wikipedia.py`, `scripts/ingest_opendata.py`, `scripts/ingest_law_pdfs.py` get retired — their logic is redistributed into `scripts/ingest/*.py`.
+Old `scripts/ingest.py`, `scripts/ingest_wikipedia.py`, `scripts/ingest_opendata.py`, `scripts/ingest_law_pdfs.py` have been retired (removed 2026-04-24) — their logic is redistributed into `scripts/ingest/*.py`. `scripts/cleanup_kb.py` stays until Phase 2 retires the old Chroma stores.
 
 ---
 
