@@ -44,3 +44,4 @@ data/manual_content/
 .env.save
 DEPLOY_NOTES.md
 data/chunks/
+data/law_pdfs_cache/
