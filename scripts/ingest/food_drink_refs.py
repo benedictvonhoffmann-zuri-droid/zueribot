@@ -59,6 +59,9 @@ class SiteEntry:
     title_override: Optional[str] = None
     subcategory: Optional[str] = None
     tags: list[str] = None  # type: ignore[assignment]
+    # Some discovery functions fetch the page to filter (e.g. by PLZ).
+    # When set, the main loop reuses these bytes instead of re-fetching.
+    prefetched_html: Optional[bytes] = None
 
 
 @dataclass
@@ -74,54 +77,147 @@ class SiteConfig:
     doc_type: str = "reference"
 
 
+_GAULTMILLAU_META = [
+    SiteEntry(
+        url="https://www.gaultmillau.ch/",
+        entity_name="Gault Millau Schweiz",
+        entity_type="Restaurantführer",
+        title_override="Gault Millau Schweiz — Übersicht",
+        subcategory="food_drink/guides",
+        tags=["gaultmillau", "restaurantfuehrer", "gastronomie"],
+    ),
+    SiteEntry(
+        url="https://www.gaultmillau.ch/restaurants",
+        entity_name="Gault Millau — Restaurants",
+        entity_type="Restaurantführer",
+        title_override="Gault Millau — Restaurants (Bewertungssystem)",
+        subcategory="food_drink/guides",
+        tags=["gaultmillau", "restaurants", "punkte", "bewertung"],
+    ),
+    SiteEntry(
+        url="https://www.gaultmillau.ch/zueri-isst",
+        entity_name="Gault Millau — Züri isst",
+        entity_type="Restaurantführer",
+        title_override="Gault Millau — Züri isst (Zürich-Sektion)",
+        subcategory="food_drink/guides",
+        tags=["gaultmillau", "zueri", "zuerich", "restaurants"],
+    ),
+    SiteEntry(
+        url="https://www.gaultmillau.ch/hot-ten",
+        entity_name="Gault Millau — Hot Ten",
+        entity_type="Restaurantführer",
+        title_override="Gault Millau — Hot Ten Listen",
+        subcategory="food_drink/guides",
+        tags=["gaultmillau", "hot-ten", "listen"],
+    ),
+    SiteEntry(
+        url="https://www.gaultmillau.ch/unsere-redaktion",
+        entity_name="Gault Millau — Redaktion",
+        entity_type="Restaurantführer",
+        title_override="Gault Millau — Unsere Redaktion",
+        subcategory="food_drink/guides",
+        tags=["gaultmillau", "redaktion", "ueberuns"],
+    ),
+]
+
+
+_PLZ_ZH_RE = __import__("re").compile(r"\b8\d{3}\b")
+
+
+def _discover_gaultmillau_zurich(fetcher: Fetcher, max_pages: int) -> list[SiteEntry]:
+    """Walk gaultmillau.ch sitemap, fetch each restaurant detail page,
+    keep only those with a Zürich-canton PLZ (8000-8999) in the body.
+
+    The sitemap index lists ~100 monthly sub-sitemaps; together they
+    contain ~860 unique restaurant detail URLs across all of Switzerland.
+    Detail pages return clean review prose via plain HTTP — no Playwright
+    needed. Filtering by PLZ inline avoids over-ingesting French-CH or
+    Tessin restaurants while staying simple.
+
+    ``max_pages`` caps the number of detail-page candidates probed (0 = no cap).
+    """
+    import re
+    from urllib.parse import urljoin
+
+    INDEX = "https://www.gaultmillau.ch/sitemap.xml"
+    LOC_RE = re.compile(r"<loc>([^<]+)</loc>")
+    DETAIL_RE = re.compile(r"/restaurants/[^/]+-\d+/?$")
+
+    res = fetcher.fetch(INDEX)
+    if res is None or res.status_code != 200:
+        logger.warning("[gaultmillau] sitemap index fetch failed")
+        return []
+    sub_sitemaps = LOC_RE.findall(res.content.decode("utf-8", "ignore"))
+    logger.info("[gaultmillau] sitemap index: %d sub-sitemaps", len(sub_sitemaps))
+
+    detail_urls: list[str] = []
+    seen: set[str] = set()
+    for sm in sub_sitemaps:
+        rr = fetcher.fetch(sm)
+        if rr is None or rr.status_code != 200:
+            continue
+        for u in LOC_RE.findall(rr.content.decode("utf-8", "ignore")):
+            u = u.rstrip("/")
+            if DETAIL_RE.search(u + "/") and u not in seen:
+                seen.add(u)
+                detail_urls.append(u)
+    logger.info("[gaultmillau] %d candidate restaurant URLs across sitemaps",
+                len(detail_urls))
+
+    if max_pages and max_pages > 0:
+        detail_urls = detail_urls[:max_pages]
+
+    out: list[SiteEntry] = []
+    for i, url in enumerate(detail_urls, 1):
+        rr = fetcher.fetch(url)
+        if rr is None or rr.status_code != 200:
+            continue
+        soup = BeautifulSoup(rr.content, "html.parser")
+        for sel in ("script", "style", "nav", "header", "footer", "aside"):
+            for tag in soup.select(sel):
+                tag.decompose()
+        main = soup.select_one("main") or soup.body or soup
+        text_head = main.get_text("\n", strip=True)[:1000] if main else ""
+
+        # PLZ filter — Zürich canton is 8000-8999. Extra-canton PLZs
+        # starting with 8 (e.g. 8580 Amriswil TG) exist but are rare;
+        # the false-positive rate is low enough to not bother with a
+        # canton list.
+        if not _PLZ_ZH_RE.search(text_head):
+            if i % 50 == 0:
+                logger.info("[gaultmillau] %d/%d probed, %d ZH so far",
+                            i, len(detail_urls), len(out))
+            continue
+
+        h1 = soup.find("h1")
+        name = h1.get_text(" ", strip=True) if h1 else url.rsplit("/", 1)[-1]
+        slug = url.rsplit("/", 1)[-1]
+        out.append(SiteEntry(
+            url=url,
+            entity_name=name,
+            entity_type="Restaurant",
+            title_override=f"Gault Millau — {name}",
+            subcategory="food_drink/restaurants",
+            tags=["gaultmillau", "restaurant", "zuerich", "review"],
+            prefetched_html=rr.content,
+        ))
+        if i % 50 == 0:
+            logger.info("[gaultmillau] %d/%d probed, %d ZH so far",
+                        i, len(detail_urls), len(out))
+    logger.info("[gaultmillau] kept %d Zürich-canton restaurants out of %d",
+                len(out), len(detail_urls))
+    return out
+
+
 GAULTMILLAU = SiteConfig(
     slug="gaultmillau",
     source_name="Gault Millau Schweiz",
     authority="community",
     ttl_days=180,
-    entries=[
-        SiteEntry(
-            url="https://www.gaultmillau.ch/",
-            entity_name="Gault Millau Schweiz",
-            entity_type="Restaurantführer",
-            title_override="Gault Millau Schweiz — Übersicht",
-            subcategory="food_drink/guides",
-            tags=["gaultmillau", "restaurantfuehrer", "gastronomie"],
-        ),
-        SiteEntry(
-            url="https://www.gaultmillau.ch/restaurants",
-            entity_name="Gault Millau — Restaurants",
-            entity_type="Restaurantführer",
-            title_override="Gault Millau — Restaurants (Bewertungssystem)",
-            subcategory="food_drink/guides",
-            tags=["gaultmillau", "restaurants", "punkte", "bewertung"],
-        ),
-        SiteEntry(
-            url="https://www.gaultmillau.ch/zueri-isst",
-            entity_name="Gault Millau — Züri isst",
-            entity_type="Restaurantführer",
-            title_override="Gault Millau — Züri isst (Zürich-Sektion)",
-            subcategory="food_drink/guides",
-            tags=["gaultmillau", "zueri", "zuerich", "restaurants"],
-        ),
-        SiteEntry(
-            url="https://www.gaultmillau.ch/hot-ten",
-            entity_name="Gault Millau — Hot Ten",
-            entity_type="Restaurantführer",
-            title_override="Gault Millau — Hot Ten Listen",
-            subcategory="food_drink/guides",
-            tags=["gaultmillau", "hot-ten", "listen"],
-        ),
-        SiteEntry(
-            url="https://www.gaultmillau.ch/unsere-redaktion",
-            entity_name="Gault Millau — Redaktion",
-            entity_type="Restaurantführer",
-            title_override="Gault Millau — Unsere Redaktion",
-            subcategory="food_drink/guides",
-            tags=["gaultmillau", "redaktion", "ueberuns"],
-        ),
-    ],
+    entries=_GAULTMILLAU_META,
+    discover=_discover_gaultmillau_zurich,
 )
+
 
 def _discover_harrysding(fetcher: Fetcher, max_pages: int) -> list[SiteEntry]:
     """Walk harrysding.ch /category/restaurants-zuerich/page/N until empty.
@@ -225,13 +321,13 @@ def _ingest_site(site: SiteConfig, limit: int, dry_run: bool) -> dict:
     skipped = 0
 
     with Fetcher(rate_limit_seconds=1.0, timeout=25) as fetcher:
+        entries = list(site.entries)
         if site.discover is not None:
-            max_pages = limit if limit else 40
-            entries = site.discover(fetcher, max_pages)  # type: ignore[misc]
-        else:
-            entries = site.entries
-            if limit:
-                entries = entries[:limit]
+            max_pages = limit if limit else 0
+            discovered = site.discover(fetcher, max_pages)  # type: ignore[misc]
+            entries = entries + discovered
+        elif limit:
+            entries = entries[:limit]
 
         if dry_run:
             for e in entries:
@@ -241,7 +337,8 @@ def _ingest_site(site: SiteConfig, limit: int, dry_run: bool) -> dict:
                     "site": site.slug, "planned": len(entries)}
 
         for entry in entries:
-            html = _fetch_with_fallback(fetcher, entry.url)
+            html = entry.prefetched_html if entry.prefetched_html is not None \
+                else _fetch_with_fallback(fetcher, entry.url)
             if html is None:
                 logger.warning("fetch failed url=%s", entry.url)
                 skipped += 1
