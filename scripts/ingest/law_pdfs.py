@@ -98,7 +98,8 @@ LAW_METADATA: dict[str, dict[str, str]] = {
 
 
 def _normalise_stem(filename: str) -> str:
-    stem = Path(filename).stem.lower()
+    import unicodedata
+    stem = unicodedata.normalize("NFC", Path(filename).stem).lower()
     stem = stem.replace("ä", "ae").replace("ö", "oe").replace("ü", "ue").replace("ß", "ss")
     stem = re.sub(r"[\s\-]+", "_", stem)
     stem = re.sub(r"[^a-z0-9_]", "", stem)
@@ -107,10 +108,10 @@ def _normalise_stem(filename: str) -> str:
 
 def _match_metadata(filename: str) -> Optional[dict[str, str]]:
     stem = _normalise_stem(filename)
-    # Prefer exact prefix match on the longest key so e.g.
-    # "verordnung_ueber_die_technischen_..." wins over "verordnung".
+    # Substring match on the longest key first — handles the "Schweizerisches
+    # Obligationenrecht" case where the law-name root isn't at the start.
     for key in sorted(LAW_METADATA, key=len, reverse=True):
-        if stem.startswith(key):
+        if key in stem:
             return LAW_METADATA[key]
     return None
 
