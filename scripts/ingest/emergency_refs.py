@@ -125,7 +125,143 @@ TOX = SiteConfig(
     ],
 )
 
-SITES: dict[str, SiteConfig] = {"tox": TOX}
+DARGEBOTENE_HAND = SiteConfig(
+    slug="dargebotene_hand",
+    source_name="Die Dargebotene Hand 143",
+    authority="community",
+    ttl_days=None,
+    entries=[
+        SiteEntry(
+            url="https://www.143.ch/",
+            entity_name="Tel 143 — Die Dargebotene Hand",
+            entity_type="Notfall-Hotline",
+            title_override="Tel 143 — Die Dargebotene Hand",
+            subcategory="emergency/seelsorge",
+            tags=["143", "krise", "seelsorge", "notfall"],
+        ),
+        SiteEntry(
+            url="https://www.143.ch/ueber-uns/",
+            entity_name="Tel 143 — Über uns",
+            entity_type="Institution",
+            title_override="Tel 143 — Über uns",
+            subcategory="emergency/seelsorge",
+            tags=["143", "stiftung", "portrait"],
+        ),
+    ],
+)
+
+PRO_JUVENTUTE = SiteConfig(
+    slug="pro_juventute_147",
+    source_name="Pro Juventute 147",
+    authority="community",
+    ttl_days=None,
+    entries=[
+        SiteEntry(
+            url="https://www.147.ch/",
+            entity_name="Pro Juventute 147 — Beratung für Jugendliche",
+            entity_type="Notfall-Hotline",
+            title_override="Pro Juventute 147 — Beratung für Kinder und Jugendliche",
+            subcategory="emergency/jugendberatung",
+            tags=["147", "jugend", "kinder", "krise", "beratung"],
+        ),
+    ],
+)
+
+REDEN_KANN_RETTEN = SiteConfig(
+    slug="reden_kann_retten",
+    source_name="Reden kann retten — Suizidprävention",
+    authority="community",
+    ttl_days=None,
+    entries=[
+        SiteEntry(
+            url="https://www.reden-kann-retten.ch/",
+            entity_name="Reden kann retten",
+            entity_type="Notfall-Hotline",
+            title_override="Reden kann retten — Suizidprävention Schweiz",
+            subcategory="emergency/suizidpraevention",
+            tags=["suizid", "praevention", "krise", "143"],
+        ),
+    ],
+)
+
+REGA = SiteConfig(
+    slug="rega",
+    source_name="Schweizerische Rettungsflugwacht Rega",
+    authority="community",
+    ttl_days=None,
+    entries=[
+        SiteEntry(
+            url="https://www.rega.ch/",
+            entity_name="Rega — Notruf 1414",
+            entity_type="Notfall-Hotline",
+            title_override="Rega — Schweizerische Rettungsflugwacht",
+            subcategory="emergency/luftrettung",
+            tags=["rega", "1414", "luftrettung", "notfall"],
+        ),
+    ],
+)
+
+USZ_NOTFALL = SiteConfig(
+    slug="usz_notfall",
+    source_name="UniversitätsSpital Zürich — Notfallzentrum",
+    authority="cantonal",
+    ttl_days=None,
+    entries=[
+        SiteEntry(
+            url="https://www.usz.ch/notfall/",
+            entity_name="USZ — Notfallzentrum",
+            entity_type="Notfallstation",
+            title_override="USZ — Notfallzentrum (Erwachsene)",
+            subcategory="emergency/spital_notfall",
+            tags=["usz", "notfall", "spital", "erwachsene"],
+        ),
+    ],
+)
+
+KISPI_NOTFALL = SiteConfig(
+    slug="kispi_notfall",
+    source_name="Kinderspital Zürich — Notfall",
+    authority="cantonal",
+    ttl_days=None,
+    entries=[
+        SiteEntry(
+            url="https://www.kispi.uzh.ch/notfall",
+            entity_name="Kispi — Notfallstation",
+            entity_type="Notfallstation",
+            title_override="Kinderspital Zürich — Notfall",
+            subcategory="emergency/spital_notfall",
+            tags=["kispi", "kinder", "notfall", "spital"],
+        ),
+    ],
+)
+
+KAPO_ZH = SiteConfig(
+    slug="kapo_zh",
+    source_name="Kantonspolizei Zürich",
+    authority="cantonal",
+    ttl_days=None,
+    entries=[
+        SiteEntry(
+            url="https://www.zh.ch/de/sicherheitsdirektion/kantonspolizei-zuerich.html",
+            entity_name="Kantonspolizei Zürich",
+            entity_type="Polizei",
+            title_override="Kantonspolizei Zürich",
+            subcategory="emergency/polizei",
+            tags=["polizei", "117", "kapo", "kanton"],
+        ),
+    ],
+)
+
+SITES: dict[str, SiteConfig] = {
+    "tox": TOX,
+    "dargebotene_hand": DARGEBOTENE_HAND,
+    "pro_juventute_147": PRO_JUVENTUTE,
+    "reden_kann_retten": REDEN_KANN_RETTEN,
+    "rega": REGA,
+    "usz_notfall": USZ_NOTFALL,
+    "kispi_notfall": KISPI_NOTFALL,
+    "kapo_zh": KAPO_ZH,
+}
 
 
 # Extraction ───────────────────────────────────────────────────────────────
@@ -278,7 +414,8 @@ def main() -> int:
                         help="Cap entries per site (0 = no cap)")
     parser.add_argument("--dry-run", action="store_true",
                         help="Print planned URLs; don't fetch")
-    parser.add_argument("--site", choices=("tox", "all"), default="all",
+    parser.add_argument("--site", choices=tuple(SITES.keys()) + ("all",),
+                        default="all",
                         help="Which site to ingest (default: all)")
     args = parser.parse_args()
     return run(limit=args.limit, dry_run=args.dry_run, site=args.site)

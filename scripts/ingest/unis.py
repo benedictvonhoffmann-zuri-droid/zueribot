@@ -91,18 +91,9 @@ SITES: dict[str, SiteConfig] = {
         keep_substrings=("/studium",),
         skip_substrings=("/news", "/medien", "/jobs", "/events", "/aktuell"),
     ),
-    "phzh": SiteConfig(
-        slug="phzh",
-        name="Pädagogische Hochschule Zürich",
-        url_prefix="https://phzh.ch/de/Ausbildung",
-        seeds=[
-            "https://phzh.ch/de/Ausbildung/",
-            "https://phzh.ch/de/Ausbildung/studiengaenge/",
-            "https://phzh.ch/de/Ausbildung/anmeldung-zulassung/",
-        ],
-        keep_substrings=("/ausbildung", "/Ausbildung"),
-        skip_substrings=("/news", "/aktuell", "/medien", "/jobs", "/events"),
-    ),
+    # phzh.ch is a SPA with no anchor links and no sitemap.xml — even
+    # rendered fetches return 0 internal navigable links. Dropped until
+    # we have a click-simulation crawler or a curated URL list.
 }
 
 
@@ -205,7 +196,7 @@ def run(site_arg: str, limit: int, dry_run: bool) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Ingest UZH/ETH/ZHAW/PHZH into Phase 1 .jsonl")
-    parser.add_argument("--site", choices=["uzh", "ethz", "zhaw", "phzh", "all"], default="all")
+    parser.add_argument("--site", choices=["uzh", "ethz", "zhaw", "all"], default="all")
     parser.add_argument("--limit", type=int, default=0,
                         help="Per-site URL cap (0 = default 150).")
     parser.add_argument("--dry-run", action="store_true")

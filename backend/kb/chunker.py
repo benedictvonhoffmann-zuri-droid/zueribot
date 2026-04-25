@@ -51,6 +51,12 @@ STATUTE_ABSATZ_SPLIT = 2000
 HISTORICAL_MIN = 300
 HISTORICAL_MAX = 400
 
+# Safety guard: a single section longer than this (in characters) is almost
+# always page noise (boilerplate dumps, JS payload bleed-through, navigation
+# turned into prose). Tokenizing huge inputs is slow and they yield low-value
+# chunks. Truncate with a warning.
+MAX_SECTION_CHARS = 80_000
+
 
 @dataclass
 class Section:
@@ -132,8 +138,12 @@ def _pack_sentences(
         s = sentences[i]
         s_tokens = count_tokens(s)
 
-        # Guard: a single sentence bigger than hard max gets emitted alone.
-        if s_tokens > HARD_MAX:
+        # Guard: a single sentence bigger than target_max gets emitted alone.
+        # (Below target_max means it can combine with neighbours; above means
+        # combining would either overflow target_max or — worse — leave us
+        # in an infinite emit-and-seed loop because the seeded overlap can
+        # never make room for a sentence that's already past target_max.)
+        if s_tokens > target_max:
             if cur:
                 chunks.append(" ".join(cur))
                 cur, cur_tokens = [], 0
@@ -154,6 +164,11 @@ def _pack_sentences(
                     break
                 tail.insert(0, prev)
                 tail_tokens += t
+            # Progress guard: if the seeded tail still leaves no room for s,
+            # drop the tail. s will start the next chunk alone (since
+            # s_tokens <= target_max here, that's safe).
+            if tail_tokens + s_tokens > target_max:
+                tail, tail_tokens = [], 0
             cur = tail
             cur_tokens = tail_tokens
             continue
@@ -263,6 +278,20 @@ def chunk_document(doc: Document) -> list[Chunk]:
         raise ValueError("Document must have either sections or text")
     if doc.created_at is None or doc.updated_at is None:
         raise ValueError("created_at and updated_at are required")
+
+    for sec in doc.sections:
+        if len(sec.text) > MAX_SECTION_CHARS:
+            logger.warning(
+                "truncating oversized section url=%s heading=%r %d->%d chars",
+                doc.source_url, sec.heading, len(sec.text), MAX_SECTION_CHARS,
+            )
+            sec.text = sec.text[:MAX_SECTION_CHARS]
+    if len(doc.text) > MAX_SECTION_CHARS:
+        logger.warning(
+            "truncating oversized doc.text url=%s %d->%d chars",
+            doc.source_url, len(doc.text), MAX_SECTION_CHARS,
+        )
+        doc.text = doc.text[:MAX_SECTION_CHARS]
 
     doc_id = make_doc_id(doc.source_url, doc.language)
 
