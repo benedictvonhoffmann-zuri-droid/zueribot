@@ -133,9 +133,14 @@ def run(limit: int, dry_run: bool) -> int:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
     url_cats = _fetch_sitemap_urls()
+    # Put rarer categories first so a low --limit still reaches them.
+    # zuerich.com's sitemap is leisure-heavy and food_drink URLs sit
+    # ~position 1180+; limit=200 in the past truncated to 0 food_drink.
+    cat_priority = {"food_drink": 0, "leisure": 1}
+    url_cats.sort(key=lambda uc: cat_priority.get(uc[1], 9))
     if limit and limit < len(url_cats):
         url_cats = url_cats[:limit]
-        logger.info("Limited to first %d URLs.", limit)
+        logger.info("Limited to first %d URLs (rarer categories first).", limit)
 
     if dry_run:
         by_cat: dict[str, int] = {}

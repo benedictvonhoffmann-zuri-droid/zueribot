@@ -49,12 +49,23 @@ def extract_title_and_sections(
     full_text is the concatenated body — useful for procedure heuristics.
     """
     soup = BeautifulSoup(html, "html.parser")
+
+    # Pull a title BEFORE stripping nav/header — some sites (zuerich.com)
+    # put the page h1 inside <header>, which would otherwise vanish.
+    title = ""
+    h1 = soup.find("h1")
+    if h1:
+        title = h1.get_text(" ", strip=True)
+    if not title:
+        og = soup.find("meta", property="og:title")
+        if og and og.get("content"):
+            title = og["content"].strip()
+    if not title and soup.title:
+        title = soup.title.get_text(strip=True)
+
     for sel in strip_selectors:
         for tag in soup.select(sel):
             tag.decompose()
-
-    h1 = soup.find("h1")
-    title = h1.get_text(" ", strip=True) if h1 else ""
 
     main = soup.select_one(main_selector) or soup.body or soup
     sections: list[Section] = []
@@ -218,6 +229,8 @@ def make_and_write(
             updated_at=today,
             ttl_days=ttl_days,
         )
+        body_chars = sum(len(s.text) for s in sections)
+        logger.info("chunking url=%s sections=%d chars=%d", res.url, len(sections), body_chars)
         try:
             chunks: list[Chunk] = chunk_document(doc)
         except Exception as e:
