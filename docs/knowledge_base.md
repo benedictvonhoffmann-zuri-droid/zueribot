@@ -1,6 +1,6 @@
 # Bünzli Knowledge Base — Rebuild Spec
 
-**Status:** Phase 1 ingest in progress — 15 of ~30 target sources landed.
+**Status:** Phase 1 ingesters complete — 22 of the planned ~25 target sources landed; remainder explicitly deferred (HLS, Stadt Zürich AS, a few dead-end directories). Ready for the §14 acceptance pass.
 **Last updated:** 2026-04-25.
 **Supersedes:** the current Chroma-based KB at `data/knowledge_base/` and `data/law_knowledge_base/`, which will be discarded once Phase 2 (Qdrant + embeddings) is live.
 
@@ -32,31 +32,29 @@ Updated as ingesters land. `scripts/ingest/*.py` is the authoritative list of wh
 | Tox Info Suisse | `emergency_refs.py` | emergency | federal |
 | Museums + Badis | `leisure_refs.py` | leisure | community/city |
 | Gault Millau + Harrys Ding | `food_drink_refs.py` | food_drink | community |
+| Quartierspiegel (per-Kreis PDFs) ⭐ | `quartierspiegel.py` | neighborhoods | city |
+| Stadtarchiv / Zürichs Geschichte ⭐ | `stadtarchiv.py` | leisure (history) | city |
+| Mieterverband (CH + ZH) + HEV Schweiz | `housing_assoc.py` | housing | community |
+| UZH / ETH / ZHAW / PHZH | `unis.py` | education | community |
+| Quartiervereine (24 sites) | `quartiervereine.py` | neighborhoods | community |
 
 Chunks go to `data/chunks/{category}/{source}/*.jsonl` (gitignored). Full crawls are deferred to the AI pod; what's in the repo are smoke-test runs.
 
-### Outstanding
+### Deferred / dropped
 
-Priority sources from §11 that still need ingesters. Grouped by what's genuinely new (not already covered by the portals above).
+Sources in §11 that we explicitly chose not to ingest, with the reason. Re-evaluate before Phase 2 acceptance.
 
-**High priority — clear gaps:**
-- **Quartierspiegel** (`stadt-zuerich.ch/quartierspiegel`) — per-Kreis profile pages. **Requires Playwright** (§12). `neighborhoods` category, ⭐ priority.
-- **Stadtarchiv Zürich** — historical layer for Bünzli's voice. Playwright-gated. `leisure/history`, ⭐ character source.
-- **HLS (Historisches Lexikon der Schweiz)** — ⭐ prioritised historical source. Attempted 2026-04-24: Cloudflare-blocks non-browser UAs and robots declares `ai-train=no`. Deferred — re-attempt later via Playwright with respectful rate limiting, or skip permanently.
-- **Stadt Zürich AS (Amtliche Sammlung)** — attempted 2026-04-25 via Playwright. Leaf pages (e.g. `/amtliche-sammlung/1/101.html` for the Gemeindeordnung) load only navigation chrome — the actual statute body is not in the rendered DOM (innerText < 500 chars). The AS appears to be a pointer index, not the canonical text store. Deferred until we find the canonical source (likely a separate gemeinderecht portal or a per-statute PDF set).
+- **HLS (Historisches Lexikon der Schweiz)** — Cloudflare blocks non-browser UAs and robots declares `ai-train=no` (attempted 2026-04-24). Re-attempt later via Playwright with respectful rate limiting, or skip permanently.
+- **Stadt Zürich AS (Amtliche Sammlung)** — attempted 2026-04-25 via Playwright. Leaf pages (e.g. `/amtliche-sammlung/1/101.html` for the Gemeindeordnung) load only navigation chrome — the actual statute body is not in the rendered DOM. The AS is a pointer index, not the canonical text store. Deferred until we find the canonical municipal-law source.
+- **Quartierverein Kreis 5 (Industriequartier)** — its domains (qv5.ch, chreis5.ch) now redirect to casino-spam at chreis5.info. Verein appears defunct; re-add if a clean domain reappears.
+- **Quartierverein rqv.ch (Riesbach)** — server 500-erroring on 2026-04-25. Riesbach is already covered via `8008.ch`. Re-add if it returns.
+- **apotheken-notfall.ch** — domain dead (NXDOMAIN). Pharmacy emergency lookups will become a live tool, not a KB lookup.
+- **Stadt Zürich Wochenmärkte** — no clean canonical page; market info comes via `zuerich_com.py`.
+- **Reddit / community forums, news feeds, business directories, classifieds, live schedules** — out of scope per §1 (handled later as live tools or dropped).
 
-**Medium priority — category fillers:**
-- Mieterverband + HEV Schweiz — `housing` (cap MV crawl to ~15% of category).
-- UZH / ETH / ZHAW / PHZH — `education`.
-- Quartiervereine (34 sites, quality-checked) — `neighborhoods`.
-- Stadt Zürich AS (municipal law) — Playwright-gated. `law`.
+### Already covered by existing portals (do not re-ingest)
 
-**Deferred / dead ends:**
-- apotheken-notfall.ch — domain dead (NXDOMAIN); pharmavista / 144.ch are SPAs without crawlable content. Pharmacy emergency lookups will likely become a live tool, not a KB lookup.
-- Stadt Zürich Wochenmärkte — no clean canonical page; market info comes via `zuerich_com.py`. Defer dedicated municipal-markets ingester.
-
-**Explicitly covered by existing portals (do not re-ingest):**
-- SRZ / Stadtpolizei → already in `stadt_zuerich.py` (service pages) and `zh_ch_canton.py` (`sicherheit-justiz`).
+- SRZ / Stadtpolizei → `stadt_zuerich.py` (service pages) and `zh_ch_canton.py` (`sicherheit-justiz`).
 - Kapo Zürich / gd.zh.ch → `zh_ch_canton.py`.
 - Stadt Zürich Velo / Parken / Schulen → `stadt_zuerich.py`.
 
