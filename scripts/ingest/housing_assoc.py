@@ -1,18 +1,23 @@
 #!/usr/bin/env python3
-"""Housing-association ingester — Mieterverband + HEV Schweiz.
+"""Housing-association ingester — Mieterverband (CH + ZH) + HEV Schweiz.
 
 Two advocacy associations explaining tenant- and landlord-rights in
 plain German: Mietrecht primers, Nebenkosten, Kündigung, Mietzinser-
 höhung. Both `authority="community"`, both `housing` category.
+
+Three sub-sources:
+- ``mieterverband`` — federal MV explainer pages (`/mv/...`).
+- ``mv_zuerich`` — MV Zürich section (`/mv-zh/...`), which has its own
+  Mietrecht tree with ZH-specific examples and Schlichtungsbehörden.
+- ``hev_schweiz`` — Hauseigentümerverband Schweiz, landlord-side.
 
 URL discovery: BFS from a curated seed list per site, restricted to
 each site's tenant-rights / landlord-rights explainer trees. We do
 not crawl the news/press/member sections (login walls, dated content).
 
 Mieterverband cap: per spec §11.2, MV must not exceed ~15% of total
-`housing` chunks. We enforce this at the ingester level by capping
-the MV crawl at a small URL budget, lower than HEV's. The default
-budget for MV is roughly half of HEV; tune via ``--mv-cap``.
+`housing` chunks. The cap is shared across MV federal and MV-ZH —
+``--mv-cap`` is the combined ceiling, split half-and-half by default.
 
 Usage:
     python -m scripts.ingest.housing_assoc --dry-run --limit 10
@@ -94,6 +99,29 @@ def _mv_subcategory(url: str) -> Optional[str]:
     if not leaf:
         return None
     return f"{CATEGORY}/{leaf[:40]}"
+
+
+# ── Mieterverband Zürich (MV-ZH) ───────────────────────────────────────────
+# Same site as MV federal but a different section tree with ZH-specific
+# guidance (Schlichtungsbehörde Zürich, kantonale Beratungsstellen).
+MV_ZH_SOURCE_NAME = "Mieterinnen- und Mieterverband Zürich"
+MV_ZH_SOURCE_SLUG = "mv_zuerich"
+MV_ZH_URL_PREFIX = "https://www.mieterverband.ch/mv-zh/"
+MV_ZH_SEEDS = [
+    "https://www.mieterverband.ch/mv-zh/mietrecht/",
+    "https://www.mieterverband.ch/mv-zh/mietrecht/top-themen/",
+    "https://www.mieterverband.ch/mv-zh/mietrecht/vor-der-miete/",
+    "https://www.mieterverband.ch/mv-zh/mietrecht/waehrend-der-miete/",
+]
+MV_ZH_SKIP = MV_SKIP + ("/login/", "/suche/", "/newsletter/", "/standort", "/asloca")
+
+
+def _mv_zh_link_filter(url: str) -> bool:
+    path = urlparse(url).path.lower()
+    if any(s in path for s in MV_ZH_SKIP):
+        return False
+    # Stay inside the substantive ZH Mietrecht tree.
+    return "/mv-zh/mietrecht" in path or path.rstrip("/").endswith("/mv-zh")
 
 
 # ── HEV Schweiz ────────────────────────────────────────────────────────────
@@ -215,13 +243,17 @@ def run(limit: int, mv_cap: int, dry_run: bool) -> int:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
     # MV is capped lower than HEV per §11.2 (~15% rule).
-    # When --limit is set, treat it as the HEV budget; MV gets min(limit, mv_cap).
+    # When --limit is set, treat it as the HEV budget; the MV cap is the
+    # combined ceiling for MV federal + MV-ZH, split half-and-half.
     if limit:
         hev_cap = limit
-        mv_budget = min(limit, mv_cap)
+        mv_total = min(limit, mv_cap)
     else:
         hev_cap = 200
-        mv_budget = mv_cap
+        mv_total = mv_cap
+
+    mv_fed_budget = max(1, mv_total // 2)
+    mv_zh_budget = max(1, mv_total - mv_fed_budget)
 
     grand = {"docs_written": 0, "total_chunks": 0, "procedures": 0, "articles": 0}
 
@@ -245,7 +277,20 @@ def run(limit: int, mv_cap: int, dry_run: bool) -> int:
         seeds=MV_SEEDS,
         link_filter=_mv_link_filter,
         subcategory_for=_mv_subcategory,
-        max_pages=mv_budget,
+        max_pages=mv_fed_budget,
+        dry_run=dry_run,
+    )
+    for k, v in s.items():
+        grand[k] += v
+
+    s = _run_site(
+        source_slug=MV_ZH_SOURCE_SLUG,
+        source_name=MV_ZH_SOURCE_NAME,
+        url_prefix=MV_ZH_URL_PREFIX,
+        seeds=MV_ZH_SEEDS,
+        link_filter=_mv_zh_link_filter,
+        subcategory_for=_mv_subcategory,
+        max_pages=mv_zh_budget,
         dry_run=dry_run,
     )
     for k, v in s.items():
