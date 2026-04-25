@@ -150,7 +150,15 @@ def _extract_pdf_text(pdf_path: Path) -> str:
         except Exception:
             continue
         text = re.sub(r"-\n(\w)", r"\1", text)
-        text = re.sub(r"(\S)\n(\S)", r"\1 \2", text)
+        # Collapse mid-sentence line breaks, but preserve newlines that
+        # precede a section marker (§ N / Art. N / Artikel N) — otherwise
+        # _SECTION_RE can't see them and adjacent statute sections get
+        # merged into a single oversized chunk.
+        text = re.sub(
+            r"(\S)\n(?!\s*(?:§|Art\.|Artikel)\s+\d)(\S)",
+            r"\1 \2",
+            text,
+        )
         text = re.sub(r"\n{3,}", "\n\n", text).strip()
         if text:
             parts.append(text)
