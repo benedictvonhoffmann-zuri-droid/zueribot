@@ -1,7 +1,7 @@
 # Bünzli Knowledge Base — Rebuild Spec
 
-**Status:** Phase 1 ingest in progress — 9 of ~30 target sources landed.
-**Last updated:** 2026-04-24.
+**Status:** Phase 1 ingest in progress — 15 of ~30 target sources landed.
+**Last updated:** 2026-04-25.
 **Supersedes:** the current Chroma-based KB at `data/knowledge_base/` and `data/law_knowledge_base/`, which will be discarded once Phase 2 (Qdrant + embeddings) is live.
 
 This document is the single source of truth for how Bünzli's knowledge base is structured, chunked, and annotated. Every ingest script must conform to this spec.
@@ -25,6 +25,13 @@ Updated as ingesters land. `scripts/ingest/*.py` is the authoritative list of wh
 | easyvote | `easyvote.py` | civic | community |
 | Zürich cantonal law (LS) | `zh_cantonal_law.py` | law (statute) | cantonal |
 | zuerich.com (Tourism) | `zuerich_com.py` | food_drink, leisure | private |
+| bag.admin.ch | `bag_admin_ch.py` | health | federal |
+| estv / sem / bsv | `admin_federal.py` | admin | federal |
+| swissvotes.ch | `swissvotes.py` | civic | federal |
+| parlament.ch | `parlament.py` | civic | federal |
+| Tox Info Suisse | `emergency_refs.py` | emergency | federal |
+| Museums + Badis | `leisure_refs.py` | leisure | community/city |
+| Gault Millau + Harrys Ding | `food_drink_refs.py` | food_drink | community |
 
 Chunks go to `data/chunks/{category}/{source}/*.jsonl` (gitignored). Full crawls are deferred to the AI pod; what's in the repo are smoke-test runs.
 
@@ -33,21 +40,20 @@ Chunks go to `data/chunks/{category}/{source}/*.jsonl` (gitignored). Full crawls
 Priority sources from §11 that still need ingesters. Grouped by what's genuinely new (not already covered by the portals above).
 
 **High priority — clear gaps:**
-- **bag.admin.ch** — federal health. Needs a curated allow-list (`/krankheiten`, `/gesund-leben`, `/impfungen`) rather than blanket sitemap; ~1,800 URLs otherwise pulls too much press-release noise. `health` category.
 - **Quartierspiegel** (`stadt-zuerich.ch/quartierspiegel`) — per-Kreis profile pages. **Requires Playwright** (§12). `neighborhoods` category, ⭐ priority.
 - **Stadtarchiv Zürich** — historical layer for Bünzli's voice. Playwright-gated. `leisure/history`, ⭐ character source.
 - **HLS (Historisches Lexikon der Schweiz)** — ⭐ prioritised historical source. Attempted 2026-04-24: Cloudflare-blocks non-browser UAs and robots declares `ai-train=no`. Deferred — re-attempt later via Playwright with respectful rate limiting, or skip permanently.
+- **Stadt Zürich AS (Amtliche Sammlung)** — attempted 2026-04-25 via Playwright. Leaf pages (e.g. `/amtliche-sammlung/1/101.html` for the Gemeindeordnung) load only navigation chrome — the actual statute body is not in the rendered DOM (innerText < 500 chars). The AS appears to be a pointer index, not the canonical text store. Deferred until we find the canonical source (likely a separate gemeinderecht portal or a per-statute PDF set).
 
 **Medium priority — category fillers:**
 - Mieterverband + HEV Schweiz — `housing` (cap MV crawl to ~15% of category).
-- estv.admin.ch, sem.admin.ch, bsv.admin.ch — federal `admin` procedures.
 - UZH / ETH / ZHAW / PHZH — `education`.
-- swissvotes.ch, parlament.ch — `civic` depth.
-- Tox Info Suisse, apotheken-notfall.ch — `emergency` reference entries.
-- Badi-Info, landesmuseum / kunsthaus / rietberg — `leisure` reference entries.
-- Gault Millau Zürich, Stadt Zürich Märkte — `food_drink`.
 - Quartiervereine (34 sites, quality-checked) — `neighborhoods`.
 - Stadt Zürich AS (municipal law) — Playwright-gated. `law`.
+
+**Deferred / dead ends:**
+- apotheken-notfall.ch — domain dead (NXDOMAIN); pharmavista / 144.ch are SPAs without crawlable content. Pharmacy emergency lookups will likely become a live tool, not a KB lookup.
+- Stadt Zürich Wochenmärkte — no clean canonical page; market info comes via `zuerich_com.py`. Defer dedicated municipal-markets ingester.
 
 **Explicitly covered by existing portals (do not re-ingest):**
 - SRZ / Stadtpolizei → already in `stadt_zuerich.py` (service pages) and `zh_ch_canton.py` (`sicherheit-justiz`).
