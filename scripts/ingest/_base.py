@@ -49,12 +49,23 @@ def extract_title_and_sections(
     full_text is the concatenated body — useful for procedure heuristics.
     """
     soup = BeautifulSoup(html, "html.parser")
+    # Strip noise tags. We *don't* strip ``form`` here because some legacy
+    # sites (some Quartierverein WordPress themes) wrap the entire page —
+    # including <main> — in a <form>, so decomposing it nukes the content.
+    # Inside-main pruning below handles any stray search/input forms.
     for sel in strip_selectors:
+        if sel == "form":
+            continue
         for tag in soup.select(sel):
             tag.decompose()
 
     h1 = soup.find("h1")
     title = h1.get_text(" ", strip=True) if h1 else ""
+    if not title and soup.title and soup.title.string:
+        # Older / hand-built sites (e.g. some Quartierverein WordPress
+        # themes) don't render an <h1>. Fall back to the document <title>
+        # so we don't drop the page entirely.
+        title = soup.title.string.strip()
 
     main = soup.select_one(main_selector) or soup.body or soup
     sections: list[Section] = []
