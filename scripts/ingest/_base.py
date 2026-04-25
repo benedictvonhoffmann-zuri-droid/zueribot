@@ -49,6 +49,23 @@ def extract_title_and_sections(
     full_text is the concatenated body — useful for procedure heuristics.
     """
     soup = BeautifulSoup(html, "html.parser")
+
+    # Pull a title BEFORE stripping nav/header — some sites (zuerich.com)
+    # put the page h1 inside <header>, which would otherwise vanish.
+    title = ""
+    h1 = soup.find("h1")
+    if h1:
+        title = h1.get_text(" ", strip=True)
+    if not title:
+        og = soup.find("meta", property="og:title")
+        if og and og.get("content"):
+            title = og["content"].strip()
+    if not title and soup.title and soup.title.string:
+        # Older / hand-built sites (e.g. some Quartierverein WordPress
+        # themes) don't render an <h1>. Fall back to the document <title>
+        # so we don't drop the page entirely.
+        title = soup.title.string.strip()
+
     # Strip noise tags. We *don't* strip ``form`` here because some legacy
     # sites (some Quartierverein WordPress themes) wrap the entire page —
     # including <main> — in a <form>, so decomposing it nukes the content.
@@ -58,14 +75,6 @@ def extract_title_and_sections(
             continue
         for tag in soup.select(sel):
             tag.decompose()
-
-    h1 = soup.find("h1")
-    title = h1.get_text(" ", strip=True) if h1 else ""
-    if not title and soup.title and soup.title.string:
-        # Older / hand-built sites (e.g. some Quartierverein WordPress
-        # themes) don't render an <h1>. Fall back to the document <title>
-        # so we don't drop the page entirely.
-        title = soup.title.string.strip()
 
     main = soup.select_one(main_selector) or soup.body or soup
     sections: list[Section] = []
@@ -229,6 +238,8 @@ def make_and_write(
             updated_at=today,
             ttl_days=ttl_days,
         )
+        body_chars = sum(len(s.text) for s in sections)
+        logger.info("chunking url=%s sections=%d chars=%d", res.url, len(sections), body_chars)
         try:
             chunks: list[Chunk] = chunk_document(doc)
         except Exception as e:
