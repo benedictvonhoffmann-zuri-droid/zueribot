@@ -1,4 +1,4 @@
-name: zitadel
+name: bunzli-app-iam
 
 services:
   proxy:

@@ -94,7 +94,7 @@ crawl → extract → clean → chunk          read .jsonl
 
 **Phase 1 dependencies:** Python + HTTP client + BeautifulSoup/Playwright + the EmbeddingGemma tokenizer file (~2 MB, no model weights, CPU only, used solely to count tokens).
 
-**Phase 2 dependencies:** Full EmbeddingGemma-300M model, BGE-reranker-v2-m3 at query time, Qdrant as a service in `deploy/docker-compose.yml`.
+**Phase 2 dependencies:** Full EmbeddingGemma-300M model, BGE-reranker-v2-m3 at query time, Qdrant — all hosted in the `bunzli-gpu` pod (`deploy/pods/gpu/docker-compose.yml`) on the Infomaniak Public Cloud GPU instance.
 
 ---
 

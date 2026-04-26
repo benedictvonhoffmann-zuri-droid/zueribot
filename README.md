@@ -188,9 +188,16 @@ Astro serves on `:4321`. The `/chat/` route proxies to the API.
 
 ### 3. Supporting services
 
+The full app stack (edge proxy + API + landing) lives in
+`deploy/pods/app/`. To bring it up locally:
+
 ```bash
-docker compose -f deploy/docker-compose.yml up -d searxng
+docker compose -f deploy/pods/app/docker-compose.yml up -d
 ```
+
+Self-hosted auth (Zitadel) is a separate pod at `deploy/pods/app-iam/`.
+The retrieval + staging-LLM pod is at `deploy/pods/gpu/` (provisioned
+on a separate Infomaniak Public Cloud GPU instance, not this laptop).
 
 ---
 

@@ -99,8 +99,10 @@ Anything user-visible needs a deploy. The standard sequence:
 # 1. If .env changed, scp the new one:
 scp /Users/benedictvonhoffmann/zuribot/.env bunzli@83.228.227.247:/home/bunzli/zueribot/.env
 
-# 2. Pull & rebuild:
-ssh bunzli@83.228.227.247 'cd ~/zueribot && git pull && cd deploy && docker compose up -d --build'
+# 2. Pull & rebuild the bunzli-app pod (Caddy + API + landing):
+ssh bunzli@83.228.227.247 'cd ~/zueribot && git pull && cd deploy/pods/app && docker compose up -d --build'
+
+# (For Zitadel: cd deploy/pods/app-iam — separate pod, deploy independently.)
 
 # 3. Smoke-test from your laptop:
 curl -sS -o /dev/null -w "site: %{http_code}\n" https://buenzli.space/

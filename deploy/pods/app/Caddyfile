@@ -11,10 +11,10 @@ buenzli.space {
 
     # Landing-page contact form → FastAPI backend.
     handle_path /zuribot/* {
-        reverse_proxy zuribot:8000
+        reverse_proxy api:8000
     }
 
     handle {
-        reverse_proxy web:80
+        reverse_proxy landing:80
     }
 }

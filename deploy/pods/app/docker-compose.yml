@@ -1,7 +1,10 @@
+name: bunzli-app
+
 services:
 
-  caddy:
+  edge:
     image: caddy:2
+    container_name: bunzli-app-edge
     dns:
       - 1.1.1.1
       - 8.8.8.8
@@ -16,43 +19,34 @@ services:
       - ACME_EMAIL=${ACME_EMAIL}
     restart: unless-stopped
     networks:
-      - zuribot-net
+      - bunzli-app-net
 
-  zuribot:
+  api:
     build:
-      context: ..
+      context: ../../..
       dockerfile: Dockerfile
+    container_name: bunzli-app-api
     expose:
       - "8000"
     env_file:
-      - ../.env
+      - ../../../.env
     restart: unless-stopped
     networks:
-      - zuribot-net
+      - bunzli-app-net
 
-  searxng:
-    image: searxng/searxng:latest
-    expose:
-      - "8080"
-    environment:
-      - SEARXNG_BASE_URL=http://localhost:8888
-      - SEARXNG_SECRET=zuribot-searxng-secret
-    restart: unless-stopped
-    networks:
-      - zuribot-net
-
-  web:
+  landing:
     build:
-      context: ..
-      dockerfile: deploy/Dockerfile.web
+      context: ../../..
+      dockerfile: deploy/pods/app/Dockerfile.landing
+    container_name: bunzli-app-landing
     expose:
       - "80"
     depends_on:
-      - zuribot
+      - api
     restart: unless-stopped
     networks:
-      - zuribot-net
+      - bunzli-app-net
 
 networks:
-  zuribot-net:
+  bunzli-app-net:
     driver: bridge
