@@ -66,6 +66,8 @@ Match verification to what changed:
 | Backend route | Start uvicorn locally, `curl` the route, read the response. |
 | SMTP / external service | Run a real call, confirm Benedict received the side-effect (email, etc). |
 | Translation/copy | Switch the locale in preview, eyeball the strings on the page. |
+| **Pod compose / Caddyfile / Dockerfile** | **Bring the pod up locally on Docker Desktop first** (`docker compose -f deploy/pods/<pod>/docker-compose.yml up -d --build`), curl it, only then deploy. The 30 seconds you spend here saves a 5-minute prod fire (learned the hard way 2026-04-26 with `ACME_EMAIL`). |
+| GPU pod compose | Cannot mirror locally (Apple Silicon, no NVIDIA). Develop directly against the GPU box via the `gpu` Docker context. |
 
 If you can't verify (e.g. needs Benedict's mailbox), say so explicitly. Don't claim success.
 
@@ -93,7 +95,22 @@ Note: `gh pr merge` locally fails with "main is already used by worktree" — us
 
 ## Deploy
 
-Anything user-visible needs a deploy. The standard sequence:
+Anything user-visible needs a deploy.
+
+**Pre-deploy (mandatory for compose / Caddyfile / Dockerfile / env-shape changes):**
+test the pod locally on Docker Desktop first.
+
+```bash
+docker compose -f deploy/pods/app/docker-compose.yml up -d --build
+curl -I http://localhost/                # → 200
+curl -I http://localhost/zuribot/health  # → 200
+docker compose -f deploy/pods/app/docker-compose.yml down
+```
+
+(Caddy can't issue real Let's Encrypt certs locally — that's expected.
+Hit plain HTTP on `localhost`, not HTTPS.)
+
+**Deploy:**
 
 ```bash
 # 1. If .env changed, scp the new one:
@@ -107,7 +124,18 @@ ssh bunzli@83.228.227.247 'cd ~/zueribot && git pull && cd deploy/pods/app && do
 # 3. Smoke-test from your laptop:
 curl -sS -o /dev/null -w "site: %{http_code}\n" https://buenzli.space/
 curl -sS -o /dev/null -w "api:  %{http_code}\n" https://buenzli.space/zuribot/health
+
+# 4. Verify container state via docker context (no SSH-quoting needed):
+docker --context prod-vps ps
 ```
+
+The laptop has Docker contexts for each remote host:
+- `desktop-linux` — local Docker Desktop (default)
+- `prod-vps` — `bunzli-app` and `bunzli-app-iam` on the Zürich VPS
+- `gpu` — `bunzli-gpu` (set up after that box is provisioned)
+
+Switch with `docker context use <name>` or scope a single command with
+`docker --context <name> <subcommand>`.
 
 Full operational reference (paths, container names, troubleshooting) is in `DEPLOY_NOTES.md`.
 
