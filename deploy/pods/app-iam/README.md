@@ -1,8 +1,11 @@
-# Zitadel — self-hosted auth
+# `bunzli-app-iam` pod — Zitadel (self-hosted auth)
 
-Minimal Zitadel stack for Bünzli. Runs independently of the main
-`deploy/docker-compose.yml` stack so it can be started, stopped, and
-redeployed on its own.
+Minimal Zitadel stack for Bünzli. This pod runs independently of the
+`bunzli-app` pod (Caddy + API + landing) so it can be started, stopped,
+and redeployed on its own. Compose project name is `bunzli-app-iam`;
+all containers and volumes are prefixed accordingly. The internal Docker
+network is named `zitadel` (upstream default — left unchanged to keep
+this stack a clean snapshot of upstream).
 
 ## What's in the box
 
@@ -18,7 +21,7 @@ Upstream files, verbatim, pinned to `ZITADEL_VERSION=v4.13.0` in
 ## Run locally
 
 ```sh
-cd deploy/compose/zitadel
+cd deploy/pods/app-iam
 cp .env.example .env
 docker compose --env-file .env up -d --wait
 ```
