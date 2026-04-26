@@ -118,7 +118,7 @@ This is the only way to validate the assumptions in this doc. Without it, every 
 ## Open items to confirm before launch
 
 1. **Prompt caching support.** Open question with Infomaniak. If supported, the system prompt + glossary become near-free after the first call — meaningful savings on the Apertus input side. Action: ask Infomaniak support directly.
-2. **Free tier.** Infomaniak gives 1M credits to test for one month. Useful for dev and load-testing without burning budget.
+2. **Free tier strategy.** Infomaniak gives 1M credits/month for testing. We will reserve these for **weekly prod-parity regression runs** of the full orchestrator against hosted Mistral 24B + Apertus 70B (see the "Staging environment" section in [orchestration_architecture.md](orchestration_architecture.md)). Day-to-day prompt iteration runs against the self-hosted Qwen2.5-7B on the staging box, costing nothing.
 3. **Budget alarms.** Need a daily-spend Slack/email alert before we have real users. Even one runaway conversation in dev could cost meaningfully.
 4. **Streaming cost accounting.** Confirm whether canceled streams on Infomaniak's side bill for delivered tokens only or for the full intended output. Affects the value of cancel-on-disconnect.
 
