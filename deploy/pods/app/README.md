@@ -23,12 +23,14 @@ Network: `bunzli-app-net` (bridge, internal-only).
 
 ## Env
 
-Required env vars in `<repo>/.env`:
+All env vars live in **one place**: the repo-root `.env`. Both the
+`edge` and `api` services read it via `env_file: ../../../.env`.
+There is **no per-pod `.env`** for `bunzli-app` — keep it that way.
 
-- `ACME_EMAIL` — for Let's Encrypt
-- All variables consumed by `api_server.py` (see top-level `.env.example`)
+Required keys (see top-level `.env.example` for the full list):
 
-The compose file reads `<repo>/.env` directly (`env_file: ../../../.env`).
+- `ACME_EMAIL` — Let's Encrypt registration, used by Caddy.
+- `ANTHROPIC_API_KEY`, `LLM_*`, `SMTP_*`, `EVENTFROG_KEY` — consumed by the API.
 
 ## Deploy
 

@@ -15,8 +15,8 @@ services:
       - "./Caddyfile:/etc/caddy/Caddyfile:ro"
       - "./caddy/data:/data"
       - "./caddy/config:/config"
-    environment:
-      - ACME_EMAIL=${ACME_EMAIL}
+    env_file:
+      - ../../../.env
     restart: unless-stopped
     networks:
       - bunzli-app-net
