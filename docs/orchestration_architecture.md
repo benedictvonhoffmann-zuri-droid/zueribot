@@ -86,7 +86,7 @@ The orchestrator is a single Python module. Its job is pre-LLM preparation, post
 - **BGE-reranker-v2-m3** — reorders top-K Qdrant hits by relevance.
 - **Qdrant** — vector store for the Zürich knowledge base (Phase 1 sealed at 41,714 chunks, 2 collections).
 
-No LLM runs locally in v1.
+No LLM runs locally **in production** in v1. The staging environment hosts a small LLM for testing — see "Staging environment" below.
 
 ### Orchestrator (Python, in FastAPI process)
 
@@ -165,9 +165,92 @@ If/when triggered, the SLM slots into the existing orchestrator as a **prompt-pr
 
 ---
 
+## Staging environment (v1 budget tier)
+
+Bünzli will run a single Infomaniak Public Cloud GPU instance that hosts the retrieval stack (embeddings, reranker, Qdrant) **and**, in staging, a small LLM. Staging is a real, independent environment that mirrors the prod orchestrator but uses a self-hosted LLM in place of Infomaniak's hosted Mistral, so we can iterate on prompts, run evals, and load-test without burning Infomaniak credits.
+
+### Hardware
+
+| Spec | Value |
+|---|---|
+| GPU | NVIDIA A2 (16GB VRAM) |
+| vCPU | 4 |
+| System RAM | 8GB |
+| Disk | 50GB |
+| Provider | Infomaniak Public Cloud (`a2-` prefixed flavor) |
+
+This is the cheapest tier that fits the workload. **System RAM is the binding constraint**, not VRAM.
+
+### What runs on this box
+
+| Component | VRAM | RAM |
+|---|---|---|
+| EmbeddingGemma 300M | ~0.6 GB | ~0.5 GB |
+| BGE-reranker-v2-m3 | ~2.3 GB | ~0.5 GB |
+| Qdrant (knowledge base) | 0 | ~1–2 GB |
+| Linux + service overhead | 0 | ~1 GB |
+| Staging LLM (Qwen2.5-7B-Instruct, Q4_K_M) | ~5 GB | ~0.5 GB (mmap) |
+| **Total** | **~8 GB** | **~3.5–4.5 GB** |
+
+VRAM has comfortable headroom. Host RAM is tight — we'll need to monitor pressure in practice.
+
+### Staging LLM choice
+
+- **Model:** [Qwen2.5-7B-Instruct](https://huggingface.co/Qwen/Qwen2.5-7B-Instruct) in **GGUF Q4_K_M** quantization (~4.5 GB on disk).
+- **Why this model:** strongest 7B-class general-purpose model in 2026 for our workload — solid OpenAI-compatible function calling, multilingual (incl. German), good structured output.
+- **Why this quantization:** Q4_K_M is the size/quality sweet spot. ~4× smaller than FP16 with negligible quality drop for inference.
+- **Why a 7B and not Mistral 24B:** Mistral 24B Q4 (~14 GB on disk) doesn't load reliably on 8 GB host RAM under our serving stack. We accept the parity gap and cover it with periodic Infomaniak free-credit runs (see "Bridging the parity gap").
+
+### Serving stack
+
+| Concern | Choice | Why |
+|---|---|---|
+| LLM inference | **llama.cpp** in `server` mode | Memory-mapped weight loading; low host-RAM footprint. Fits 8 GB system RAM where vLLM would not. Exposes an OpenAI-compatible HTTP endpoint. |
+| Embeddings + reranker | Small FastAPI processes | Same as production. |
+| Qdrant | Containerized | Tune mmap settings to keep payload off RAM. |
+| All services | Run as systemd units with memory limits | Defensive — prevents one runaway service from OOM-killing another. |
+
+The orchestrator points its `base_url` at the staging GPU box for staging runs, and at Infomaniak for production. **No code changes between environments** — the OpenAI-compatible API surface is identical.
+
+### What staging can and cannot test
+
+| Can test end-to-end | Cannot test (still needs prod / Infomaniak) |
+|---|---|
+| Orchestrator logic + intent routing | Apertus voice quality |
+| RAG pipeline (embed → Qdrant → rerank) | Swiss German fluency end-result |
+| Tool-call loop and function-calling shape | Mistral-24B-specific reasoning quirks |
+| Prompt regression tests | Infomaniak rate limits and any prompt-caching behavior |
+| History truncation behavior | Real-network latency budget |
+| Token-counting and telemetry instrumentation | |
+| Load shape / orchestrator stability | |
+
+This covers most of the bug surface. The voice and reasoning-fidelity gaps are real but bounded.
+
+### Bridging the parity gap
+
+Infomaniak's free 1M-credit/month tier covers periodic prod-parity runs. The plan:
+- Day-to-day prompt iteration and eval loops → staging box (unlimited volume, no cost).
+- Weekly or pre-deploy regression sweep → run the full orchestrator against Infomaniak's hosted Mistral 24B + Apertus 70B to catch model-fidelity regressions.
+- 1M credits comfortably covers a full regression sweep plus headroom.
+
+### Risks and escape hatches
+
+- **Memory pressure.** 8 GB RAM with four services is tight. Mitigations: swap, Qdrant mmap tuning, llama.cpp thread/ngl tuning. **Escape hatch:** if it's painful in practice, drop the local LLM and use Infomaniak free credits for everything. Embed + reranker + Qdrant alone are comfortable on this box.
+- **7B ≠ 24B for tool-calling reliability.** Some bugs only surface at 24B. **Escape hatch:** the parity-bridging weekly Infomaniak run catches those. If the gap becomes too noisy, upgrade the staging box to NVIDIA L4 + 16 GB RAM (one flavor change, no architectural rework).
+- **Operational surface grows.** Four services on one box vs. zero. **Mitigation:** containerize everything; automate provisioning so staging can be torn down and recreated cheaply.
+
+### Discipline
+
+This is a **dev/eval/staging tool**, not the local orchestrator we deferred to v3. Specifically:
+- The staging LLM is **never** called from a user-facing path.
+- It is **not** a production fallback if Infomaniak goes down.
+- It does **not** drift into v3 territory by stealth. If we ever want it user-facing, that's a separate architecture decision.
+
+---
+
 ## Implications for the rest of the stack
 
-- **No new infrastructure beyond the existing VPS** for v1. Embedding + reranker services run as small FastAPI processes on the same GPU host. No model-serving framework (vLLM, TGI) needed yet — they're for hosting LLMs, which we are not doing locally in v1.
+- **One new GPU box for v1: the staging environment** (NVIDIA A2 / 4 vCPU / 8 GB RAM / 50 GB disk on Infomaniak Public Cloud). Hosts embed + reranker + Qdrant for both staging *and* production retrieval, plus a self-hosted LLM in staging only. Production LLM calls go to Infomaniak's hosted models. Detail in the "Staging environment" section above.
 - **The Qwen3 family stays in the roadmap, not the build plan.** Document them as "v3 candidates" but do not provision for them.
 - **`.env` additions:** `INFOMANIAK_API_KEY`, `INFOMANIAK_BASE_URL`, `APERTUS_MODEL_ID`, `MISTRAL_MODEL_ID`, `QDRANT_URL`, `EMBED_SERVICE_URL`, `RERANK_SERVICE_URL`. All to be added to `.env.example` when implementation begins.
 - **Knowledge base.** Phase 1 is sealed (41,714 chunks). Phase 2 (embed + Qdrant ingest) is the prerequisite for the [knowledge] path of this orchestrator.
@@ -187,3 +270,7 @@ If/when triggered, the SLM slots into the existing orchestrator as a **prompt-pr
 | 2026-04-25 | Fail closed on Mistral failure, no Apertus fallback | Wrong-but-confident answers worse than a retry message |
 | 2026-04-25 | Glossary injected into Apertus only | Mistral reasons better in English |
 | 2026-04-25 | v1 = chitchat + RAG; tools deferred to v1.1 | Smallest provable orchestrator skeleton first |
+| 2026-04-26 | Staging on Infomaniak A2 / 4vCPU / 8GB RAM / 50GB disk | Cheapest tier that fits embed + reranker + Qdrant + a 7B-class staging LLM |
+| 2026-04-26 | Staging LLM = Qwen2.5-7B-Instruct, Q4_K_M GGUF, served by llama.cpp | Best 7B for tool calling; llama.cpp fits 8GB host RAM where vLLM would not |
+| 2026-04-26 | Accept staging-prod parity gap; bridge via weekly Infomaniak free-credit runs | 7B ≠ 24B; periodic full-stack runs against hosted Mistral catch fidelity regressions |
+| 2026-04-26 | Staging LLM is never user-facing | Discipline; prevents drift into the v3 local-orchestrator we deferred |
