@@ -6,7 +6,9 @@ This file is read automatically by Claude at the start of every session in this 
 
 ## Project shape (one paragraph)
 
-Bünzli is a Zürich-focused AI assistant. The repo holds a FastAPI backend (`api_server.py`, `backend/`), a static landing site (`frontend/landing/`, Astro + Tailwind, two locales), a chat frontend (`frontend/chat/`), and a Docker Compose deployment (`deploy/`) targeting a single Infomaniak VPS in Zürich. Operational details (VPS IP, SSH user, env layout, smoke-test commands) live in `DEPLOY_NOTES.md` at the repo root — gitignored, present on Benedict's machine.
+Bünzli is a Zürich-focused AI assistant. The repo holds a FastAPI backend (`api_server.py`, `backend/`), a static landing site (`frontend/landing/`, Astro + Tailwind, two locales), the chat UI (currently *nested inside the landing app* at `frontend/landing/src/pages/chat/` with a React `BunzliChat` component under `frontend/landing/src/components/chat/`), and a Docker Compose deployment (`deploy/`) targeting a single Infomaniak VPS in Zürich. Operational details (VPS IP, SSH user, env layout, smoke-test commands) live in `DEPLOY_NOTES.md` at the repo root — gitignored, present on Benedict's machine.
+
+> **Structural debt — chat lives in the wrong place.** The chat is currently a route inside the landing Astro app, not its own frontend. It should be its own top-level folder (e.g. `frontend/chat/`), with its own build, its own Dockerfile, and its own Caddy route. As long as it lives inside the landing app, every chat change forces a full landing rebuild, the two products share a build pipeline that does not match their lifecycles, and prototype/demo work (e.g. `frontend/landing/public/prototype-pitch/`) sits awkwardly in the same tree. Flag this when scoping the next significant chat change — that is the right moment to extract.
 
 ---
 
