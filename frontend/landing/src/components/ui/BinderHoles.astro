@@ -1,0 +1,22 @@
+---
+// Row of keyhole-shaped rip-outs along the top edge of a section.
+// Each "hole" is a thin white rectangle reaching from the section's
+// top border down to a round white circle, like the paper has been
+// ripped out of a spiral binder. Render at the top of any section
+// that should read as a sheet of paper.
+interface Props {
+  count?: number;
+}
+const { count = 10 } = Astro.props;
+---
+<div
+  class="absolute top-0 left-0 right-0 flex justify-between px-8 sm:px-12 pointer-events-none"
+  aria-hidden="true"
+>
+  {Array.from({ length: count }).map(() => (
+    <span class="flex flex-col items-center">
+      <span class="block w-2 sm:w-2.5 h-4 bg-white"></span>
+      <span class="block w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white -mt-1.5"></span>
+    </span>
+  ))}
+</div>

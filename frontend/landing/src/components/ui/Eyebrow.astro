@@ -2,8 +2,11 @@
 interface Props {
   /** Tilt in degrees. Keep small — between -2 and +2. */
   tilt?: -2 | -1 | 1 | 2;
-  /** Background context. `dark` flips text/bg so the block stays a white marker on dark sections. */
-  theme?: 'light' | 'dark';
+  /** Background context.
+   *  - light: blue tape on light section
+   *  - dark : white tape on dark section
+   *  - paper: white tape with tiny gray border (drop-shadow) on cream paper sections */
+  theme?: 'light' | 'dark' | 'paper';
   class?: string;
 }
 
@@ -22,7 +25,11 @@ const tiltClass: Record<number, string> = {
 // the teeth keep the same visual size regardless of how long the
 // eyebrow text is.
 const tapeColor =
-  theme === 'dark' ? 'bg-white text-zurich-blue' : 'bg-zurich-blue text-white';
+  theme === 'dark' ? 'bg-white text-zurich-blue'
+  : theme === 'paper' ? 'bg-white text-zurich-gray'
+  : 'bg-zurich-blue text-white';
+
+const tapeOutline = '';
 
 const torn =
   '[clip-path:polygon(5px_0%,calc(100%-5px)_0%,100%_16.7%,calc(100%-5px)_33.3%,100%_50%,calc(100%-5px)_66.7%,100%_83.3%,calc(100%-5px)_100%,5px_100%,0_83.3%,5px_66.7%,0_50%,5px_33.3%,0_16.7%)]';
@@ -33,6 +40,7 @@ const torn =
     'inline-block px-3.5 py-1 font-mono text-xs tracking-widest uppercase',
     torn,
     tapeColor,
+    tapeOutline,
     tiltClass[tilt],
     className,
   ]}
