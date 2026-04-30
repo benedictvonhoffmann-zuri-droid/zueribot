@@ -1,4 +1,5 @@
 ---
+import Eyebrow from '../ui/Eyebrow.astro';
 import type { TranslationSchema } from '../../i18n/translations/de';
 
 interface Props {
@@ -21,7 +22,78 @@ const pillars = [
 ];
 ---
 
-<section id="privacy" class="relative py-20 sm:py-28 overflow-hidden bg-zurich-blue text-white">
+<section id="privacy" class="relative py-20 sm:py-28 bg-zurich-blue text-white">
+
+  <!-- Limmat water surface — top edge.
+       Smooth sinusoidal wave (consistent amplitude + wavelength) with
+       a paler secondary wave behind it for ripple depth. Reads as the
+       water's surface rather than torn paper. -->
+  <svg
+    class="absolute -top-7 sm:-top-10 left-0 w-full h-7 sm:h-10 text-zurich-blue pointer-events-none"
+    viewBox="0 0 1200 40"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+  >
+    <!-- Back ripple: lighter blue, slightly shifted phase -->
+    <path
+      d="M 0 40 L 0 28
+         Q 60 14, 120 22  Q 180 30, 240 22
+         Q 300 14, 360 22  Q 420 30, 480 22
+         Q 540 14, 600 22  Q 660 30, 720 22
+         Q 780 14, 840 22  Q 900 30, 960 22
+         Q 1020 14, 1080 22 Q 1140 30, 1200 22
+         L 1200 40 Z"
+      fill="currentColor"
+      opacity="0.55"
+    />
+    <!-- Front wave: full saturation, primary water line -->
+    <path
+      d="M 0 40 L 0 22
+         Q 50 10, 100 18  Q 150 26, 200 18
+         Q 250 10, 300 18  Q 350 26, 400 18
+         Q 450 10, 500 18  Q 550 26, 600 18
+         Q 650 10, 700 18  Q 750 26, 800 18
+         Q 850 10, 900 18  Q 950 26, 1000 18
+         Q 1050 10, 1100 18 Q 1150 26, 1200 18
+         L 1200 40 Z"
+      fill="currentColor"
+    />
+  </svg>
+
+  <!-- Limmat water surface — bottom edge.
+       Same wave language as the top, phase-shifted so the two edges
+       don't mirror identically. -->
+  <svg
+    class="absolute -bottom-7 sm:-bottom-10 left-0 w-full h-7 sm:h-10 text-zurich-blue pointer-events-none"
+    viewBox="0 0 1200 40"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+  >
+    <!-- Back ripple -->
+    <path
+      d="M 0 0 L 0 12
+         Q 60 26, 120 18  Q 180 10, 240 18
+         Q 300 26, 360 18  Q 420 10, 480 18
+         Q 540 26, 600 18  Q 660 10, 720 18
+         Q 780 26, 840 18  Q 900 10, 960 18
+         Q 1020 26, 1080 18 Q 1140 10, 1200 18
+         L 1200 0 Z"
+      fill="currentColor"
+      opacity="0.55"
+    />
+    <!-- Front wave -->
+    <path
+      d="M 0 0 L 0 18
+         Q 50 30, 100 22  Q 150 14, 200 22
+         Q 250 30, 300 22  Q 350 14, 400 22
+         Q 450 30, 500 22  Q 550 14, 600 22
+         Q 650 30, 700 22  Q 750 14, 800 22
+         Q 850 30, 900 22  Q 950 14, 1000 22
+         Q 1050 30, 1100 22 Q 1150 14, 1200 22
+         L 1200 0 Z"
+      fill="currentColor"
+    />
+  </svg>
 
   <!-- Subtle dot grid -->
   <div
@@ -34,9 +106,7 @@ const pillars = [
     <!-- Header -->
     <div class="mb-14 text-center max-w-3xl mx-auto" data-animate>
       <p class="mb-4">
-        <span class="inline-block bg-white px-2.5 py-1 font-mono text-xs tracking-widest uppercase text-tram-green -rotate-1">
-          {t.privEyebrow}
-        </span>
+        <Eyebrow tilt={-1} theme="dark">{t.privEyebrow}</Eyebrow>
       </p>
       <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-white">
         {t.privHeadline}

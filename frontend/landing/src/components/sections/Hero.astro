@@ -1,5 +1,6 @@
 ---
 import Button from '../ui/Button.astro';
+import Eyebrow from '../ui/Eyebrow.astro';
 import type { TranslationSchema } from '../../i18n/translations/de';
 import type { Locale } from '../../i18n/locales';
 
@@ -21,26 +22,14 @@ const prompts = [
 ---
 
 <section class="relative pt-24 pb-16 sm:pt-28 sm:pb-20 overflow-hidden bg-white">
-  <!-- Zürich-flag diagonal hatching — sparse, calm, Swiss -->
-  <svg class="absolute inset-0 w-full h-full opacity-[0.035] pointer-events-none" aria-hidden="true">
-    <defs>
-      <pattern id="zh-diag" width="120" height="120" patternUnits="userSpaceOnUse">
-        <!-- Only the diagonal, no cell border — cleaner, less nervous -->
-        <line x1="0" y1="120" x2="120" y2="0" stroke="#0070B4" stroke-width="1"/>
-      </pattern>
-    </defs>
-    <rect width="100%" height="100%" fill="url(#zh-diag)"/>
-  </svg>
-
   <div class="relative max-w-6xl mx-auto px-4 sm:px-6">
     <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
       <!-- Left: copy -->
       <div class="min-w-0">
-        <div class="inline-flex items-center gap-2 border border-zurich-border rounded-full px-3 py-1 text-[11px] font-mono text-zurich-gray mb-6 bg-white">
-          <span class="w-1.5 h-1.5 rounded-full bg-tram-green animate-pulse"></span>
-          {t.heroEyebrow}
-        </div>
+        <p class="mb-6">
+          <Eyebrow tilt={-1}>{t.heroEyebrow}</Eyebrow>
+        </p>
 
         <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.05] sm:leading-[1.02] mb-6 text-zurich-dark break-words hyphens-auto" lang="de">
           {t.heroHeadline1}

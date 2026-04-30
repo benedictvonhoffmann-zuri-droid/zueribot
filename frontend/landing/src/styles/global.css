@@ -194,3 +194,39 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+/* ── Pencil-sketch border ─────────────────────────────────────────
+   Used inside community ("paper") sections. The hand-drawn look
+   comes from asymmetric ELLIPTICAL border-radius — each corner has
+   very different horizontal and vertical radii, alternating
+   tall/wide around the box. The result reads as a rectangle
+   sketched in pencil without needing SVG filters or wobble.
+   Credit: technique from joeybeninghove/NyWePZ on CodePen. */
+
+.doodle-card {
+  border: 1.5px solid var(--color-zurich-border);
+  border-top-left-radius:     255px 15px;
+  border-top-right-radius:    15px 200px;
+  border-bottom-left-radius:  15px 255px;
+  border-bottom-right-radius: 200px 15px;
+}
+
+.doodle-pill {
+  border: 1px solid var(--color-zurich-border);
+  /* Hand-drawn oval: percentages keep it ellipse-shaped at any size,
+     slightly off-symmetric so it reads as circled by hand. */
+  border-radius: 50% 48% 52% 49% / 52% 50% 48% 51%;
+}
+/* Slight tilt that varies by parent card so neighbouring pills don't
+   all tilt the same direction. */
+.doodle-card:nth-child(odd)  .doodle-pill { transform: rotate(-2deg); }
+.doodle-card:nth-child(even) .doodle-pill { transform: rotate(1.5deg); }
+.doodle-card:nth-child(3n)   .doodle-pill { transform: rotate(-1deg); }
+/* Pills outside cards (e.g. connector list) — tilt by their own
+   position in the row. */
+.doodle-pill:nth-of-type(odd):not(.doodle-card .doodle-pill) {
+  transform: rotate(-1.5deg);
+}
+.doodle-pill:nth-of-type(even):not(.doodle-card .doodle-pill) {
+  transform: rotate(1.2deg);
+}

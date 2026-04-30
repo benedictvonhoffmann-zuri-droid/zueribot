@@ -1,4 +1,6 @@
 ---
+import Eyebrow from '../ui/Eyebrow.astro';
+import BinderHoles from '../ui/BinderHoles.astro';
 import type { TranslationSchema } from '../../i18n/translations/de';
 
 interface Props {
@@ -11,13 +13,18 @@ const { t } = Astro.props;
 const launchTarget = '2026-06-01T00:00:00+02:00';
 ---
 
-<section id="join" class="py-20 sm:py-28 bg-zh-black-5 border-t border-zurich-border">
-  <div class="max-w-3xl mx-auto px-4 sm:px-6 text-center">
+<section
+  id="join"
+  class="relative py-20 sm:py-28 bg-chat-bg"
+>
 
-    <div class="inline-flex items-center gap-2 border border-zurich-border rounded-full px-3 py-1 text-[11px] font-mono text-zurich-gray mb-6 bg-white" data-animate>
-      <span class="w-1.5 h-1.5 rounded-full bg-tram-green animate-pulse"></span>
-      {t.joinEyebrow}
-    </div>
+  <BinderHoles />
+
+  <div class="relative max-w-3xl mx-auto px-4 sm:px-6 text-center">
+
+    <p class="mb-6" data-animate>
+      <Eyebrow tilt={-1}>{t.joinEyebrow}</Eyebrow>
+    </p>
 
     <h2 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-zurich-dark mb-4" data-animate>
       {t.joinHeadline}
@@ -48,19 +55,19 @@ const launchTarget = '2026-06-01T00:00:00+02:00';
         data-countdown
         data-target={launchTarget}
       >
-        <div class="flex flex-col items-center bg-white border border-zurich-border rounded-md px-3 sm:px-4 py-2 min-w-[60px] sm:min-w-[72px]">
+        <div class="doodle-card flex flex-col items-center bg-white px-3 sm:px-4 py-2 min-w-[60px] sm:min-w-[72px]">
           <span class="text-2xl sm:text-3xl font-bold text-zurich-dark font-mono tabular-nums" data-days>--</span>
           <span class="text-[10px] font-mono text-zurich-gray/70 uppercase tracking-wider mt-0.5">{t.joinCountdownDays}</span>
         </div>
-        <div class="flex flex-col items-center bg-white border border-zurich-border rounded-md px-3 sm:px-4 py-2 min-w-[60px] sm:min-w-[72px]">
+        <div class="doodle-card flex flex-col items-center bg-white px-3 sm:px-4 py-2 min-w-[60px] sm:min-w-[72px]">
           <span class="text-2xl sm:text-3xl font-bold text-zurich-dark font-mono tabular-nums" data-hours>--</span>
           <span class="text-[10px] font-mono text-zurich-gray/70 uppercase tracking-wider mt-0.5">{t.joinCountdownHours}</span>
         </div>
-        <div class="flex flex-col items-center bg-white border border-zurich-border rounded-md px-3 sm:px-4 py-2 min-w-[60px] sm:min-w-[72px]">
+        <div class="doodle-card flex flex-col items-center bg-white px-3 sm:px-4 py-2 min-w-[60px] sm:min-w-[72px]">
           <span class="text-2xl sm:text-3xl font-bold text-zurich-dark font-mono tabular-nums" data-minutes>--</span>
           <span class="text-[10px] font-mono text-zurich-gray/70 uppercase tracking-wider mt-0.5">{t.joinCountdownMinutes}</span>
         </div>
-        <div class="flex flex-col items-center bg-white border border-zurich-border rounded-md px-3 sm:px-4 py-2 min-w-[60px] sm:min-w-[72px]">
+        <div class="doodle-card flex flex-col items-center bg-white px-3 sm:px-4 py-2 min-w-[60px] sm:min-w-[72px]">
           <span class="text-2xl sm:text-3xl font-bold text-zurich-blue font-mono tabular-nums" data-seconds>--</span>
           <span class="text-[10px] font-mono text-zurich-gray/70 uppercase tracking-wider mt-0.5">{t.joinCountdownSeconds}</span>
         </div>

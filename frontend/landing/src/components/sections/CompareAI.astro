@@ -1,5 +1,6 @@
 ---
 import SectionHeader from '../ui/SectionHeader.astro';
+import BinderHoles from '../ui/BinderHoles.astro';
 import type { TranslationSchema } from '../../i18n/translations/de';
 
 interface Props {
@@ -23,7 +24,7 @@ const columns = [
     answer: t.compareChatGPTAnswer,
     verdict: t.compareChatGPTVerdict,
     verdictColor: 'text-amber-700',
-    badge: { label: t.compareBadgeDanger, icon: '⚠️', class: 'text-amber-700 border-amber-500/40 bg-amber-50' },
+    badge: { label: t.compareBadgeDanger, icon: '⚠️', class: 'text-amber-700 !border-amber-500/70 bg-amber-50' },
   },
   {
     key: 'gemini',
@@ -34,7 +35,7 @@ const columns = [
     answer: t.compareGeminiAnswer,
     verdict: t.compareGeminiVerdict,
     verdictColor: 'text-amber-700',
-    badge: { label: t.compareBadgeDanger, icon: '⚠️', class: 'text-amber-700 border-amber-500/40 bg-amber-50' },
+    badge: { label: t.compareBadgeDanger, icon: '⚠️', class: 'text-amber-700 !border-amber-500/70 bg-amber-50' },
   },
   {
     key: 'bunzli',
@@ -46,17 +47,19 @@ const columns = [
     verdict: t.compareBunzliVerdict,
     verdictColor: 'text-tram-green',
     highlight: true,
-    badge: { label: t.compareBadgeSafe, icon: '✓', class: 'text-tram-green border-tram-green/40 bg-tram-green/5' },
+    badge: { label: t.compareBadgeSafe, icon: '✓', class: 'text-tram-green !border-tram-green/70 bg-tram-green/5' },
   },
 ];
 ---
 
-<section id="compare" class="py-20 sm:py-28 bg-zh-black-5">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6">
+<section id="compare" class="relative py-20 sm:py-28 bg-chat-bg">
+  <BinderHoles />
+  <div class="relative max-w-6xl mx-auto px-4 sm:px-6">
 
     <div class="mb-12" data-animate>
       <SectionHeader
         eyebrow={t.compareEyebrow}
+        eyebrowTilt={1}
         heading={t.compareHeadline}
         subtext={t.compareSub}
       />
@@ -84,10 +87,8 @@ const columns = [
     <div class="grid md:grid-cols-3 gap-4" data-animate>
       {columns.map((c) => (
         <div class:list={[
-          'rounded-md border p-5 flex flex-col',
-          c.highlight
-            ? 'bg-white border-zurich-blue/40 shadow-regular ring-1 ring-zurich-blue/10'
-            : 'bg-white border-zurich-border opacity-90',
+          'doodle-card p-5 flex flex-col bg-white',
+          c.highlight ? 'shadow-regular !border-zurich-blue/70' : 'opacity-90',
         ]}>
           <div class="flex items-center gap-2 mb-4">
             <div class:list={['w-8 h-8 rounded-full flex items-center justify-center', c.logoBg]}>
@@ -100,7 +101,7 @@ const columns = [
               />
             </div>
             <span class="text-sm font-semibold text-zurich-dark">{c.label}</span>
-            <span class:list={['ml-auto inline-flex items-center gap-1 text-[10px] font-mono font-semibold border rounded-full px-2 py-0.5', c.badge.class]}>
+            <span class:list={['doodle-pill ml-auto inline-flex items-center gap-1 text-[10px] font-mono font-semibold px-2 py-0.5', c.badge.class]}>
               <span aria-hidden="true">{c.badge.icon}</span>
               {c.badge.label}
             </span>

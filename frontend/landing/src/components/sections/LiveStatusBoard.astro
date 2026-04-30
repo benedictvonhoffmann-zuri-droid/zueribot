@@ -1,5 +1,12 @@
 ---
 import SectionHeader from '../ui/SectionHeader.astro';
+import BinderHoles from '../ui/BinderHoles.astro';
+import Eyebrow from '../ui/Eyebrow.astro';
+
+// Cycle through small tilts so a row of tape strips doesn't feel
+// stamped — tape never gets stuck on perfectly straight.
+const TAPE_TILTS = [-2, -1, 1, 2] as const;
+const tiltFor = (i: number) => TAPE_TILTS[i % TAPE_TILTS.length];
 import type { TranslationSchema } from '../../i18n/translations/de';
 
 interface Props {
@@ -81,12 +88,14 @@ const connectorsLabel = t.boardConnectorsLabel.replace('{count}', String(others.
 const clientI18n = t.boardClient;
 ---
 
-<section id="board" class="py-20 sm:py-28 bg-zh-black-5 relative overflow-hidden">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6">
+<section id="board" class="py-20 sm:py-28 bg-chat-bg relative overflow-hidden">
+  <BinderHoles />
+  <div class="relative max-w-6xl mx-auto px-4 sm:px-6">
 
     <div class="mb-12" data-animate>
       <SectionHeader
         eyebrow={t.boardEyebrow}
+        eyebrowTilt={1}
         heading={t.boardHeadline}
         subtext={t.boardSub}
       />
@@ -106,11 +115,11 @@ const clientI18n = t.boardClient;
         {realtimeCells.map((c) => (
           <div
             id={`cell-${c.key}`}
-            class="bg-white border border-zurich-border rounded-md hover:border-tram-green/40 transition-all duration-150 p-3.5 sm:p-4"
+            class="doodle-card bg-white p-3.5 sm:p-4"
           >
             <div class="flex items-center justify-between mb-2">
               <span class="text-xl" aria-hidden="true">{c.emoji}</span>
-              <span class="inline-flex items-center gap-1.5 text-[10px] font-mono text-tram-green border border-tram-green/50 px-2 py-0.5 rounded-full">
+              <span class="doodle-pill inline-flex items-center gap-1.5 text-[10px] font-mono text-tram-green !border-tram-green/70 px-2 py-0.5">
                 <span class="live-dot w-1.5 h-1.5 rounded-full bg-tram-green"></span>
                 {t.boardLiveLabel}
               </span>
@@ -140,11 +149,11 @@ const clientI18n = t.boardClient;
         {staticCells.map((c) => (
           <div
             id={`cell-${c.key}`}
-            class="bg-white border border-zurich-border rounded-md hover:border-zurich-blue/30 transition-all duration-150 p-3.5 sm:p-4"
+            class="doodle-card bg-white p-3.5 sm:p-4"
           >
             <div class="flex items-center justify-between mb-2">
               <span class="text-xl" aria-hidden="true">{c.emoji}</span>
-              <span class="inline-flex items-center gap-1.5 text-[10px] font-mono text-zurich-blue border border-zurich-blue/40 px-2 py-0.5 rounded-full">
+              <span class="doodle-pill inline-flex items-center gap-1.5 text-[10px] font-mono text-zurich-blue !border-zurich-blue/70 px-2 py-0.5">
                 {t.boardTodayBadge}
               </span>
             </div>
@@ -166,11 +175,9 @@ const clientI18n = t.boardClient;
         <p class="text-[10px] font-mono text-zurich-gray/40 uppercase tracking-wider mb-2">
           {connectorsLabel}
         </p>
-        <div class="flex flex-wrap gap-x-2 gap-y-1.5">
-          {others.map((name) => (
-            <span class="text-[11px] font-mono text-zurich-gray/50 bg-white border border-zurich-border/60 rounded-full px-2.5 py-0.5 whitespace-nowrap">
-              {name}
-            </span>
+        <div class="flex flex-wrap gap-x-3 gap-y-3">
+          {others.map((name, i) => (
+            <Eyebrow tilt={tiltFor(i)} theme="paper">{name}</Eyebrow>
           ))}
         </div>
       </div>
@@ -180,12 +187,9 @@ const clientI18n = t.boardClient;
           <p class="text-[10px] font-mono text-zurich-gray/40 uppercase tracking-wider mb-2">
             {t.boardAgentsLabel}
           </p>
-          <div class="flex flex-wrap gap-2">
-            {agentsInProgress.map((a) => (
-              <span class="inline-flex items-center gap-1.5 text-[11px] font-mono text-zurich-gray/60 bg-white border border-dashed border-zurich-border rounded-full px-2.5 py-0.5 whitespace-nowrap">
-                <span>{a.emoji}</span>
-                {a.label}
-              </span>
+          <div class="flex flex-wrap gap-x-3 gap-y-3">
+            {agentsInProgress.map((a, i) => (
+              <Eyebrow tilt={tiltFor(i + 1)} theme="paper">{a.emoji} {a.label}</Eyebrow>
             ))}
           </div>
         </div>
