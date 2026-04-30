@@ -16,13 +16,23 @@ const tiltClass: Record<number, string> = {
   [2]: 'rotate-2',
 };
 
-const colorClass = theme === 'dark' ? 'bg-white text-tram-green' : 'bg-zurich-dark text-white';
+// Torn-tape look: three clean triangular teeth on each end, like a strip
+// of tape ripped off a roll. Top + bottom stay straight (tape is cut
+// clean along its length, ripped at the ends). Spike depth is in px so
+// the teeth keep the same visual size regardless of how long the
+// eyebrow text is.
+const tapeColor =
+  theme === 'dark' ? 'bg-white text-zurich-blue' : 'bg-zurich-blue text-white';
+
+const torn =
+  '[clip-path:polygon(5px_0%,calc(100%-5px)_0%,100%_16.7%,calc(100%-5px)_33.3%,100%_50%,calc(100%-5px)_66.7%,100%_83.3%,calc(100%-5px)_100%,5px_100%,0_83.3%,5px_66.7%,0_50%,5px_33.3%,0_16.7%)]';
 ---
 
 <span
   class:list={[
-    'inline-block px-2.5 py-1 font-mono text-xs tracking-widest uppercase',
-    colorClass,
+    'inline-block px-3.5 py-1 font-mono text-xs tracking-widest uppercase',
+    torn,
+    tapeColor,
     tiltClass[tilt],
     className,
   ]}
