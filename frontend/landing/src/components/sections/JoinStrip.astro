@@ -1,4 +1,5 @@
 ---
+import Eyebrow from '../ui/Eyebrow.astro';
 import type { TranslationSchema } from '../../i18n/translations/de';
 
 interface Props {
@@ -14,10 +15,9 @@ const launchTarget = '2026-06-01T00:00:00+02:00';
 <section id="join" class="py-20 sm:py-28 bg-zh-black-5 border-t border-zurich-border">
   <div class="max-w-3xl mx-auto px-4 sm:px-6 text-center">
 
-    <div class="inline-flex items-center gap-2 border border-zurich-border rounded-full px-3 py-1 text-[11px] font-mono text-zurich-gray mb-6 bg-white" data-animate>
-      <span class="w-1.5 h-1.5 rounded-full bg-tram-green animate-pulse"></span>
-      {t.joinEyebrow}
-    </div>
+    <p class="mb-6" data-animate>
+      <Eyebrow tilt={-1}>{t.joinEyebrow}</Eyebrow>
+    </p>
 
     <h2 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-zurich-dark mb-4" data-animate>
       {t.joinHeadline}

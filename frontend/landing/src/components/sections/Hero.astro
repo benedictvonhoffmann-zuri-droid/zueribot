@@ -1,5 +1,6 @@
 ---
 import Button from '../ui/Button.astro';
+import Eyebrow from '../ui/Eyebrow.astro';
 import type { TranslationSchema } from '../../i18n/translations/de';
 import type { Locale } from '../../i18n/locales';
 
@@ -37,10 +38,9 @@ const prompts = [
 
       <!-- Left: copy -->
       <div class="min-w-0">
-        <div class="inline-flex items-center gap-2 border border-zurich-border rounded-full px-3 py-1 text-[11px] font-mono text-zurich-gray mb-6 bg-white">
-          <span class="w-1.5 h-1.5 rounded-full bg-tram-green animate-pulse"></span>
-          {t.heroEyebrow}
-        </div>
+        <p class="mb-6">
+          <Eyebrow tilt={-1}>{t.heroEyebrow}</Eyebrow>
+        </p>
 
         <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.05] sm:leading-[1.02] mb-6 text-zurich-dark break-words hyphens-auto" lang="de">
           {t.heroHeadline1}

@@ -1,0 +1,31 @@
+---
+interface Props {
+  /** Tilt in degrees. Keep small — between -2 and +2. */
+  tilt?: -2 | -1 | 1 | 2;
+  /** Background context. `dark` flips text/bg so the block stays a white marker on dark sections. */
+  theme?: 'light' | 'dark';
+  class?: string;
+}
+
+const { tilt = -1, theme = 'light', class: className } = Astro.props;
+
+const tiltClass: Record<number, string> = {
+  [-2]: '-rotate-2',
+  [-1]: '-rotate-1',
+  [1]: 'rotate-1',
+  [2]: 'rotate-2',
+};
+
+const colorClass = theme === 'dark' ? 'bg-white text-tram-green' : 'bg-zurich-dark text-white';
+---
+
+<span
+  class:list={[
+    'inline-block px-2.5 py-1 font-mono text-xs tracking-widest uppercase',
+    colorClass,
+    tiltClass[tilt],
+    className,
+  ]}
+>
+  <slot />
+</span>

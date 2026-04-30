@@ -1,6 +1,10 @@
 ---
+import Eyebrow from './Eyebrow.astro';
+
 interface Props {
   eyebrow?: string;
+  /** Tilt for the marker eyebrow. Keep ≤ 2°. */
+  eyebrowTilt?: -2 | -1 | 1 | 2;
   heading: string;
   subtext?: string;
   align?: 'left' | 'center';
@@ -10,6 +14,7 @@ interface Props {
 
 const {
   eyebrow,
+  eyebrowTilt = -1,
   heading,
   subtext,
   align = 'center',
@@ -18,15 +23,14 @@ const {
 } = Astro.props;
 
 const alignClass = align === 'center' ? 'text-center mx-auto' : 'text-left';
-const eyebrowColor = theme === 'dark' ? 'text-tram-green' : 'text-zurich-blue';
 const headingColor = theme === 'dark' ? 'text-white' : 'text-zurich-dark';
 const subtextColor = theme === 'dark' ? 'text-white/60' : 'text-zurich-gray';
 ---
 
 <div class:list={['max-w-3xl', alignClass, className]}>
   {eyebrow && (
-    <p class:list={['font-mono text-xs tracking-widest uppercase mb-4', eyebrowColor]}>
-      {eyebrow}
+    <p class="mb-4">
+      <Eyebrow tilt={eyebrowTilt} theme={theme}>{eyebrow}</Eyebrow>
     </p>
   )}
   <h2 class:list={['text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-4', headingColor]}>

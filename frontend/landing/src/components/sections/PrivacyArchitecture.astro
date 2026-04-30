@@ -1,4 +1,5 @@
 ---
+import Eyebrow from '../ui/Eyebrow.astro';
 import type { TranslationSchema } from '../../i18n/translations/de';
 
 interface Props {
@@ -34,9 +35,7 @@ const pillars = [
     <!-- Header -->
     <div class="mb-14 text-center max-w-3xl mx-auto" data-animate>
       <p class="mb-4">
-        <span class="inline-block bg-white px-2.5 py-1 font-mono text-xs tracking-widest uppercase text-tram-green -rotate-1">
-          {t.privEyebrow}
-        </span>
+        <Eyebrow tilt={-1} theme="dark">{t.privEyebrow}</Eyebrow>
       </p>
       <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-white">
         {t.privHeadline}
