@@ -163,6 +163,25 @@ Every session that deploys ends with a short business-focused summary Benedict c
 
 ---
 
+## DeepSource (code-quality scanner)
+
+Account: `benedictvonhoffmann-zuri-droid/zueribot` on DeepSource. The repo is graded on every push to `main`. Configuration lives in `.deepsource.toml` at the repo root — analyzer list, excludes (the prototype-pitch demo is excluded so it doesn't drown the dashboard), Python/JS metadata. Update that file when the analyzer surface changes, not the dashboard.
+
+To query findings programmatically (avoids manually copy-pasting from the web UI):
+
+```bash
+DS_KEY=$(grep '^DS_KEY=' /Users/benedictvonhoffmann/zuribot/.env | cut -d= -f2-)
+# GraphQL endpoint is api.deepsource.com (not .io). Auth scheme is Bearer.
+curl -sS -X POST https://api.deepsource.com/graphql/ \
+  -H "Authorization: Bearer $DS_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"query":"{ repository(name:\"zueribot\", login:\"benedictvonhoffmann-zuri-droid\", vcsProvider:GITHUB) { issues(first:50) { totalCount edges { node { issue { shortcode title category severity } occurrences(first:30) { edges { node { path beginLine title } } } } } } } }"}'
+```
+
+Workflow when working through findings: triage by severity + bug-risk first, then mechanical cleanup (unused imports, comprehensions), then logging hygiene. Suppress false positives inline with `# skipcq: <SHORTCODE>` (Python) or `// skipcq: <SHORTCODE>` (JS) and a one-line reason — the suppression is self-documenting at the call site rather than buried in the dashboard.
+
+---
+
 ## Memory system
 
 Benedict's per-project memory lives at `~/.claude/projects/-Users-benedictvonhoffmann-zuribot/memory/`. The `MEMORY.md` index is loaded into every session automatically. Use it for:
