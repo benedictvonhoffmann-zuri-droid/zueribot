@@ -1,0 +1,45 @@
+version = 1
+
+# Pin the analyzer surface explicitly so the dashboard reflects real product
+# code. Keep this list narrow on purpose — every entry here is something we
+# don't want graded.
+exclude_patterns = [
+  "venv/**",
+  "node_modules/**",
+  "**/node_modules/**",
+  "frontend/landing/dist/**",
+  "frontend/landing/.astro/**",
+  ".claude/**",
+  # Productschool pitch demo. Self-contained static page, not real product
+  # code; otherwise it dominates the dashboard with globals + any-types.
+  "frontend/landing/public/prototype-pitch/**",
+]
+
+test_patterns = [
+  "tests/**",
+  "**/test_*.py",
+  "**/*_test.py",
+  "**/*.test.ts",
+  "**/*.test.tsx",
+]
+
+[[analyzers]]
+name = "python"
+
+  [analyzers.meta]
+  # Production runtime — see Dockerfile (python:3.11-slim).
+  runtime_version = "3.x.x"
+
+[[analyzers]]
+name = "javascript"
+
+  [analyzers.meta]
+  plugins = ["react"]
+  environment = ["browser", "nodejs"]
+  dialect = "typescript"
+
+[[analyzers]]
+name = "secrets"
+
+[[analyzers]]
+name = "docker"
