@@ -1,0 +1,33 @@
+version: 2
+
+updates:
+  # Container base images — opens a PR when python:3.11-slim, node:22-alpine,
+  # caddy:2, nginx:alpine, etc. publish a newer tag. Most base-image CVEs
+  # are fixed in the next image release, so weekly bump PRs cover most of
+  # the gap without needing a separate scanner.
+  #
+  # Watches Dockerfile* under each `directory`, plus any `image:` literals
+  # in docker-compose.yml in the same directory. Zitadel's compose at
+  # deploy/pods/app-iam/ uses ${VAR} interpolation for image tags, so
+  # Dependabot can't resolve them — pinned versions live in that pod's
+  # .env and need manual tracking.
+  - package-ecosystem: docker
+    directories:
+      - "/"                       # root Dockerfile (FastAPI / Python)
+      - "/deploy/pods/app"        # Dockerfile.landing + caddy:2 in compose
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps(docker)"
+
+  # GitHub Actions used by CodeQL etc. — actions also accumulate
+  # vulns and bumping them weekly is cheap insurance.
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "deps(actions)"
