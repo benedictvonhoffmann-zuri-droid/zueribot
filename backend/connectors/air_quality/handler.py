@@ -46,7 +46,7 @@ class AirQualityConnector(BaseConnector):
             if not rows:
                 return self.err("No air quality data available")
 
-            dates = set(r.get("Datum", "")[:10] for r in rows)
+            dates = {r.get("Datum", "")[:10] for r in rows}
             latest_date = sorted(dates)[-1]
             latest_rows = [r for r in rows if r.get("Datum", "").startswith(latest_date)]
 

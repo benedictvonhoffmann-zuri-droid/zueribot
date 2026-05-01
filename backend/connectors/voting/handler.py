@@ -50,7 +50,7 @@ class VotingConnector(BaseConnector):
                 filtered = [r for r in filtered if r.get("Nr_Wahlkreis_StZH", "").strip() == kreis_str]
 
             if not date_filter and not level and not kreis:
-                dates = sorted(set(r.get("Abstimmungs_Datum", "") for r in filtered), reverse=True)
+                dates = sorted({r.get("Abstimmungs_Datum", "") for r in filtered}, reverse=True)
                 if dates:
                     latest_date = dates[0]
                     filtered = [r for r in filtered if r.get("Abstimmungs_Datum", "") == latest_date]

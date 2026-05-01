@@ -54,10 +54,7 @@ MV_ALLOWED_PATTERNS = [
 
 def is_non_german_url(url: str) -> bool:
     """Return True if the URL is a non-German language page."""
-    for pattern in NON_DE_URL_PATTERNS:
-        if re.search(pattern, url, re.IGNORECASE):
-            return True
-    return False
+    return any(re.search(p, url, re.IGNORECASE) for p in NON_DE_URL_PATTERNS)
 
 
 def is_unwanted_mv(url: str, source_name: str) -> bool:
@@ -137,7 +134,7 @@ def run_cleanup(dry_run: bool = False) -> None:
         if len(ids) < batch_size:
             break
 
-    logger.info(f"\nChunks to remove:")
+    logger.info("\nChunks to remove:")
     logger.info(f"  Non-German language duplicates: {non_de_count}")
     logger.info(f"  Unwanted Mieterverband cantons: {mv_count}")
     logger.info(f"  Total to delete: {len(to_delete)}")
