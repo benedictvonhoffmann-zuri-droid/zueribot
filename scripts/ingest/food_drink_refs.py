@@ -137,7 +137,6 @@ def _discover_gaultmillau_zurich(fetcher: Fetcher, max_pages: int) -> list[SiteE
     ``max_pages`` caps the number of detail-page candidates probed (0 = no cap).
     """
     import re
-    from urllib.parse import urljoin
 
     INDEX = "https://www.gaultmillau.ch/sitemap.xml"
     LOC_RE = re.compile(r"<loc>([^<]+)</loc>")

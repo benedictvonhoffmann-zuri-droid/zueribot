@@ -40,7 +40,7 @@ from typing import Optional
 from urllib.parse import urlparse
 
 import requests
-from bs4 import BeautifulSoup, Tag
+from bs4 import BeautifulSoup
 
 from backend.kb.fetchers import Fetcher
 from scripts.ingest._base import CrawlConfig, crawl, make_and_write
