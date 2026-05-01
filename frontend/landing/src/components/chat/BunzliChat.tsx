@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   AssistantRuntimeProvider,
   ComposerPrimitive,
@@ -19,24 +19,26 @@ import { localThreadListAdapter } from "./threads";
 import { ThreadSidebar } from "./ThreadSidebar";
 import { AuthProvider, useAuth } from "../../auth/AuthProvider";
 import { setAuthTokenGetter } from "./authToken";
+import type { ContentPart } from "./messageTypes";
+import { isTextPart } from "./messageTypes";
 
 // ── helpers ─────────────────────────────────────────────────────────────
 
-function messageText(content: readonly any[] | any[] | undefined): string {
+function messageText(content: readonly ContentPart[] | ContentPart[] | undefined): string {
   return (content ?? [])
-    .map((c: any) => (c.type === "text" ? c.text : ""))
+    .map((c) => (isTextPart(c) ? c.text : ""))
     .join("");
 }
 
 // ── icons (lucide-style, 1.75 stroke, 16px default) ────────────────────
 
 const Icon = {
-  ArrowUp: (p: any) => (
+  ArrowUp: (p: React.SVGProps<SVGSVGElement>) => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}>
       <path d="M12 19V5M5 12l7-7 7 7" />
     </svg>
   ),
-  Shield: (p: any) => (
+  Shield: (p: React.SVGProps<SVGSVGElement>) => (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...p}>
       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
       <path d="M9 12l2 2 4-4" />
@@ -107,7 +109,7 @@ function FollowUps() {
 
   const suggestions = useMemo(() => {
     if (!lastAssistant || isRunning) return [] as string[];
-    const txt = messageText((lastAssistant as any).content).toLowerCase();
+    const txt = messageText((lastAssistant as { content?: readonly ContentPart[] }).content).toLowerCase();
     const pool: Record<string, string[]> = {
       tram: ["Zeig mir ui de Charte", "Wie lang isch d'Fahrt?"],
       wetter: ["Und übermorn?", "Wie isch s'Wasser im See?"],

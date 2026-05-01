@@ -2,6 +2,8 @@ import type { ChatModelAdapter } from "@assistant-ui/react";
 import type { Prefs } from "./prefs";
 import { buildContextBlock } from "./prefs";
 import { getAccessToken } from "./authToken";
+import type { ContentPart, MessageLike } from "./messageTypes";
+import { isTextPart } from "./messageTypes";
 
 const ENDPOINT = import.meta.env.DEV
   ? "http://localhost/zuribot/v1/chat/completions"
@@ -9,11 +11,11 @@ const ENDPOINT = import.meta.env.DEV
 
 type OpenAIMsg = { role: string; content: string };
 
-function toOpenAI(messages: readonly any[]): OpenAIMsg[] {
-  return messages.map((m: any) => ({
+function toOpenAI(messages: readonly MessageLike[]): OpenAIMsg[] {
+  return messages.map((m) => ({
     role: m.role,
-    content: (m.content || [])
-      .map((c: any) => (c.type === "text" ? c.text : ""))
+    content: (m.content ?? [])
+      .map((c: ContentPart) => (isTextPart(c) ? c.text : ""))
       .join(""),
   }));
 }

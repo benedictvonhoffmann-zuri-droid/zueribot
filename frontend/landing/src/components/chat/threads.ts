@@ -10,6 +10,8 @@ import {
 } from "./db";
 import { deleteThreadMessages } from "./history";
 import { getAccessToken } from "./authToken";
+import type { ContentPart, MessageLike } from "./messageTypes";
+import { isTextPart } from "./messageTypes";
 
 // On-disk row: id in clear (IDB key), rest encrypted.
 type ThreadRow = {
@@ -68,11 +70,11 @@ function truncateTitle(text: string, max = 48): string {
   return (lastSpace > max * 0.6 ? sliced.slice(0, lastSpace) : sliced).trim() + "…";
 }
 
-function extractText(message: any): string {
-  const parts = message?.content ?? [];
+function extractText(message: MessageLike): string {
+  const parts = message.content ?? [];
   if (!Array.isArray(parts)) return "";
   return parts
-    .map((p: any) => (p?.type === "text" ? p.text : ""))
+    .map((p: ContentPart) => (isTextPart(p) ? p.text : ""))
     .join("")
     .trim();
 }
@@ -217,8 +219,8 @@ export const localThreadListAdapter: RemoteThreadListAdapter = {
   },
 
   async generateTitle(remoteId, messages) {
-    const firstUser = messages.find((m: any) => m.role === "user");
-    const firstAssistant = messages.find((m: any) => m.role === "assistant");
+    const firstUser = (messages as readonly MessageLike[]).find((m) => m.role === "user");
+    const firstAssistant = (messages as readonly MessageLike[]).find((m) => m.role === "assistant");
     const userText = firstUser ? extractText(firstUser) : "";
     const assistantText = firstAssistant ? extractText(firstAssistant) : "";
 
