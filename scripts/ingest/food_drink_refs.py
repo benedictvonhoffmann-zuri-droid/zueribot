@@ -175,8 +175,8 @@ def _discover_gaultmillau_zurich(fetcher: Fetcher, max_pages: int) -> list[SiteE
         for sel in ("script", "style", "nav", "header", "footer", "aside"):
             for tag in soup.select(sel):
                 tag.decompose()
-        main = soup.select_one("main") or soup.body or soup
-        text_head = main.get_text("\n", strip=True)[:1000] if main else ""
+        main_el = soup.select_one("main") or soup.body or soup
+        text_head = main_el.get_text("\n", strip=True)[:1000] if main_el else ""
 
         # PLZ filter — Zürich canton is 8000-8999. Extra-canton PLZs
         # starting with 8 (e.g. 8580 Amriswil TG) exist but are rare;
@@ -287,8 +287,8 @@ def _extract_text(html: bytes) -> tuple[str, str]:
                 "noscript", "form", "iframe"):
         for tag in soup.select(sel):
             tag.decompose()
-    main = soup.select_one("main") or soup.body or soup
-    text = main.get_text("\n", strip=True) if main else ""
+    main_el = soup.select_one("main") or soup.body or soup
+    text = main_el.get_text("\n", strip=True) if main_el else ""
     if not title:
         h = soup.find("h1") or soup.find("title")
         if h:
