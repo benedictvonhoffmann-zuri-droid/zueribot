@@ -168,7 +168,7 @@ def _clean_wikipedia_html(html: str, title: str) -> bytes:
             el.decompose()
 
     # Strip everything from a "References"-class heading onwards.
-    for h in soup.find_all(["h1", "h2", "h3"]):
+    for h in soup.find_all(["h1", "h2", "h3"]):  # skipcq: PYL-E1133  (bs4 ResultSet is iterable; pylint can't infer)
         label = h.get_text(" ", strip=True).lower().strip()
         if label in _STRIP_HEADINGS:
             # Remove this heading and all following siblings.

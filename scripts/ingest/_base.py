@@ -171,7 +171,7 @@ def crawl(fetcher: Fetcher, cfg: CrawlConfig) -> list[FetchResult]:
             continue
 
         soup = BeautifulSoup(res.content, "html.parser")
-        for a in soup.find_all("a", href=True):
+        for a in soup.find_all("a", href=True):  # skipcq: PYL-E1133  (bs4 ResultSet is iterable; pylint can't infer)
             href = a["href"]
             if href.startswith("/"):
                 href = f"https://{res.final_url.split('/')[2]}{href}"

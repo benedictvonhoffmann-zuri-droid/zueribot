@@ -152,7 +152,7 @@ def _normalise_html(html: bytes) -> bytes:
     if not title and soup.title:
         title = soup.title.get_text(strip=True).removesuffix(" | Kanton Zürich").strip()
 
-    for h1 in soup.find_all("h1"):
+    for h1 in soup.find_all("h1"):  # skipcq: PYL-E1133  (bs4 ResultSet is iterable; pylint can't infer)
         h1.decompose()
     if title and soup.body:
         new_h1 = soup.new_tag("h1")

@@ -336,6 +336,10 @@ function AuthedChat() {
 
   const runtime = useRemoteThreadListRuntime({
     adapter: localThreadListAdapter,
+    // assistant-ui's API requires the property be named `runtimeHook`; the arrow
+    // function IS used as a hook (called from inside useRemoteThreadListRuntime),
+    // so the rule violation is a false positive driven by the property name.
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     runtimeHook: () => useBunzliThreadRuntime(() => prefsRef.current),
   });
 
