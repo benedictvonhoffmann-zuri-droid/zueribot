@@ -37,7 +37,12 @@ function getKey(): Promise<CryptoKey> {
   return keyPromise;
 }
 
-export type Ciphertext = { iv: Uint8Array; data: Uint8Array };
+// Pin the buffer-type generic to ArrayBuffer (not ArrayBufferLike) so these
+// values are accepted as BufferSource by SubtleCrypto on TS 5.7+.
+export type Ciphertext = {
+  iv: Uint8Array<ArrayBuffer>;
+  data: Uint8Array<ArrayBuffer>;
+};
 
 export async function encryptJson(value: unknown): Promise<Ciphertext> {
   const key = await getKey();
