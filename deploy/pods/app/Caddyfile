@@ -32,7 +32,9 @@ asksaul.ch {
     encode gzip
 
     # Same-origin API — front-end fetches /api/* on the same host.
-    handle_path /api/* {
+    # Use `handle` (not `handle_path`) so the /api prefix is preserved
+    # and FastAPI's @app.get("/api/health") routes match correctly.
+    handle /api/* {
         reverse_proxy asksaul-api:8000
     }
 
