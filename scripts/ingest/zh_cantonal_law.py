@@ -110,7 +110,7 @@ def _fetch_pdf(pdf_url: str, cache_dir: Path) -> Optional[Path]:
     """
     import hashlib
     cache_dir.mkdir(parents=True, exist_ok=True)
-    key = hashlib.sha1(pdf_url.encode()).hexdigest()[:16]
+    key = hashlib.sha1(pdf_url.encode(), usedforsecurity=False).hexdigest()[:16]
     path = cache_dir / f"{key}.pdf"
     if path.exists() and path.stat().st_size > 1024:
         return path

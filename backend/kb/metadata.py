@@ -30,7 +30,7 @@ _SUBCATEGORY_RE = re.compile(r"^[a-z_]+/[a-z0-9_]+$")
 def make_doc_id(source_url: str, language: str) -> str:
     """Stable 12-char doc id. Same URL+lang always hashes to the same id."""
     key = f"{source_url}|{language}|{SCHEMA_VERSION}"
-    return hashlib.sha1(key.encode("utf-8")).hexdigest()[:12]
+    return hashlib.sha1(key.encode("utf-8"), usedforsecurity=False).hexdigest()[:12]
 
 
 def make_chunk_id(doc_id: str, chunk_index: int | str) -> str:
