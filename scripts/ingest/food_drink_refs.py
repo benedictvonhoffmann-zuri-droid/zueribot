@@ -236,7 +236,7 @@ def _discover_harrysding(fetcher: Fetcher, max_pages: int) -> list[SiteEntry]:
             break
         soup = BeautifulSoup(rendered.content, "html.parser")
         new_here = 0
-        for h in soup.find_all(["h2", "h3"]):
+        for h in soup.find_all(["h2", "h3"]):  # skipcq: PYL-E1133  (bs4 ResultSet is iterable; pylint can't infer)
             a = h.find("a", href=True)
             if not a:
                 continue

@@ -168,7 +168,7 @@ def _normalise_stzh_html(html: bytes) -> bytes:
         title = soup.title.get_text(strip=True).removesuffix(" | Stadt Zürich").strip()
 
     # Strip the decorative "Navigation" h1 and anything else at h1.
-    for h1 in soup.find_all("h1"):
+    for h1 in soup.find_all("h1"):  # skipcq: PYL-E1133  (bs4 ResultSet is iterable; pylint can't infer)
         h1.decompose()
     if title and soup.body:
         new_h1 = soup.new_tag("h1")
@@ -176,7 +176,7 @@ def _normalise_stzh_html(html: bytes) -> bytes:
         soup.body.insert(0, new_h1)
 
     # stzh-heading → hN
-    for el in soup.find_all("stzh-heading"):
+    for el in soup.find_all("stzh-heading"):  # skipcq: PYL-E1133  (bs4 ResultSet is iterable; pylint can't infer)
         try:
             n = int(el.get("level", "2"))
         except (TypeError, ValueError):
@@ -187,7 +187,7 @@ def _normalise_stzh_html(html: bytes) -> bytes:
         el.replace_with(new)
 
     # stzh-accordion-item → h3 + body wrapper
-    for el in soup.find_all("stzh-accordion-item"):
+    for el in soup.find_all("stzh-accordion-item"):  # skipcq: PYL-E1133  (bs4 ResultSet is iterable; pylint can't infer)
         heading = (el.get("heading") or el.get("label") or "").strip()
         body_text = el.get_text(" ", strip=True)
         if heading and body_text.startswith(heading):

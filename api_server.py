@@ -272,4 +272,4 @@ async def contact(req: ContactRequest, request: Request):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)  # skipcq: BAN-B104  (intentional: container binds to 0.0.0.0; Caddy is the public surface)

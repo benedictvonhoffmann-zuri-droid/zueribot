@@ -111,7 +111,7 @@ def _normalise_html(html: bytes) -> bytes:
     # the RichHtmlField wrapper.
     content = None
     best_len = 0
-    for div in soup.find_all("div", id=True):
+    for div in soup.find_all("div", id=True):  # skipcq: PYL-E1133  (bs4 ResultSet is iterable; pylint can't infer)
         if "PublishingPageContent" in div.get("id", ""):
             txt_len = len(div.get_text(" ", strip=True))
             if txt_len > best_len:
