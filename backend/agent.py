@@ -185,7 +185,7 @@ def grade_rag_results(state: AgentState) -> AgentState:
                     content="[GRADER: Retrieved documents are not relevant to the question. I will search the web for a better answer.]"
                 )]}
     except Exception as e:
-        logger.warning(f"Grader failed (non-blocking): {e}")
+        logger.warning("Grader failed (non-blocking): %s", e)
 
     return state  # Relevant — continue normally
 
@@ -200,7 +200,7 @@ def call_tools(state: AgentState) -> AgentState:
         name = tc["name"]
         arguments = tc.get("args", {})
         
-        logger.info(f"Tool call: {name}({json.dumps(arguments, ensure_ascii=False)})")
+        logger.info("Tool call: %s(%s)", name, json.dumps(arguments, ensure_ascii=False))
         
         result = dispatch_tool(name, arguments)
         

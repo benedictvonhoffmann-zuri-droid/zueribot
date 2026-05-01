@@ -47,7 +47,7 @@ class WaterQualityConnector(BaseConnector):
             df["Datum"] = pd.to_datetime(df["Datum"], errors="coerce")
             return df
         except Exception as e:
-            logger.warning(f"Failed to load water quality data for {year}: {e}")
+            logger.warning("Failed to load water quality data for %s: %s", year, e)
             return None
 
     def _load(self) -> tuple[pd.DataFrame | None, int | None]:

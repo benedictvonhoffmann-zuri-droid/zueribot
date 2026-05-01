@@ -48,7 +48,7 @@ class PedestrianConnector(BaseConnector):
             return df[df["timestamp"] >= cutoff]
 
         except Exception as e:
-            logger.error(f"Failed to load pedestrian data: {e}")
+            logger.error("Failed to load pedestrian data: %s", e)
             return None
 
     def get_pedestrian_counts(self, hours: int = 6) -> dict:

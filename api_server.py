@@ -99,7 +99,7 @@ async def _stream_generator(langchain_messages: list, model: str, chat_id: str):
                 continue
             yield f"data: {json.dumps({'id': chat_id, 'object': 'chat.completion.chunk', 'created': created, 'model': model, 'choices': [{'index': 0, 'delta': {'content': token}, 'finish_reason': None}]})}\n\n"
     except Exception as e:
-        logger.error(f"Error during streaming: {e}", exc_info=True)
+        logger.error("Error during streaming: %s", e, exc_info=True)
 
     # Stop chunk
     yield f"data: {json.dumps({'id': chat_id, 'object': 'chat.completion.chunk', 'created': created, 'model': model, 'choices': [{'index': 0, 'delta': {}, 'finish_reason': 'stop'}]})}\n\n"
@@ -156,7 +156,7 @@ async def chat_completions(request: ChatRequest, user: dict = Depends(require_us
         )
 
     except Exception as e:
-        logger.error(f"Error in chat_completions: {e}", exc_info=True)
+        logger.error("Error in chat_completions: %s", e, exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 

@@ -34,7 +34,7 @@ class CrimeConnector(BaseConnector):
             df.columns = [c.strip() for c in df.columns]
             return df
         except Exception as e:
-            logger.error(f"Failed to load crime data: {e}")
+            logger.error("Failed to load crime data: %s", e)
             return None
 
     def get_crime_stats(self, stadtkreis: str = "", category: str = "") -> dict:

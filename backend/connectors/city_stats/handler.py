@@ -30,7 +30,7 @@ class CityStatsConnector(BaseConnector):
             df["Datum"] = pd.to_datetime(df["Datum"], errors="coerce")
             return df
         except Exception as e:
-            logger.error(f"Failed to load ERZ data: {e}")
+            logger.error("Failed to load ERZ data: %s", e)
             return None
 
     def _fetch_ewz(self) -> pd.DataFrame | None:
@@ -45,7 +45,7 @@ class CityStatsConnector(BaseConnector):
             df["zeitpunkt"] = pd.to_datetime(df["zeitpunkt"], errors="coerce", utc=True)
             return df
         except Exception as e:
-            logger.error(f"Failed to load EWZ data: {e}")
+            logger.error("Failed to load EWZ data: %s", e)
             return None
 
     def get_recycling_stats(self) -> dict:

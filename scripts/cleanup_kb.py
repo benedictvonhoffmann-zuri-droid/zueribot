@@ -89,11 +89,11 @@ def run_cleanup(dry_run: bool = False) -> None:
     try:
         collection = client.get_collection(COLLECTION_NAME)
     except Exception:
-        logger.error(f"Collection '{COLLECTION_NAME}' not found at {STORE_PATH}")
+        logger.error("Collection '%s' not found at %s", COLLECTION_NAME, STORE_PATH)
         return
 
     total = collection.count()
-    logger.info(f"Total chunks in store: {total}")
+    logger.info("Total chunks in store: %s", total)
 
     # Fetch all records (metadata + ids, no embeddings needed)
     batch_size = 5000
@@ -123,22 +123,22 @@ def run_cleanup(dry_run: bool = False) -> None:
             if is_non_german_url(url):
                 to_delete.append(chunk_id)
                 non_de_count += 1
-                logger.debug(f"  [non-DE] {url}")
+                logger.debug("  [non-DE] %s", url)
 
             elif is_unwanted_mv(url, source_name):
                 to_delete.append(chunk_id)
                 mv_count += 1
-                logger.debug(f"  [mv-canton] {url}")
+                logger.debug("  [mv-canton] %s", url)
 
         offset += batch_size
         if len(ids) < batch_size:
             break
 
     logger.info("\nChunks to remove:")
-    logger.info(f"  Non-German language duplicates: {non_de_count}")
-    logger.info(f"  Unwanted Mieterverband cantons: {mv_count}")
-    logger.info(f"  Total to delete: {len(to_delete)}")
-    logger.info(f"  Remaining after cleanup: {total - len(to_delete)}")
+    logger.info("  Non-German language duplicates: %s", non_de_count)
+    logger.info("  Unwanted Mieterverband cantons: %s", mv_count)
+    logger.info("  Total to delete: %s", len(to_delete))
+    logger.info("  Remaining after cleanup: %s", total - len(to_delete))
 
     if not to_delete:
         logger.info("Nothing to delete.")
@@ -153,10 +153,10 @@ def run_cleanup(dry_run: bool = False) -> None:
     for i in range(0, len(to_delete), delete_batch):
         batch = to_delete[i:i + delete_batch]
         collection.delete(ids=batch)
-        logger.info(f"  Deleted batch {i // delete_batch + 1} ({len(batch)} chunks)")
+        logger.info("  Deleted batch %s (%s chunks)", i // delete_batch + 1, len(batch))
 
     remaining = collection.count()
-    logger.info(f"\nCleanup complete. Chunks remaining: {remaining}")
+    logger.info("\nCleanup complete. Chunks remaining: %s", remaining)
 
 
 def main():

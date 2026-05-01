@@ -42,7 +42,7 @@ class RentConnector(BaseConnector):
             ]
             return df
         except Exception as e:
-            logger.error(f"Failed to load rent data: {e}")
+            logger.error("Failed to load rent data: %s", e)
             return None
 
     def get_rent_prices(self, quartier: str = "", rooms: str = "", gemeinnuetzig: bool = False) -> dict:
