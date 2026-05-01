@@ -274,7 +274,7 @@ def _extract_text(html: bytes) -> tuple[str, str]:
     a clean blob that the chunker emits as one chunk. We do however
     drop boilerplate like nav/footer/scripts.
     """
-    title, sections, full = extract_title_and_sections(html)
+    title, _sections, full = extract_title_and_sections(html)
     if full and len(full) >= 200:
         return title, full
 
@@ -285,8 +285,8 @@ def _extract_text(html: bytes) -> tuple[str, str]:
                 "noscript", "form", "iframe"):
         for tag in soup.select(sel):
             tag.decompose()
-    main = soup.select_one("main") or soup.body or soup
-    text = main.get_text("\n", strip=True) if main else ""
+    main_el = soup.select_one("main") or soup.body or soup
+    text = main_el.get_text("\n", strip=True) if main_el else ""
     if not title:
         h = soup.find("h1") or soup.find("title")
         if h:

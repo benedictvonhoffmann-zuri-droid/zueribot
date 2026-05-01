@@ -108,13 +108,17 @@ def audit():
                     ci = int(ci_raw)
                 except (TypeError, ValueError):
                     ci = 0
-                if ci > 0 and c.get("doc_type") != "statute" and disp:
-                    if starts_mid_word(disp):
-                        fails[key]["8_starts_mid_word"] += 1
-                        if len(examples["8_starts_mid_word"]) < 10:
-                            examples["8_starts_mid_word"].append(
-                                (category, source, c.get("chunk_id"), disp[:80])
-                            )
+                if (
+                    ci > 0
+                    and c.get("doc_type") != "statute"
+                    and disp
+                    and starts_mid_word(disp)
+                ):
+                    fails[key]["8_starts_mid_word"] += 1
+                    if len(examples["8_starts_mid_word"]) < 10:
+                        examples["8_starts_mid_word"].append(
+                            (category, source, c.get("chunk_id"), disp[:80])
+                        )
 
                 # 9. display_text doesn't start with heading_path
                 if hp and disp.lstrip().startswith(hp):

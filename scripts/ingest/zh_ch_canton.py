@@ -211,7 +211,7 @@ def run(limit: int, dry_run: bool) -> int:
         return 0
 
     # Map from URL → category for routing after fetch.
-    cat_by_url = {u: c for u, c in url_cats}
+    cat_by_url = dict(url_cats)
 
     cfg = CrawlConfig(
         seeds=[u for u, _ in url_cats],

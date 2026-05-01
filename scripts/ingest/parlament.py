@@ -37,7 +37,6 @@ import sys
 from typing import Optional
 from urllib.parse import unquote, urlparse
 
-import requests
 from bs4 import BeautifulSoup
 
 from backend.kb.fetchers import Fetcher

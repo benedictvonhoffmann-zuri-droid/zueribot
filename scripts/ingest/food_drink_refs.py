@@ -137,7 +137,6 @@ def _discover_gaultmillau_zurich(fetcher: Fetcher, max_pages: int) -> list[SiteE
     ``max_pages`` caps the number of detail-page candidates probed (0 = no cap).
     """
     import re
-    from urllib.parse import urljoin
 
     INDEX = "https://www.gaultmillau.ch/sitemap.xml"
     LOC_RE = re.compile(r"<loc>([^<]+)</loc>")
@@ -176,8 +175,8 @@ def _discover_gaultmillau_zurich(fetcher: Fetcher, max_pages: int) -> list[SiteE
         for sel in ("script", "style", "nav", "header", "footer", "aside"):
             for tag in soup.select(sel):
                 tag.decompose()
-        main = soup.select_one("main") or soup.body or soup
-        text_head = main.get_text("\n", strip=True)[:1000] if main else ""
+        main_el = soup.select_one("main") or soup.body or soup
+        text_head = main_el.get_text("\n", strip=True)[:1000] if main_el else ""
 
         # PLZ filter — Zürich canton is 8000-8999. Extra-canton PLZs
         # starting with 8 (e.g. 8580 Amriswil TG) exist but are rare;
@@ -191,7 +190,6 @@ def _discover_gaultmillau_zurich(fetcher: Fetcher, max_pages: int) -> list[SiteE
 
         h1 = soup.find("h1")
         name = h1.get_text(" ", strip=True) if h1 else url.rsplit("/", 1)[-1]
-        slug = url.rsplit("/", 1)[-1]
         out.append(SiteEntry(
             url=url,
             entity_name=name,
@@ -289,8 +287,8 @@ def _extract_text(html: bytes) -> tuple[str, str]:
                 "noscript", "form", "iframe"):
         for tag in soup.select(sel):
             tag.decompose()
-    main = soup.select_one("main") or soup.body or soup
-    text = main.get_text("\n", strip=True) if main else ""
+    main_el = soup.select_one("main") or soup.body or soup
+    text = main_el.get_text("\n", strip=True) if main_el else ""
     if not title:
         h = soup.find("h1") or soup.find("title")
         if h:

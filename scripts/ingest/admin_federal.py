@@ -32,7 +32,7 @@ import argparse
 import logging
 import re
 import sys
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
 from urllib.parse import urlparse
 
@@ -229,7 +229,8 @@ def _run_site(profile: SiteProfile, limit: int, dry_run: bool) -> dict:
         max_depth = profile.bfs_max_depth
         logger.info("[%s] BFS mode — %d seeds, max_depth=%d, max_pages=%d",
                     profile.slug, len(seeds), max_depth, max_pages)
-        link_filter = lambda u: _is_allowed_path_substring(u, profile)
+        def link_filter(u):
+            return _is_allowed_path_substring(u, profile)
     else:
         all_urls = _fetch_sitemap_urls(profile)
         logger.info("[%s] sitemap: %d URLs total.", profile.slug, len(all_urls))

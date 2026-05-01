@@ -28,7 +28,6 @@ import logging
 import sys
 import time
 from datetime import date
-from pathlib import Path
 from typing import Optional
 from urllib.parse import quote
 

@@ -150,7 +150,7 @@ def run(limit: int, dry_run: bool) -> int:
             logger.info("  %-12s %4d", cat, n)
         return 0
 
-    cat_by_url = {u: c for u, c in url_cats}
+    cat_by_url = dict(url_cats)
 
     cfg = CrawlConfig(
         seeds=[u for u, _ in url_cats],

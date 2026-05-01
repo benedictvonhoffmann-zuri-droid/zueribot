@@ -14,7 +14,6 @@ import argparse
 import json
 import pathlib
 import re
-import sys
 
 from .ollama_client import chat
 
