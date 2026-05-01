@@ -238,12 +238,17 @@ function LocationItem({
 function UserBadge() {
   const { state, logout } = useAuth();
   if (state.status !== "authenticated") return null;
-  const profile: any = state.user.profile ?? {};
+  const profile = (state.user.profile ?? {}) as {
+    name?: string;
+    preferred_username?: string;
+    email?: string;
+    sub?: string;
+  };
   const name: string =
     profile.name ||
     profile.preferred_username ||
     profile.email ||
-    (profile.sub as string) ||
+    profile.sub ||
     "Benutzer";
   const email: string | undefined = profile.email;
   const initial = name.trim().charAt(0).toUpperCase();

@@ -83,7 +83,7 @@ export function makeThreadHistory(threadId: string): ThreadHistoryAdapter {
 
     async append(item: ExportedMessageRepositoryItem): Promise<void> {
       try {
-        const id = (item.message as any).id as string;
+        const id = (item.message as { id: string }).id;
         const plain: PlainItem = {
           id,
           parentId: item.parentId,

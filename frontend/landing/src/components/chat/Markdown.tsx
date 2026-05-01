@@ -18,7 +18,7 @@ export function Markdown({ children }: { children: string }) {
           ul: (props) => <ul {...props} className="list-disc pl-6 my-3 space-y-1.5 marker:text-zurich-gray" />,
           ol: (props) => <ol {...props} className="list-decimal pl-6 my-3 space-y-1.5 marker:text-zurich-gray" />,
           li: (props) => <li {...props} className="pl-1" />,
-          code: ({ className, children, ...rest }: any) => {
+          code: ({ className, children, ...rest }) => {
             const isBlock = String(className || "").includes("language-");
             if (isBlock) {
               return (
