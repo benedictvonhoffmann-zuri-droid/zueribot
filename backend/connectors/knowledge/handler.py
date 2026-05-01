@@ -122,7 +122,7 @@ class KnowledgeConnector(BaseConnector):
         except FileNotFoundError as e:
             return self.err(e)
         except Exception as e:
-            logger.error(f"Knowledge base search failed: {e}", exc_info=True)
+            logger.error("Knowledge base search failed: %s", e, exc_info=True)
             return self.err(f"Knowledge base error: {str(e)}")
 
     def search_law_knowledge_base(self, query: str, limit: int = 5) -> dict:
@@ -222,5 +222,5 @@ class KnowledgeConnector(BaseConnector):
         except FileNotFoundError as e:
             return self.err(e)
         except Exception as e:
-            logger.error(f"Law knowledge base search failed: {e}", exc_info=True)
+            logger.error("Law knowledge base search failed: %s", e, exc_info=True)
             return self.err(f"Law knowledge base error: {str(e)}")
