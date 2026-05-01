@@ -93,7 +93,7 @@ def _fetch_index_urls(timeout: int = 30, max_pages: int = 60) -> list[str]:
     return out
 
 
-def _extract_vote(html: bytes, url: str) -> Optional[tuple[str, str]]:
+def _extract_vote(html: bytes, _url: str) -> Optional[tuple[str, str]]:
     """Return (title, summary_text) for a vote-detail page, or None to skip."""
     soup = BeautifulSoup(html, "html.parser")
     for sel in ("script", "style", "nav", "header", "footer", "aside",

@@ -274,7 +274,7 @@ def _extract_text(html: bytes) -> tuple[str, str]:
     a clean blob that the chunker emits as one chunk. We do however
     drop boilerplate like nav/footer/scripts.
     """
-    title, sections, full = extract_title_and_sections(html)
+    title, _sections, full = extract_title_and_sections(html)
     if full and len(full) >= 200:
         return title, full
 

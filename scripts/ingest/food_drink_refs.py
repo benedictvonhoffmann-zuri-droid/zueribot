@@ -190,7 +190,6 @@ def _discover_gaultmillau_zurich(fetcher: Fetcher, max_pages: int) -> list[SiteE
 
         h1 = soup.find("h1")
         name = h1.get_text(" ", strip=True) if h1 else url.rsplit("/", 1)[-1]
-        slug = url.rsplit("/", 1)[-1]
         out.append(SiteEntry(
             url=url,
             entity_name=name,

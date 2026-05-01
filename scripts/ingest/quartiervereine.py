@@ -132,7 +132,7 @@ _SKIP = (
 )
 
 
-def _link_filter_for(site: SiteConfig):
+def _link_filter_for(_site: SiteConfig):
     def keep(url: str) -> bool:
         path = urlparse(url).path.lower()
         if any(s in path for s in _SKIP):
@@ -144,7 +144,7 @@ def _link_filter_for(site: SiteConfig):
 
 
 def _subcategory_for_site(site: SiteConfig):
-    def fn(url: str) -> Optional[str]:
+    def fn(_url: str) -> Optional[str]:
         return f"{CATEGORY}/{site.slug}"
     return fn
 

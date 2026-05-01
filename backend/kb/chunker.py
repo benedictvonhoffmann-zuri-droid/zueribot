@@ -116,7 +116,6 @@ def _sentences(text: str) -> list[str]:
 
 def _pack_sentences(
     sentences: list[str],
-    target_min: int,
     target_max: int,
     overlap_ratio: float,
 ) -> list[str]:
@@ -198,7 +197,7 @@ def _heading_path(doc: Document, *extra: str) -> str:
 
 # ── Per-doc_type chunkers ──────────────────────────────────────────────────
 
-def _chunk_article(doc: Document, target_min: int, target_max: int) -> list[tuple[str, str, Optional[str]]]:
+def _chunk_article(doc: Document, target_max: int) -> list[tuple[str, str, Optional[str]]]:
     """Return (display_text, heading_path_suffix, parent_ref_key) triples.
 
     parent_ref_key is a key identifying which parent section the child
@@ -215,7 +214,7 @@ def _chunk_article(doc: Document, target_min: int, target_max: int) -> list[tupl
             parent_key = sec.heading or "body"
 
         sentences = _sentences(sec.text)
-        pieces = _pack_sentences(sentences, target_min, target_max, OVERLAP_RATIO)
+        pieces = _pack_sentences(sentences, target_max, OVERLAP_RATIO)
         for piece in pieces:
             results.append((piece, sec.heading, parent_key))
 
@@ -237,7 +236,7 @@ def _chunk_procedure(doc: Document) -> list[tuple[str, str, Optional[int]]]:
 
     # Flat procedure text above the whole-limit: fall back to article packing.
     pieces = _pack_sentences(
-        _sentences(whole), TARGET_MIN, TARGET_MAX, OVERLAP_RATIO,
+        _sentences(whole), TARGET_MAX, OVERLAP_RATIO,
     )
     return [(p, "", i) for i, p in enumerate(pieces)]
 
@@ -263,7 +262,7 @@ def _chunk_statute(doc: Document) -> list[tuple[str, str, Optional[str]]]:
 
 def _chunk_historical(doc: Document) -> list[tuple[str, str, Optional[str]]]:
     """Same as article but with smaller target range."""
-    return _chunk_article(doc, HISTORICAL_MIN, HISTORICAL_MAX)
+    return _chunk_article(doc, HISTORICAL_MAX)
 
 
 # ── Public entry point ────────────────────────────────────────────────────
@@ -296,7 +295,7 @@ def chunk_document(doc: Document) -> list[Chunk]:
     doc_id = make_doc_id(doc.source_url, doc.language)
 
     dispatch = {
-        "article": lambda: _chunk_article(doc, TARGET_MIN, TARGET_MAX),
+        "article": lambda: _chunk_article(doc, TARGET_MAX),
         "historical": lambda: _chunk_historical(doc),
         "procedure": lambda: _chunk_procedure(doc),
         "reference": lambda: _chunk_reference(doc),
@@ -359,7 +358,7 @@ def _build(
     chunk_index: int | str,
     parent_chunk_id: Optional[str],
     display_text: str,
-    section_heading: str,
+    _section_heading: str,
     heading_path: str,
     *,
     step_index: Optional[int] = None,
