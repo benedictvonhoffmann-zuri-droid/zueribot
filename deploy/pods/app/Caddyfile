@@ -2,6 +2,7 @@
     email {$ACME_EMAIL}
 }
 
+# ── Bünzli ───────────────────────────────────────────────────────────
 www.buenzli.space {
     redir https://buenzli.space{uri} permanent
 }
@@ -16,5 +17,26 @@ buenzli.space {
 
     handle {
         reverse_proxy landing:80
+    }
+}
+
+# ── Better Ask Saul ──────────────────────────────────────────────────
+# Asksaul application containers run on a separate compose stack and
+# join bunzli-app-net externally so this edge can route to them by
+# container name. See ~/asksaul/deploy/ on the VPS.
+www.asksaul.ch {
+    redir https://asksaul.ch{uri} permanent
+}
+
+asksaul.ch {
+    encode gzip
+
+    # Same-origin API — front-end fetches /api/* on the same host.
+    handle_path /api/* {
+        reverse_proxy asksaul-api:8000
+    }
+
+    handle {
+        reverse_proxy asksaul-frontend:3000
     }
 }
